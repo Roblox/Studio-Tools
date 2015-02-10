@@ -1,0 +1,866 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<External>null</External>
+	<External>nil</External>
+	<Item class="Model" referent="RBX86FFB02824494DED9D94FBBAF6DB2C16">
+		<Properties>
+			<CoordinateFrame name="ModelInPrimary">
+				<X>0</X>
+				<Y>0</Y>
+				<Z>0</Z>
+				<R00>1</R00>
+				<R01>0</R01>
+				<R02>0</R02>
+				<R10>0</R10>
+				<R11>1</R11>
+				<R12>0</R12>
+				<R20>0</R20>
+				<R21>0</R21>
+				<R22>1</R22>
+			</CoordinateFrame>
+			<string name="Name">Terrain Tools Clean</string>
+			<Ref name="PrimaryPart">null</Ref>
+		</Properties>
+		<Item class="Script" referent="RBXA8FC3DD9F6574FAB9C141ABA15632377">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">TerrainPluginScript</string>
+				<ProtectedString name="Source">--Made by Stickmasterluke
+--Code has been cleaned up and moved around
+
+--[[todo:
+&#9;make grid refresh transparency
+&#9;make plane intersect cursor line
+&#9;find a solution to far cursor drags
+&#9;clear grid at appropriate times
+&#9;clear sphere selections when cursor size changes
+&#9;test out snap to grid
+&#9;make building with brick work nicely
+&#9;try scaling strength with cursor size
+&#9;make smooth tool
+&#9;make sure something has changed before setting changehistory waypoint
+&#9;make gui settings for planeLock and snapToGrid
+&#9;make a way to continue a flat surface
+]]
+
+
+while not workspace:WaitForChild(&quot;Terrain&quot;).IsSmooth do
+&#9;workspace.Terrain.Changed:wait()
+end
+
+local on = false
+local setup = false
+local currentTool = &apos;Create&apos;
+
+
+local toolBar = plugin:CreateToolbar(&apos;Smooth Terrain&apos;)
+
+local pluginButtons = {
+&#9;[&apos;Add&apos;] = toolBar:CreateButton(
+&#9;&#9;&apos;Add&apos;,&#9;--button title
+&#9;&#9;&apos;Click and hold to add terrain.&apos;,&#9;--hover text
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;&#9;--icon
+&#9;),
+&#9;[&apos;Subtract&apos;] = toolBar:CreateButton(
+&#9;&#9;&apos;Subtract&apos;,
+&#9;&#9;&apos;Click and hold to remove terrain.&apos;,
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;
+&#9;),
+&#9;[&apos;Paint&apos;] = toolBar:CreateButton(
+&#9;&#9;&apos;Paint&apos;,
+&#9;&#9;&apos;Paint the material of the terrain.&apos;,
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;
+&#9;),
+&#9;[&apos;Grow&apos;] = toolBar:CreateButton(
+&#9;&#9;&apos;Grow&apos;,
+&#9;&#9;&apos;Click and hold to grow and expand terrain.&apos;,
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;
+&#9;),
+&#9;[&apos;Erode&apos;] = toolBar:CreateButton(
+&#9;&#9;&apos;Erode&apos;,
+&#9;&#9;&apos;Click and hold to erode and remove terrain.&apos;,
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;
+&#9;),
+}
+
+for name, button in pairs(pluginButtons) do
+&#9;button.Click:connect(function()
+&#9;&#9;if not on or (currentTool ~= nil and name ~= currentTool) then&#9;--if off or on but current tool isn&apos;t the desired tool, then select this tool.
+&#9;&#9;&#9;if not setup then&#9;--I do this so that things only get set up when this plugin is used.
+&#9;&#9;&#9;&#9;FirstTimeSetUp()
+&#9;&#9;&#9;end
+&#9;&#9;&#9;Selected(button, name)
+&#9;&#9;else
+&#9;&#9;&#9;Deselected()
+&#9;&#9;end
+&#9;end)
+end
+
+function FirstTimeSetUp()
+&#9;setup = true
+&#9;local changeHistory = game:GetService(&apos;ChangeHistoryService&apos;)
+&#9;local terrain = game.Workspace.Terrain
+&#9;local coreGui = game:GetService(&apos;CoreGui&apos;)
+&#9;local gui = script.Parent:WaitForChild(&apos;TerrainPluginGui&apos;)
+&#9;local guiFrame = gui:WaitForChild(&apos;Frame&apos;)
+&#9;local closeButton = guiFrame:WaitForChild(&apos;CloseButton&apos;)
+&#9;local library = assert(LoadLibrary(&apos;RbxGui&apos;))
+&#9;local mouse = plugin:GetMouse()
+
+&#9;----SETTINGS----
+&#9;local selectionSize = 7
+&#9;local strength = .5
+&#9;local snapToGrid = false
+&#9;local planeLock = true
+&#9;local brushType = &apos;Sphere&apos;
+&#9;local materialSelection = &apos;Grass&apos;
+&#9;----------------
+&#9;--SUB SETTINGS--
+&#9;local minSelectionSize = 1
+&#9;local maxSelectionSize = 20
+&#9;local brushTypes = {&apos;Sphere&apos;, &apos;Box&apos;}
+&#9;local materialSelections = {&apos;Grass&apos;, &apos;Sand&apos;, &apos;Slate&apos;, &apos;Water&apos;, &apos;Wood Planks&apos;, &apos;Brick&apos;, &apos;Concrete&apos;}
+&#9;local resolution = 4
+&#9;local clickThreshold = .1
+&#9;----------------
+
+&#9;--Variables--
+&#9;local materialDictionary = {
+&#9;&#9;[&apos;Grass&apos;] = Enum.Material.Grass,
+&#9;&#9;[&apos;Concrete&apos;] = Enum.Material.Concrete,
+&#9;&#9;[&apos;Slate&apos;] = Enum.Material.Slate,
+&#9;&#9;[&apos;Brick&apos;] = Enum.Material.Brick,
+&#9;&#9;[&apos;Water&apos;] = Enum.Material.Water,
+&#9;&#9;[&apos;Sand&apos;] = Enum.Material.Sand,
+&#9;&#9;[&apos;Wood Planks&apos;] = Enum.Material.WoodPlanks,
+&#9;}
+&#9;local lineParts = {}
+&#9;local gridLineParts = {}
+&#9;local tau = math.pi * 2
+&#9;local currentLoopTag = nil
+&#9;local lastMainPoint = Vector3.new(0, 0, 0)
+&#9;local click = false
+&#9;local firstOperation = tick()
+&#9;local downKeys = {}
+&#9;local lastPlanePoint = Vector3.new(0, 0, 0)
+&#9;local lastNormal = Vector3.new(0, 1, 0)
+&#9;-------------
+
+
+&#9;--Gui Setup--
+&#9;local selectionSizeSlider, selectionSizeValue = library.CreateSlider(maxSelectionSize - 1, 150, UDim2.new(.5, -75, 0, 60))
+&#9;selectionSizeSlider.Parent = guiFrame
+&#9;selectionSizeValue.Changed:connect(function()
+&#9;&#9;selectionSize = selectionSizeValue.Value
+&#9;end)
+&#9;function updateSelectionSize()
+&#9;&#9;selectionSizeValue.Value = selectionSize
+&#9;end
+&#9;updateSelectionSize()
+
+&#9;local strengthslider, strengthvalue = library.CreateSlider(101, 150, UDim2.new(.5, -75, 0, 110))
+&#9;strengthslider.Parent = guiFrame
+&#9;strengthvalue.Changed:connect(function()
+&#9;&#9;strength = (strengthvalue.Value - 1) / 100
+&#9;end)
+&#9;strengthvalue.Value = strength * 100
+
+&#9;function brushTypeChange(newBrushType)
+&#9;&#9;brushType = newBrushType
+&#9;end
+&#9;local brushTypeDropDown, setBrushTypeSelection = library.CreateDropDownMenu(brushTypes, brushTypeChange)
+&#9;brushTypeDropDown.Size = UDim2.new(0, 150, 0, 30)
+&#9;brushTypeDropDown.Position = UDim2.new(.5, -75, 0, 150)
+&#9;brushTypeDropDown.Parent = guiFrame
+&#9;setBrushTypeSelection(brushType)
+
+&#9;function materialChange(newMaterialSelection)
+&#9;&#9;materialSelection = newMaterialSelection
+&#9;end
+&#9;local materialDropDown, setMaterialSelection = library.CreateDropDownMenu(materialSelections, materialChange)
+&#9;materialDropDown.Size = UDim2.new(0, 150, 0, 30)
+&#9;materialDropDown.Position = UDim2.new(.5, -75, 0, 200)
+&#9;materialDropDown.Parent = guiFrame
+&#9;setMaterialSelection(materialSelection)
+&#9;-------------
+
+
+&#9;do
+&#9;&#9;local runService = game:GetService(&apos;RunService&apos;).RenderStepped
+&#9;&#9;function quickWait(waittime)
+&#9;&#9;&#9;if not waittime then
+&#9;&#9;&#9;&#9;runService:wait()
+&#9;&#9;&#9;elseif waittime &lt; .033333 then
+&#9;&#9;&#9;&#9;local startTick = tick()
+&#9;&#9;&#9;&#9;runService:wait()
+&#9;&#9;&#9;&#9;local delta = tick() - startTick
+&#9;&#9;&#9;&#9;if delta &lt;= waittime * .5 then
+&#9;&#9;&#9;&#9;&#9;quickWait(waittime - delta)
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;wait(waittime)
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+
+&#9;function clearGrid()
+&#9;&#9;for i, v in pairs(gridLineParts) do
+&#9;&#9;&#9;if v then
+&#9;&#9;&#9;&#9;v:destroy()
+&#9;&#9;&#9;end
+&#9;&#9;&#9;gridLineParts[i] = nil
+&#9;&#9;end
+&#9;end
+
+&#9;function drawGrid(point, normal, transparency, color)
+&#9;&#9;local transparency = transparency or .9
+&#9;&#9;local color = color or color or &apos;Pastel light blue&apos;
+&#9;&#9;local gridCellSize = selectionSize * resolution
+&#9;&#9;local gridSize = 10
+&#9;&#9;local baseCframe = CFrame.new(point, point + normal)
+&#9;&#9;local normalSpase = CFrame.new(Vector3.new(0, 0, 0), normal):pointToObjectSpace(point)
+&#9;&#9;local roundedNormalOffset = (Vector3.new((normalSpase.x / gridCellSize) % 1, (normalSpase.y / gridCellSize) % 1, 0) - Vector3.new(.5, .5, 0)) * -gridCellSize
+&#9;&#9;for u = 1, gridSize do
+&#9;&#9;&#9;local linePart = gridLineParts[u]
+&#9;&#9;&#9;if not linePart then
+&#9;&#9;&#9;&#9;linePart = Instance.new(&apos;Part&apos;)
+&#9;&#9;&#9;&#9;linePart.Transparency = 1
+&#9;&#9;&#9;&#9;linePart.TopSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;linePart.BottomSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;linePart.Anchored = true
+&#9;&#9;&#9;&#9;linePart.CanCollide = false
+&#9;&#9;&#9;&#9;linePart.formFactor = &apos;Custom&apos;
+&#9;&#9;&#9;&#9;local selectionBox = Instance.new(&apos;SelectionBox&apos;)
+&#9;&#9;&#9;&#9;selectionBox.Color = BrickColor.new(color)
+&#9;&#9;&#9;&#9;selectionBox.Transparency = transparency
+&#9;&#9;&#9;&#9;selectionBox.Adornee = linePart
+&#9;&#9;&#9;&#9;selectionBox.Parent = linePart
+&#9;&#9;&#9;&#9;linePart.Parent = gui
+&#9;&#9;&#9;&#9;gridLineParts[u] = linePart
+&#9;&#9;&#9;end
+&#9;&#9;&#9;local percent = (u - 1) / (gridSize - 1)
+&#9;&#9;&#9;linePart.Size = Vector3.new(gridCellSize * gridSize * math.sin(math.acos(percent * 1.8 - .9)), 0, 0)
+&#9;&#9;&#9;--linepart.CFrame=basecframe*CFrame.new(0,(percent-.5)*160,0)
+&#9;&#9;&#9;linePart.CFrame = baseCframe * CFrame.new(0, (percent - .5) * (gridSize - 1) * gridCellSize, 0) * CFrame.new(roundedNormalOffset)
+&#9;&#9;end
+&#9;&#9;for u = 1, gridSize do
+&#9;&#9;&#9;local linePart = gridLineParts[gridSize + u]
+&#9;&#9;&#9;if not linePart then
+&#9;&#9;&#9;&#9;linePart = Instance.new(&apos;Part&apos;)
+&#9;&#9;&#9;&#9;linePart.Transparency = 1
+&#9;&#9;&#9;&#9;linePart.TopSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;linePart.BottomSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;linePart.Anchored = true
+&#9;&#9;&#9;&#9;linePart.CanCollide = false
+&#9;&#9;&#9;&#9;linePart.formFactor = &apos;Custom&apos;
+&#9;&#9;&#9;&#9;local selectionBox = Instance.new(&apos;SelectionBox&apos;)
+&#9;&#9;&#9;&#9;selectionBox.Color = BrickColor.new(color)
+&#9;&#9;&#9;&#9;selectionBox.Transparency = transparency
+&#9;&#9;&#9;&#9;selectionBox.Adornee = linePart
+&#9;&#9;&#9;&#9;selectionBox.Parent = linePart
+&#9;&#9;&#9;&#9;linePart.Parent = gui
+&#9;&#9;&#9;&#9;gridLineParts[gridSize + u] = linePart
+&#9;&#9;&#9;end
+&#9;&#9;&#9;local percent = (u - 1) / (gridSize - 1)
+&#9;&#9;&#9;linePart.Size = Vector3.new(0, gridCellSize * gridSize * math.sin(math.acos(percent * 1.8 - .9)), 0)
+&#9;&#9;&#9;--linepart.CFrame=basecframe*CFrame.new((percent-.5)*160,0,0)
+&#9;&#9;&#9;linePart.CFrame = baseCframe * CFrame.new((percent - .5) * (gridSize - 1) * gridCellSize, 0, 0) * CFrame.new(roundedNormalOffset)
+&#9;&#9;end
+&#9;end
+
+&#9;function getNeighborOccupancies(list, x, y, z)
+&#9;&#9;local fullNeighbor = false
+&#9;&#9;local neighborOccupancies = 0
+&#9;&#9;local totalNeighbors = 0
+&#9;&#9;for axis = 1, 3 do
+&#9;&#9;&#9;for offset = -1, 1, 2 do
+&#9;&#9;&#9;&#9;local neighbor = nil
+&#9;&#9;&#9;&#9;if axis == 1 then
+&#9;&#9;&#9;&#9;&#9;neighbor = list[x + offset] and list[x + offset][y][z]
+&#9;&#9;&#9;&#9;elseif axis == 2 then
+&#9;&#9;&#9;&#9;&#9;neighbor = list[x][y + offset] and list[x][y + offset][z]
+&#9;&#9;&#9;&#9;elseif axis == 3 then
+&#9;&#9;&#9;&#9;&#9;neighbor = list[x][y][z + offset]
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;if neighbor then
+&#9;&#9;&#9;&#9;&#9;if neighbor &gt;= 1 then
+&#9;&#9;&#9;&#9;&#9;&#9;fullNeighbor = true
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;totalNeighbors = totalNeighbors + 1
+&#9;&#9;&#9;&#9;&#9;neighborOccupancies = neighborOccupancies + neighbor
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;&#9;return neighborOccupancies / (totalNeighbors == 0 and .5 or totalNeighbors), fullNeighbor
+&#9;end
+
+&#9;function round(n)
+&#9;&#9;return math.floor(n + .5)
+&#9;end
+
+&#9;function findFace()
+&#9;&#9;local cameraLookVector = game.Workspace.CurrentCamera.CoordinateFrame.lookVector
+&#9;&#9;return Vector3.new(round(cameraLookVector.x), round(cameraLookVector.y), round(cameraLookVector.z)).unit
+&#9;end
+
+&#9;function lineToPlaneIntersection(linePoint, lineDirection, planePoint, planeNormal)
+&#9;&#9;local denominator = lineDirection:Dot(planeNormal)
+&#9;&#9;if denominator == 0 then
+&#9;&#9;&#9;return linePoint
+&#9;&#9;end
+&#9;&#9;local distance = ((planePoint - linePoint):Dot(planeNormal)) / denominator
+&#9;&#9;return linePoint + lineDirection * distance
+&#9;end
+
+
+&#9;function operation(centerPoint)
+&#9;&#9;local radius = selectionSize * .5 * resolution
+&#9;&#9;local minBounds = Vector3.new(math.floor((centerPoint.x - radius) / resolution), math.floor((centerPoint.y - radius) / resolution), math.floor((centerPoint.z - radius) / resolution)) * resolution
+&#9;&#9;local maxBounds = Vector3.new(math.ceil((centerPoint.x + radius) / resolution), math.ceil((centerPoint.y + radius) / resolution), math.ceil((centerPoint.z + radius) / resolution)) * resolution
+&#9;&#9;local region = Region3.new(minBounds, maxBounds)
+
+&#9;&#9;local materials, occupancies = terrain:ReadVoxels(region, resolution)
+        for ix, vx in ipairs(occupancies) do
+&#9;&#9;&#9;for iy, vy in pairs(vx) do
+&#9;&#9;&#9;&#9;for iz, cellOccupancy in pairs(vy) do
+
+&#9;&#9;&#9;&#9;&#9;local cellWorldPos = minBounds + (Vector3.new(ix, iy, iz) - Vector3.new(.5, .5, .5)) * resolution
+&#9;&#9;&#9;&#9;&#9;local distance = (cellWorldPos - centerPoint).magnitude
+
+&#9;&#9;&#9;&#9;&#9;local magnitudePercent = 1
+&#9;&#9;&#9;&#9;&#9;local brushOccupancy = 1
+&#9;&#9;&#9;&#9;&#9;if brushType == &apos;Sphere&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;magnitudePercent = math.cos(math.min(1, distance / (radius + resolution * .5)) * math.pi * .5)
+&#9;&#9;&#9;&#9;&#9;&#9;brushOccupancy = math.max(0, math.min(1, (radius + .5 * resolution - distance) / resolution))
+&#9;&#9;&#9;&#9;&#9;elseif brushType == &apos;Box&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;--leave as default
+&#9;&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;&#9;if currentTool == &apos;Add&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = brushOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Subtract&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = 1 - brushOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;if desiredOccupancy &lt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Grow&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies, fullNeighbor = getNeighborOccupancies(occupancies, ix, iy, iz)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &gt; 0 or fullNeighbor then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = math.min(brushOccupancy, desiredOccupancy + neighborOccupancies * strength * .25 * brushOccupancy * magnitudePercent)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Erode&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;local flippedBrushOccupancy = 1 - brushOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;if flippedBrushOccupancy &lt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local emptyNeighbor = false
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies = 6
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;for axis = 1, 3 do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;for offset = -1, 1, 2 do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighbor = nil
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if axis == 1 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix + offset] and occupancies[ix + offset][iy][iz]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif axis == 2 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix][iy + offset] and occupancies[ix][iy + offset][iz]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif axis == 3 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix][iy][iz + offset]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if neighbor then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if neighbor &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;emptyNeighbor = true
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighborOccupancies = neighborOccupancies - neighbor
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &gt; 0 or emptyNeighbor then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = math.max(flippedBrushOccupancy, desiredOccupancy - (neighborOccupancies / 6) * strength * .25 * brushOccupancy * magnitudePercent)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Paint&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; 0 and cellOccupancy &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;&#9;terrain:WriteVoxels(region, resolution, materials, occupancies)
+&#9;end
+
+&#9;
+&#9;function Selected(toolButton, toolName)
+&#9;&#9;plugin:Activate(true)
+&#9;&#9;if toolButton then
+&#9;&#9;&#9;toolButton:SetActive(true)
+&#9;&#9;&#9;lastToolButton = toolButton
+&#9;&#9;end
+&#9;&#9;on = true
+&#9;&#9;currentTool = toolName
+&#9;&#9;gui.Parent = coreGui
+
+&#9;&#9;local loopTag = {}&#9;--using table as a unique value for debouncing
+&#9;&#9;currentLoopTag = loopTag
+
+&#9;&#9;while currentLoopTag and currentLoopTag == loopTag do
+&#9;&#9;&#9;local t = tick()
+&#9;&#9;&#9;local radius = selectionSize * .5 * resolution
+
+&#9;&#9;&#9;planeLock = toolName == &apos;Add&apos; or toolName == &apos;Subtract&apos;
+&#9;&#9;&#9;snapToGrid = materialSelection == &apos;Brick&apos;
+&#9;&#9;&#9;
+&#9;&#9;&#9;local mainPoint = mouse.Hit.p
+&#9;&#9;&#9;if not mouseDown or click then
+&#9;&#9;&#9;&#9;lastPlanePoint = mainPoint
+&#9;&#9;&#9;&#9;lastNormal = findFace()
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;if planeLock then
+&#9;&#9;&#9;&#9;mainPoint = lineToPlaneIntersection(mouse.Hit.p, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;if snapToGrid then
+&#9;&#9;&#9;&#9;local snapOffset=Vector3.new(1, 1, 1) * (radius % resolution)&#9;--in studs
+&#9;&#9;&#9;&#9;mainPoint = Vector3.new(math.floor(mainPoint.x / resolution), math.floor(mainPoint.y / resolution), math.floor(mainPoint.z / resolution)) * resolution + snapOffset
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;if mouseDown then
+&#9;&#9;&#9;&#9;if click then
+&#9;&#9;&#9;&#9;&#9;firstOperation = t
+&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;if click or t &gt; firstOperation + clickThreshold then
+&#9;&#9;&#9;&#9;&#9;click = false
+&#9;&#9;&#9;&#9;&#9;local difference = mainPoint - lastMainPoint
+&#9;&#9;&#9;&#9;&#9;local distance = (difference).magnitude
+&#9;&#9;&#9;&#9;&#9;local moveRadius = math.max(1,radius)
+&#9;&#9;&#9;&#9;&#9;--[[local samples=math.ceil(distance/radius-.1)&#9;--this code linear interpolation sampling between mousepoints
+&#9;&#9;&#9;&#9;&#9;for i=1, samples do
+&#9;&#9;&#9;&#9;&#9;&#9;operation(lastmainpoint+difference*(i/samples))
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;if samples&gt;0 then
+&#9;&#9;&#9;&#9;&#9;&#9;lastmainpoint=mousepos
+&#9;&#9;&#9;&#9;&#9;end]]
+&#9;&#9;&#9;&#9;&#9;if distance &gt; moveRadius then
+&#9;&#9;&#9;&#9;&#9;&#9;mainPoint = lastMainPoint + difference.unit * moveRadius * .5&#9;--crawling distance is half the radius. Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
+&#9;&#9;&#9;&#9;&#9;&#9;operation(mainPoint)
+&#9;&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
+&#9;&#9;&#9;&#9;&#9;elseif moveRadius &gt; 1 then
+&#9;&#9;&#9;&#9;&#9;&#9;operation(mainPoint)
+&#9;&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;if brushType == &apos;Sphere&apos; then
+&#9;&#9;&#9;&#9;local circumference = tau * radius
+&#9;&#9;&#9;&#9;local linesegments = 2 + math.floor(circumference / 8)
+&#9;&#9;&#9;&#9;for i = 1, linesegments do
+&#9;&#9;&#9;&#9;&#9;local circlevalue1 = tau * ((i - .5 + t * .2) / linesegments)
+&#9;&#9;&#9;&#9;&#9;local point1 = mainPoint + Vector3.new(math.sin(circlevalue1), 0, math.cos(circlevalue1)) * radius
+&#9;&#9;&#9;&#9;&#9;local circlevalue2 = tau * ((i + t * .2) / linesegments)
+&#9;&#9;&#9;&#9;&#9;local point2 = mainPoint + Vector3.new(math.sin(circlevalue2), 0, math.cos(circlevalue2)) * radius
+&#9;&#9;&#9;&#9;&#9;local linePart = lineParts[i]
+&#9;&#9;&#9;&#9;&#9;if not linePart then
+&#9;&#9;&#9;&#9;&#9;&#9;linePart = Instance.new(&apos;Part&apos;)
+&#9;&#9;&#9;&#9;&#9;&#9;linePart.Transparency = 1
+&#9;&#9;&#9;&#9;&#9;&#9;linePart.TopSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;&#9;&#9;linePart.BottomSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;&#9;&#9;linePart.Anchored = true
+&#9;&#9;&#9;&#9;&#9;&#9;linePart.CanCollide = false
+&#9;&#9;&#9;&#9;&#9;&#9;linePart.formFactor = &apos;Custom&apos;
+&#9;&#9;&#9;&#9;&#9;&#9;local selectionBox = Instance.new(&apos;SelectionBox&apos;)
+&#9;&#9;&#9;&#9;&#9;&#9;selectionBox.Color = BrickColor.new(&apos;Toothpaste&apos;)
+&#9;&#9;&#9;&#9;&#9;&#9;selectionBox.Adornee = linePart
+&#9;&#9;&#9;&#9;&#9;&#9;selectionBox.Parent = linePart
+&#9;&#9;&#9;&#9;&#9;&#9;linePart.Parent = gui
+&#9;&#9;&#9;&#9;&#9;&#9;lineParts[i] = linePart
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;linePart.Size = Vector3.new(0, 0, (point2 - point1).magnitude)
+&#9;&#9;&#9;&#9;&#9;linePart.CFrame = CFrame.new(point1, point2) * CFrame.new(0, 0, -linePart.Size.z * .5)
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;elseif brushType == &apos;Box&apos; then
+&#9;&#9;&#9;&#9;local linePart = lineParts[1]
+&#9;&#9;&#9;&#9;if not linePart then
+&#9;&#9;&#9;&#9;&#9;linePart = Instance.new(&apos;Part&apos;)
+&#9;&#9;&#9;&#9;&#9;linePart.Transparency = 1
+&#9;&#9;&#9;&#9;&#9;linePart.TopSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;&#9;linePart.BottomSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;&#9;linePart.Anchored = true
+&#9;&#9;&#9;&#9;&#9;linePart.CanCollide = false
+&#9;&#9;&#9;&#9;&#9;linePart.formFactor = &apos;Custom&apos;
+&#9;&#9;&#9;&#9;&#9;local selectionBox = Instance.new(&apos;SelectionBox&apos;)
+&#9;&#9;&#9;&#9;&#9;selectionBox.Color = BrickColor.new(&apos;Toothpaste&apos;)
+&#9;&#9;&#9;&#9;&#9;selectionBox.Adornee = linePart
+&#9;&#9;&#9;&#9;&#9;selectionBox.Parent = linePart
+&#9;&#9;&#9;&#9;&#9;linePart.Parent = gui
+&#9;&#9;&#9;&#9;&#9;lineParts[1] = linePart
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;linePart.Size = Vector3.new(1, 1, 1) * radius * 2
+&#9;&#9;&#9;&#9;linePart.CFrame = CFrame.new(mainPoint)
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;if planeLock then
+&#9;&#9;&#9;&#9;drawGrid(lastPlanePoint, lastNormal, mouseDown and .5)
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;quickWait()
+&#9;&#9;end
+&#9;end
+&#9;
+&#9;function Deselected()
+&#9;&#9;currentLoopTag = nil
+&#9;&#9;gui.Parent = script.Parent
+&#9;&#9;for i, v in pairs(lineParts) do
+&#9;&#9;&#9;if v then
+&#9;&#9;&#9;&#9;v:destroy()
+&#9;&#9;&#9;end
+&#9;&#9;&#9;lineParts[i] = nil
+&#9;&#9;end
+&#9;&#9;clearGrid()
+&#9;&#9;if lastToolButton then
+&#9;&#9;&#9;lastToolButton:SetActive(false)
+&#9;&#9;end
+&#9;&#9;mouseDown = false
+&#9;&#9;on = false
+&#9;end
+
+&#9;function scrollwheel(change)
+&#9;&#9;if on then
+&#9;&#9;&#9;if downKeys[Enum.KeyCode.LeftShift] or downKeys[Enum.KeyCode.RightShift] then
+&#9;&#9;&#9;&#9;selectionSize = math.max(minSelectionSize, math.min(maxSelectionSize, selectionSize + change))
+&#9;&#9;&#9;&#9;updateSelectionSize()
+&#9;&#9;&#9;end
+&#9;&#9;&#9;if downKeys[Enum.KeyCode.LeftControl] or downKeys[Enum.KeyCode.RightControl] then
+&#9;&#9;&#9;&#9;selectionSize = math.max(minSelectionSize, math.min(maxSelectionSize, selectionSize + change * 4))
+&#9;&#9;&#9;&#9;updateSelectionSize()
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+
+&#9;game:GetService(&apos;UserInputService&apos;).InputBegan:connect(function(event)
+&#9;&#9;downKeys[event.KeyCode] = true
+&#9;end)
+&#9;game:GetService(&apos;UserInputService&apos;).InputEnded:connect(function(event)
+&#9;&#9;downKeys[event.KeyCode] = nil
+&#9;end)
+&#9;mouse.WheelForward:connect(function()
+&#9;&#9;scrollwheel(1)
+&#9;end)
+&#9;mouse.WheelBackward:connect(function()
+&#9;&#9;scrollwheel(-1)
+&#9;end)
+
+&#9;mouse.Button1Down:connect(function()
+&#9;&#9;if on then
+&#9;&#9;&#9;mouseDown = true
+&#9;&#9;&#9;click = true
+&#9;&#9;end
+&#9;end)
+&#9;mouse.Button1Up:connect(function()
+&#9;&#9;mouseDown = false
+&#9;&#9;changeHistory:SetWaypoint(&apos;Terrain &apos;..currentTool)
+&#9;end)
+
+&#9;closeButton.MouseButton1Down:connect(Deselected)
+
+&#9;plugin.Deactivation:connect(function()
+&#9;&#9;if on then
+&#9;&#9;&#9;Deselected()
+&#9;&#9;end
+&#9;end)
+end
+
+
+</ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="ScreenGui" referent="RBXD49A0523709C4347846A1DA8B15CE305">
+			<Properties>
+				<string name="Name">TerrainPluginGui</string>
+			</Properties>
+			<Item class="Frame" referent="RBX6CDA97953A0A4B93AB71986D133B1D82">
+				<Properties>
+					<bool name="Active">true</bool>
+					<Color3 name="BackgroundColor3">4294967295</Color3>
+					<float name="BackgroundTransparency">0</float>
+					<Color3 name="BorderColor3">4279970357</Color3>
+					<int name="BorderSizePixel">1</int>
+					<bool name="ClipsDescendants">false</bool>
+					<bool name="Draggable">false</bool>
+					<string name="Name">Frame</string>
+					<UDim2 name="Position">
+						<XS>0</XS>
+						<XO>0</XO>
+						<YS>0</YS>
+						<YO>0</YO>
+					</UDim2>
+					<float name="Rotation">0</float>
+					<UDim2 name="Size">
+						<XS>0</XS>
+						<XO>180</XO>
+						<YS>0</YS>
+						<YO>255</YO>
+					</UDim2>
+					<token name="SizeConstraint">0</token>
+					<token name="Style">6</token>
+					<bool name="Visible">true</bool>
+					<int name="ZIndex">1</int>
+				</Properties>
+				<Item class="TextButton" referent="RBX4745D4AD592044A5AD14976CA0CA3EF5">
+					<Properties>
+						<bool name="Active">true</bool>
+						<bool name="AutoButtonColor">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">1</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">0</token>
+						<token name="FontSize">4</token>
+						<bool name="Modal">false</bool>
+						<string name="Name">CloseButton</string>
+						<UDim2 name="Position">
+							<XS>1</XS>
+							<XO>-20</XO>
+							<YS>0</YS>
+							<YO>0</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<bool name="Selected">false</bool>
+						<UDim2 name="Size">
+							<XS>0</XS>
+							<XO>20</XO>
+							<YS>0</YS>
+							<YO>20</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">0</token>
+						<string name="Text">X</string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">true</bool>
+						<token name="TextXAlignment">2</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">3</int>
+					</Properties>
+				</Item>
+				<Item class="TextLabel" referent="RBXE0F1C6EA4C7E4ABE8D8E993D508EA791">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">0.75</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">5</token>
+						<string name="Name">TitleLabel</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>0</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>20</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<string name="Text">Terrain</string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">2</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="TextLabel" referent="RBXE6F4B73C073048868D1075EC81C03D54">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">1</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">5</token>
+						<string name="Name">Label1</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>10</XO>
+							<YS>0</YS>
+							<YO>30</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>-20</XO>
+							<YS>0</YS>
+							<YO>20</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<string name="Text">Brush Size</string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">0</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="TextLabel" referent="RBX970E45246FEE4FBAAA2DB90B022B48D3">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">1</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">5</token>
+						<string name="Name">Label2</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>10</XO>
+							<YS>0</YS>
+							<YO>80</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>-20</XO>
+							<YS>0</YS>
+							<YO>20</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<string name="Text">Strength</string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">0</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="TextLabel" referent="RBX5D8D273F1B2641668C220F5D780D0FF1">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">1</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">5</token>
+						<string name="Name">Label3</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>10</XO>
+							<YS>0</YS>
+							<YO>130</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>-20</XO>
+							<YS>0</YS>
+							<YO>20</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<string name="Text">Brush Shape</string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">0</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="TextLabel" referent="RBX622FD7A7993D4EF68DAC246CDF398E3D">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">1</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">5</token>
+						<string name="Name">Label4</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>10</XO>
+							<YS>0</YS>
+							<YO>180</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>-20</XO>
+							<YS>0</YS>
+							<YO>20</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<string name="Text">Material</string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">0</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+			</Item>
+		</Item>
+	</Item>
+</roblox>
