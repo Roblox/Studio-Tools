@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBX86FFB02824494DED9D94FBBAF6DB2C16">
+	<Item class="Model" referent="RBX27AD1A4D9E904FF58188BBF60370118B">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -17,10 +17,10 @@
 				<R21>0</R21>
 				<R22>1</R22>
 			</CoordinateFrame>
-			<string name="Name">Terrain Tools Clean</string>
+			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXA8FC3DD9F6574FAB9C141ABA15632377">
+		<Item class="Script" referent="RBX8A040F9065F0458A8B820A1E7103E552">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -30,12 +30,17 @@
 
 --[[todo:
 &#9;make grid refresh transparency
+&#9;&#9;fix grid to make it follow cursor when dragging again
+&#9;fix problem where subtract with sphere selection size 1 doesn&apos;t work
+&#9;-fix problem where grow with a small strength sometimes makes no change at all
+&#9;&#9;-maybe solve this bad experience by increasing the minimum strength
+&#9;solve cursor dragging off into distance with grow or erode
 &#9;make plane intersect cursor line
 &#9;find a solution to far cursor drags
 &#9;clear grid at appropriate times
 &#9;clear sphere selections when cursor size changes
-&#9;test out snap to grid
-&#9;make building with brick work nicely
+&#9;-test out snap to grid
+&#9;-make building with brick work nicely
 &#9;try scaling strength with cursor size
 &#9;make smooth tool
 &#9;make sure something has changed before setting changehistory waypoint
@@ -59,27 +64,27 @@ local pluginButtons = {
 &#9;[&apos;Add&apos;] = toolBar:CreateButton(
 &#9;&#9;&apos;Add&apos;,&#9;--button title
 &#9;&#9;&apos;Click and hold to add terrain.&apos;,&#9;--hover text
-&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;&#9;--icon
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;&#9;--icon
 &#9;),
 &#9;[&apos;Subtract&apos;] = toolBar:CreateButton(
 &#9;&#9;&apos;Subtract&apos;,
 &#9;&#9;&apos;Click and hold to remove terrain.&apos;,
-&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;
 &#9;),
 &#9;[&apos;Paint&apos;] = toolBar:CreateButton(
 &#9;&#9;&apos;Paint&apos;,
 &#9;&#9;&apos;Paint the material of the terrain.&apos;,
-&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;
 &#9;),
 &#9;[&apos;Grow&apos;] = toolBar:CreateButton(
 &#9;&#9;&apos;Grow&apos;,
 &#9;&#9;&apos;Click and hold to grow and expand terrain.&apos;,
-&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;
 &#9;),
 &#9;[&apos;Erode&apos;] = toolBar:CreateButton(
 &#9;&#9;&apos;Erode&apos;,
 &#9;&#9;&apos;Click and hold to erode and remove terrain.&apos;,
-&#9;&#9;&apos;http://www.roblox.com/asset/?id=57419471&apos;
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;
 &#9;),
 }
 
@@ -117,7 +122,7 @@ function FirstTimeSetUp()
 &#9;----------------
 &#9;--SUB SETTINGS--
 &#9;local minSelectionSize = 1
-&#9;local maxSelectionSize = 20
+&#9;local maxSelectionSize = 16
 &#9;local brushTypes = {&apos;Sphere&apos;, &apos;Box&apos;}
 &#9;local materialSelections = {&apos;Grass&apos;, &apos;Sand&apos;, &apos;Slate&apos;, &apos;Water&apos;, &apos;Wood Planks&apos;, &apos;Brick&apos;, &apos;Concrete&apos;}
 &#9;local resolution = 4
@@ -349,11 +354,12 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Grow&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then--if brushOccupancy &gt; cellOccupancy then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies, fullNeighbor = getNeighborOccupancies(occupancies, ix, iy, iz)
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &gt; 0 or fullNeighbor then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = math.min(brushOccupancy, desiredOccupancy + neighborOccupancies * strength * .25 * brushOccupancy * magnitudePercent)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &gt; 0 or fullNeighbor then&#9;--problem is selection size is small.
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--desiredOccupancy = math.min(brushOccupancy, desiredOccupancy + neighborOccupancies * strength * .25 * brushOccupancy * magnitudePercent)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy + neighborOccupancies * (strength + .1) * .25 * brushOccupancy * magnitudePercent
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
@@ -362,7 +368,7 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Erode&apos; then
 &#9;&#9;&#9;&#9;&#9;&#9;local flippedBrushOccupancy = 1 - brushOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;if flippedBrushOccupancy &lt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;if flippedBrushOccupancy &lt;= .5 then--if flippedBrushOccupancy &lt; cellOccupancy then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;local emptyNeighbor = false
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies = 6
@@ -384,8 +390,9 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &gt; 0 or emptyNeighbor then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = math.max(flippedBrushOccupancy, desiredOccupancy - (neighborOccupancies / 6) * strength * .25 * brushOccupancy * magnitudePercent)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &lt; 1 or emptyNeighbor then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--desiredOccupancy = math.max(flippedBrushOccupancy, desiredOccupancy - (neighborOccupancies / 6) * strength * .25 * brushOccupancy * magnitudePercent)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy - (neighborOccupancies / 6) * (strength + .1) * .25 * brushOccupancy * magnitudePercent
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
@@ -447,23 +454,23 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;if click or t &gt; firstOperation + clickThreshold then
 &#9;&#9;&#9;&#9;&#9;click = false
 &#9;&#9;&#9;&#9;&#9;local difference = mainPoint - lastMainPoint
-&#9;&#9;&#9;&#9;&#9;local distance = (difference).magnitude
-&#9;&#9;&#9;&#9;&#9;local moveRadius = math.max(1,radius)
-&#9;&#9;&#9;&#9;&#9;--[[local samples=math.ceil(distance/radius-.1)&#9;--this code linear interpolation sampling between mousepoints
-&#9;&#9;&#9;&#9;&#9;for i=1, samples do
-&#9;&#9;&#9;&#9;&#9;&#9;operation(lastmainpoint+difference*(i/samples))
-&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;if samples&gt;0 then
-&#9;&#9;&#9;&#9;&#9;&#9;lastmainpoint=mousepos
-&#9;&#9;&#9;&#9;&#9;end]]
-&#9;&#9;&#9;&#9;&#9;if distance &gt; moveRadius then
-&#9;&#9;&#9;&#9;&#9;&#9;mainPoint = lastMainPoint + difference.unit * moveRadius * .5&#9;--crawling distance is half the radius. Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
+&#9;&#9;&#9;&#9;&#9;local dragDistance = (difference).magnitude
+&#9;&#9;&#9;&#9;&#9;local crawlDistance = radius * .5&#9;--Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
+&#9;&#9;&#9;&#9;&#9;if dragDistance &gt; crawlDistance then
+&#9;&#9;&#9;&#9;&#9;&#9;--mainPoint = lastMainPoint + difference.unit * moveRadius * .5&#9;
+&#9;&#9;&#9;&#9;&#9;&#9;--operation(mainPoint)
+
+&#9;&#9;&#9;&#9;&#9;&#9;local differenceVector = difference.unit
+&#9;&#9;&#9;&#9;&#9;&#9;local dragDistance = math.min(dragDistance, crawlDistance * 2 + 20)&#9;--limiting this so that it does not attempt too many operations within a single drag.
+&#9;&#9;&#9;&#9;&#9;&#9;local samples=math.ceil(dragDistance / crawlDistance - .1)
+&#9;&#9;&#9;&#9;&#9;&#9;for i = 1, samples do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;operation(lastMainPoint + differenceVector * dragDistance * (i / samples))
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;mainPoint = lastMainPoint + differenceVector * dragDistance
+&#9;&#9;&#9;&#9;&#9;else
 &#9;&#9;&#9;&#9;&#9;&#9;operation(mainPoint)
-&#9;&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
-&#9;&#9;&#9;&#9;&#9;elseif moveRadius &gt; 1 then
-&#9;&#9;&#9;&#9;&#9;&#9;operation(mainPoint)
-&#9;&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
 &#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
 &#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;end
 
@@ -590,11 +597,11 @@ end
 </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBXD49A0523709C4347846A1DA8B15CE305">
+		<Item class="ScreenGui" referent="RBX119FDDD1528B4D60B6C65F858E96FFDF">
 			<Properties>
 				<string name="Name">TerrainPluginGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX6CDA97953A0A4B93AB71986D133B1D82">
+			<Item class="Frame" referent="RBX84A1B061D7A94EFD9AAD9ECC48AE4633">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -622,7 +629,7 @@ end
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX4745D4AD592044A5AD14976CA0CA3EF5">
+				<Item class="TextButton" referent="RBX624008CB7CE8453A95D14A91300192D3">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -665,7 +672,7 @@ end
 						<int name="ZIndex">3</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXE0F1C6EA4C7E4ABE8D8E993D508EA791">
+				<Item class="TextLabel" referent="RBX0065AAD7CDC04649A141155C1673322C">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -704,7 +711,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXE6F4B73C073048868D1075EC81C03D54">
+				<Item class="TextLabel" referent="RBX9B85786FB06E4BA9AF6C6F0EF00799E1">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -743,7 +750,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX970E45246FEE4FBAAA2DB90B022B48D3">
+				<Item class="TextLabel" referent="RBX0FBC531BD30F4175BCCFE5D585A3C639">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -782,7 +789,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX5D8D273F1B2641668C220F5D780D0FF1">
+				<Item class="TextLabel" referent="RBX57EBCD8DB5094DB18B0525DD6983CD14">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -821,7 +828,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX622FD7A7993D4EF68DAC246CDF398E3D">
+				<Item class="TextLabel" referent="RBXB5A380C809434CFBBE6E6756035ED6A2">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
