@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBX69DC9DBB02DE492A95A34A6DCAE2510E">
+	<Item class="Model" referent="RBX1CCA0974EED54A3C9D4B35361DB51CE7">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXF20C4209CF0E48A9A01A5FFB746CFCB6">
+		<Item class="Script" referent="RBX96B055DDC1D7492EA768160A9712951D">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -34,18 +34,17 @@
 &#9;fix problem where subtract with sphere selection size 1 doesn&apos;t work
 &#9;-fix problem where grow with a small strength sometimes makes no change at all
 &#9;&#9;-maybe solve this bad experience by increasing the minimum strength
-&#9;solve cursor dragging off into distance with grow or erode
+&#9;-solve cursor dragging off into distance with grow or erode
 &#9;make plane intersect cursor line
-&#9;find a solution to far cursor drags
+&#9;-find a solution to far cursor drags
 &#9;clear grid at appropriate times
 &#9;-test out snap to grid
 &#9;-make building with brick work nicely
 &#9;try scaling strength with cursor size
 &#9;make smooth tool
 &#9;make sure something has changed before setting changehistory waypoint
-&#9;make gui settings for planeLock and snapToGrid
 &#9;make a way to continue a flat surface
-&#9;create a way to grow materials using grow
+&#9;create a way to grow natural materials using grow
 ]]
 
 
@@ -115,7 +114,7 @@ function FirstTimeSetUp()
 &#9;local mouse = plugin:GetMouse()
 
 &#9;----SETTINGS----
-&#9;local selectionSize = 7
+&#9;local selectionSize = 6
 &#9;local strength = .5
 &#9;local snapToGrid = false
 &#9;local planeLock = false
@@ -154,6 +153,7 @@ function FirstTimeSetUp()
 &#9;local downKeys = {}
 &#9;local lastPlanePoint = Vector3.new(0, 0, 0)
 &#9;local lastNormal = Vector3.new(0, 1, 0)
+&#9;local lastCursorDistance = 300
 &#9;-------------
 
 
@@ -199,7 +199,7 @@ function FirstTimeSetUp()
 
 &#9;function updatePlaneLock()
 &#9;&#9;checkBox1.Style = forcePlaneLock and Enum.ButtonStyle.RobloxRoundButton or Enum.ButtonStyle.RobloxRoundDefaultButton
-&#9;&#9;checkBox1.Text = planeLock and &apos;X&apos; or &apos;&apos;
+&#9;&#9;checkBox1.Text = (planeLock or forcePlaneLock) and &apos;X&apos; or &apos;&apos;
 &#9;&#9;if not (planeLock or forcePlaneLock) then
 &#9;&#9;&#9;clearGrid()
 &#9;&#9;end
@@ -211,7 +211,7 @@ function FirstTimeSetUp()
 
 &#9;function updateSnapToGrid()
 &#9;&#9;checkBox2.Style = forceSnapToGrid and Enum.ButtonStyle.RobloxRoundButton or Enum.ButtonStyle.RobloxRoundDefaultButton
-&#9;&#9;checkBox2.Text = snapToGrid or forceSnapToGrid and &apos;X&apos; or &apos;&apos;
+&#9;&#9;checkBox2.Text = (snapToGrid or forceSnapToGrid) and &apos;X&apos; or &apos;&apos;
 &#9;end
 &#9;checkBox2.MouseButton1Down:connect(function()
 &#9;&#9;snapToGrid = not snapToGrid
@@ -286,7 +286,6 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;end
 &#9;&#9;&#9;local percent = (u - 1) / (gridSize - 1)
 &#9;&#9;&#9;linePart.Size = Vector3.new(gridCellSize * gridSize * math.sin(math.acos(percent * 1.8 - .9)), 0, 0)
-&#9;&#9;&#9;--linepart.CFrame=basecframe*CFrame.new(0,(percent-.5)*160,0)
 &#9;&#9;&#9;linePart.CFrame = baseCframe * CFrame.new(0, (percent - .5) * (gridSize - 1) * gridCellSize, 0) * CFrame.new(roundedNormalOffset)
 &#9;&#9;end
 &#9;&#9;for u = 1, gridSize do
@@ -309,7 +308,6 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;end
 &#9;&#9;&#9;local percent = (u - 1) / (gridSize - 1)
 &#9;&#9;&#9;linePart.Size = Vector3.new(0, gridCellSize * gridSize * math.sin(math.acos(percent * 1.8 - .9)), 0)
-&#9;&#9;&#9;--linepart.CFrame=basecframe*CFrame.new((percent-.5)*160,0,0)
 &#9;&#9;&#9;linePart.CFrame = baseCframe * CFrame.new((percent - .5) * (gridSize - 1) * gridCellSize, 0, 0) * CFrame.new(roundedNormalOffset)
 &#9;&#9;end
 &#9;end
@@ -383,16 +381,31 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;end
 
 &#9;&#9;&#9;&#9;&#9;if currentTool == &apos;Add&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; cellOccupancy then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;if selectionSize &lt;= 2 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = 1
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end 
+&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = brushOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = brushOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Subtract&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = 1 - brushOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;if desiredOccupancy &lt; cellOccupancy then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;if selectionSize &lt;= 2 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = 0
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = 1 - brushOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if desiredOccupancy &lt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Grow&apos; then
 &#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then--if brushOccupancy &gt; cellOccupancy then
@@ -409,7 +422,7 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Erode&apos; then
 &#9;&#9;&#9;&#9;&#9;&#9;local flippedBrushOccupancy = 1 - brushOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;if flippedBrushOccupancy &lt;= .5 then--if flippedBrushOccupancy &lt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;if flippedBrushOccupancy &lt;= .5 then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;local emptyNeighbor = false
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies = 6
@@ -473,6 +486,17 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;local radius = selectionSize * .5 * resolution
 &#9;&#9;&#9;
 &#9;&#9;&#9;local mainPoint = mouse.Hit.p
+
+&#9;&#9;&#9;if toolName == &apos;Add&apos; then
+&#9;&#9;&#9;&#9;mainPoint = mainPoint - mouse.UnitRay.Direction * .01
+&#9;&#9;&#9;elseif toolName == &apos;Subtract&apos; or toolName == &apos;Paint&apos; then
+&#9;&#9;&#9;&#9;mainPoint = mainPoint + mouse.UnitRay.Direction * .01
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;if mouse.Target == nil then
+&#9;&#9;&#9;&#9;mainPoint = game.Workspace.CurrentCamera.CoordinateFrame.p + mouse.UnitRay.Direction * lastCursorDistance
+&#9;&#9;&#9;end
+
 &#9;&#9;&#9;if not mouseDown or click then
 &#9;&#9;&#9;&#9;lastPlanePoint = mainPoint
 &#9;&#9;&#9;&#9;lastNormal = findFace()
@@ -541,6 +565,8 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;if planeLock or forcePlaneLock then
 &#9;&#9;&#9;&#9;drawGrid(mainPoint, lastNormal, mouseDown and .5)
 &#9;&#9;&#9;end
+
+&#9;&#9;&#9;lastCursorDistance = math.max(selectionSize * resolution,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
 
 &#9;&#9;&#9;quickWait()
 &#9;&#9;end
@@ -613,11 +639,11 @@ end
 </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX7C200F0CC2DA411FA19ECFD6BC05CF68">
+		<Item class="ScreenGui" referent="RBX74C174ECF4BA4A62B5E3C1AB6669115F">
 			<Properties>
 				<string name="Name">TerrainPluginGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX1F415BF2DAF8452E9693CBF4CBE14595">
+			<Item class="Frame" referent="RBX65B85BD18782416A88D58119B3D6F963">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -645,7 +671,7 @@ end
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBXB684DD2663A347AE9D8A761C3E146E2D">
+				<Item class="TextButton" referent="RBX551295F98E0B496AB5C580B7886B104E">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -688,7 +714,7 @@ end
 						<int name="ZIndex">3</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXBC0F6F26DDE242D3BCCC3731AAA578EA">
+				<Item class="TextLabel" referent="RBX7DC18F057657479393B7D6DACD85C1F5">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -727,7 +753,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX6499CF415E07406BA8A16EE3C1F1A54D">
+				<Item class="TextLabel" referent="RBX36F3E18A4ED74AA3B9CB4F57A3A8C6E7">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -766,7 +792,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX2F42587E7D7548B19B9C908BA9FECACB">
+				<Item class="TextLabel" referent="RBX5B3C7864BFEE4FC48C231CAA435CCFCA">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -805,7 +831,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX1342328D9B8E4C8AA0257CB13C367070">
+				<Item class="TextLabel" referent="RBX2CF60C5CC4DD4E7E9A22F03B5D448CD7">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -844,7 +870,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX4001B5D0FB164E00B7AF61CC5F04327C">
+				<Item class="TextLabel" referent="RBX65D6760F8AB341D6A0A522149B523CE8">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -883,7 +909,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX2DA1AC0F1F4A4817B73DAFBFD2E394CE">
+				<Item class="TextButton" referent="RBXBEFEB0E202154FC8B9B80434626B031C">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -925,7 +951,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX52EBC73D20F34B0BAD170ED3077ACF74">
+					<Item class="TextLabel" referent="RBX8A61E97E07C745F29432EA34B3968522">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -965,7 +991,7 @@ end
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextButton" referent="RBXB6E0C4E72A404A8BA03FBE032C9A3242">
+				<Item class="TextButton" referent="RBX8EBC83498A9549E99F50622A4CDB6578">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -1007,7 +1033,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXEBCA7FF104B84DE1A3B52F406B5EE10E">
+					<Item class="TextLabel" referent="RBX8EA529FE84D04480B5DBCC2B36F4A9CF">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
