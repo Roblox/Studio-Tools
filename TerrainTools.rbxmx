@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBX48DDEF51218440BAAF2A1F2122B41848">
+	<Item class="Model" referent="RBXAAC466F25AC14C4BBB0ED6FE8B302884">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXF06AE90BBCA34B808E6CA889F4551D2C">
+		<Item class="Script" referent="RBXC5CFE583E54E497A9F4794EC1FE80911">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -29,11 +29,10 @@
 
 
 --[[todo:
-&#9;make grid refresh transparency
 &#9;-fix problem where subtract with sphere selection size 1 doesn&apos;t work
 &#9;-fix problem where grow with a small strength sometimes makes no change at all
 &#9;&#9;-maybe solve this bad experience by increasing the minimum strength
-&#9;make plane intersect cursor line
+&#9;try plane intersect cursor line
 &#9;-make building with brick work nicely
 &#9;try scaling strength with cursor size
 &#9;make sure something has changed before setting changehistory waypoint
@@ -254,7 +253,7 @@ function FirstTimeSetUp()
 
 &#9;function drawGrid(point, normal, transparency, color)
 &#9;&#9;local transparency = transparency or .95
-&#9;&#9;local color = BrickColor.new(color or &apos;Pastel light blue&apos;)
+&#9;&#9;local color = BrickColor.new(color or &apos;Institutional white&apos;)--&apos;Pastel light blue&apos;)
 &#9;&#9;local gridCellSize = selectionSize * resolution
 &#9;&#9;local gridSize = 10
 &#9;&#9;local baseCframe = CFrame.new(point, point + normal)
@@ -344,7 +343,17 @@ function FirstTimeSetUp()
 
 &#9;function findFace()
 &#9;&#9;local cameraLookVector = game.Workspace.CurrentCamera.CoordinateFrame.lookVector
-&#9;&#9;return Vector3.new(round(cameraLookVector.x), round(cameraLookVector.y), round(cameraLookVector.z)).unit
+&#9;&#9;--[[local absx = math.abs(cameraLookVector.x)&#9;&#9;--this code is for 90 plane locking
+&#9;&#9;local absy = math.abs(cameraLookVector.y)
+&#9;&#9;local absz = math.abs(cameraLookVector.z)
+&#9;&#9;if absy &gt;= absx and absy &gt;= absz then&#9;--preference towards y axis planes
+&#9;&#9;&#9;return Vector3.new(0, cameraLookVector.y / absy, 0)
+&#9;&#9;elseif absx &gt;= absz then
+&#9;&#9;&#9;return&#9;Vector3.new(cameraLookVector.x / absx, 0, 0)
+&#9;&#9;end
+&#9;&#9;return Vector3.new(0, 0, cameraLookVector.z / absz)]]
+
+&#9;&#9;return Vector3.new(round(cameraLookVector.x), round(cameraLookVector.y), round(cameraLookVector.z)).unit&#9;--this code is for 45 degree plane locking
 &#9;end
 
 &#9;function lineToPlaneIntersection(linePoint, lineDirection, planePoint, planeNormal)
@@ -491,8 +500,8 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;mainPoint = mainPoint + mouse.UnitRay.Direction * .05
 &#9;&#9;&#9;end
 
-&#9;&#9;&#9;if mouse.Target == nil then
-&#9;&#9;&#9;&#9;mainPoint = game.Workspace.CurrentCamera.CoordinateFrame.p + mouse.UnitRay.Direction * lastCursorDistance
+&#9;&#9;&#9;if mouse.Target == nil then&#9;--cage the cursor so that it does not fly away
+&#9;&#9;&#9;&#9;mainPoint = game.Workspace.CurrentCamera.CoordinateFrame.p + mouse.UnitRay.Direction * lastCursorDistance --limits the distance of the mainPoint if the mouse is not hitting an object
 &#9;&#9;&#9;end
 
 &#9;&#9;&#9;if not mouseDown or click then
@@ -505,8 +514,9 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;end
 
 &#9;&#9;&#9;if snapToGrid or forceSnapToGrid then
-&#9;&#9;&#9;&#9;local snapOffset=Vector3.new(1, 1, 1) * (radius % resolution)&#9;--in studs
-&#9;&#9;&#9;&#9;mainPoint = Vector3.new(math.floor(mainPoint.x / resolution), math.floor(mainPoint.y / resolution), math.floor(mainPoint.z / resolution)) * resolution + snapOffset
+&#9;&#9;&#9;&#9;local snapOffset = Vector3.new(1, 1, 1) * (radius % resolution)&#9;&#9;--in studs
+&#9;&#9;&#9;&#9;local tempMainPoint = (mainPoint - snapOffset) / resolution + Vector3.new(.5, .5, .5)&#9;--in voxels
+&#9;&#9;&#9;&#9;mainPoint = Vector3.new(math.floor(tempMainPoint.x), math.floor(tempMainPoint.y), math.floor(tempMainPoint.z)) * resolution + snapOffset
 &#9;&#9;&#9;end
 
 &#9;&#9;&#9;if mouseDown then
@@ -518,11 +528,8 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;click = false
 &#9;&#9;&#9;&#9;&#9;local difference = mainPoint - lastMainPoint
 &#9;&#9;&#9;&#9;&#9;local dragDistance = (difference).magnitude
-&#9;&#9;&#9;&#9;&#9;local crawlDistance = radius * .5&#9;--Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
+&#9;&#9;&#9;&#9;&#9;local crawlDistance = radius * .5&#9;&#9;&#9;--Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
 &#9;&#9;&#9;&#9;&#9;if dragDistance &gt; crawlDistance then
-&#9;&#9;&#9;&#9;&#9;&#9;--mainPoint = lastMainPoint + difference.unit * moveRadius * .5&#9;
-&#9;&#9;&#9;&#9;&#9;&#9;--operation(mainPoint)
-
 &#9;&#9;&#9;&#9;&#9;&#9;local differenceVector = difference.unit
 &#9;&#9;&#9;&#9;&#9;&#9;local dragDistance = math.min(dragDistance, crawlDistance * 2 + 20)&#9;--limiting this so that it does not attempt too many operations within a single drag.
 &#9;&#9;&#9;&#9;&#9;&#9;local samples=math.ceil(dragDistance / crawlDistance - .1)
@@ -561,10 +568,11 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;selectionPart.CFrame = CFrame.new(mainPoint)
 
 &#9;&#9;&#9;if planeLock or forcePlaneLock then
-&#9;&#9;&#9;&#9;drawGrid(mainPoint, lastNormal, mouseDown and .7)
+&#9;&#9;&#9;&#9;local mainPointIntersect = lineToPlaneIntersection(mainPoint, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)&#9;--we need to get this otherwise the plane can shift whiel drawing
+&#9;&#9;&#9;&#9;drawGrid(mainPointIntersect, lastNormal, mouseDown and .8)
 &#9;&#9;&#9;end
 
-&#9;&#9;&#9;lastCursorDistance = math.max(10 + selectionSize * resolution,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
+&#9;&#9;&#9;lastCursorDistance = math.max(20 + selectionSize * resolution * 1.5,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
 
 &#9;&#9;&#9;quickWait()
 &#9;&#9;end
@@ -637,11 +645,11 @@ end
 </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX9B2C7AF073F34F43B1FCE21B9A69CF98">
+		<Item class="ScreenGui" referent="RBX9B3D708B695B4467B568DA7CDE6A2189">
 			<Properties>
 				<string name="Name">TerrainPluginGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX71DF38F2CB374E058F27567468A39A40">
+			<Item class="Frame" referent="RBX5225120D325843588CDD651F3542BB9D">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -669,7 +677,7 @@ end
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX7FCF837301E34F6CA425F1ED662FF367">
+				<Item class="TextButton" referent="RBX8AD0565CA5C14BB2A7FCB65357771949">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -712,7 +720,7 @@ end
 						<int name="ZIndex">3</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX961E495C906249FF96D773F991A860B2">
+				<Item class="TextLabel" referent="RBX66455AAB517142C2B3ED7B6F72EC9A7A">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -751,7 +759,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX4B8A26293DB0427CB7E25BF43122B05A">
+				<Item class="TextLabel" referent="RBX2CB207EDB2584BD28AD5AB5A42AA9256">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -790,7 +798,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXC4532A3CCA3C412AA24B96E19CE894CD">
+				<Item class="TextLabel" referent="RBXC9D4240FBF884627BCDC625DB4BDEA60">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -829,7 +837,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX7BD859E52465435E9D3E16B2A3853783">
+				<Item class="TextLabel" referent="RBX1231F9507CF748B197E6EBE567C209F2">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -868,7 +876,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX204BA3D9A080419FBF998BF4D1E3D826">
+				<Item class="TextLabel" referent="RBX7AF234303DD14F8E9A2A47B1F0C5C89A">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -907,7 +915,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX9E00E53F2D2D4421AB4DF6BEBD7091E1">
+				<Item class="TextButton" referent="RBXDE54CD3D1BEC48AA858D5A0F35174925">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -949,7 +957,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXADE0AC21011C4677894D661E91073F26">
+					<Item class="TextLabel" referent="RBX35ACF1ADE4BA4CF8A0F9D9D5174289A2">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -989,7 +997,7 @@ end
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextButton" referent="RBXA5743FE9005B4892956C754664062497">
+				<Item class="TextButton" referent="RBX2AC6EF3C0932459495741892819D98EE">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -1031,7 +1039,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXC44F2749C4424A73A369FA1AA66E7884">
+					<Item class="TextLabel" referent="RBX1B73DC89FB7D42B5ADA0C686446BDF3A">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
