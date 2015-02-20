@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBXAAC466F25AC14C4BBB0ED6FE8B302884">
+	<Item class="Model" referent="RBX0149DFDC29E349C5B78AB978C9B071D1">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXC5CFE583E54E497A9F4794EC1FE80911">
+		<Item class="Script" referent="RBXADE21B5871134E799F869AFC1A1B9A0E">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -50,6 +50,25 @@ local setup = false
 local currentTool = &apos;Create&apos;
 
 
+--[[
+&#9;How to add a module:
+&#9;&#9;1. Add the require to the modules table below.
+&#9;&#9;2. Add a plugin button for it into the pluginButtons table, with the same index as used in the modules table.
+&#9;&#9;3. You win.
+
+&#9;How modules work
+&#9;&#9;Your ModuleScript should return a table. The table should can contain the following functions
+&#9;&#9;&#9;On&#9;= This function will be called when your tool is selected. Will hand in the mouse object
+&#9;&#9;&#9;Off&#9;= This function will be called when your tool is deselected.
+&#9;&#9;&#9;operation = If this function exists, it will be called when mouse operations take place.
+&#9;&#9;&#9;&#9;operation(centerPoint, materialsTable, occupanciesTable, resolution, selectionSize, strength, materialSelection)
+]]
+
+local modules = {
+&#9;[&apos;Generate&apos;] = require(script.Parent.GenerationModule),
+}
+
+
 local toolBar = plugin:CreateToolbar(&apos;Smooth Terrain&apos;)
 
 local pluginButtons = {
@@ -76,6 +95,11 @@ local pluginButtons = {
 &#9;[&apos;Erode&apos;] = toolBar:CreateButton(
 &#9;&#9;&apos;Erode&apos;,
 &#9;&#9;&apos;Click and hold to erode and remove terrain.&apos;,
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;
+&#9;),
+&#9;[&apos;Generate&apos;] = toolBar:CreateButton(
+&#9;&#9;&apos;Generate&apos;,
+&#9;&#9;&apos;Generate landscapes of terrain.&apos;,
 &#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;
 &#9;),
 }
@@ -115,11 +139,11 @@ function FirstTimeSetUp()
 &#9;local materialSelection = &apos;Grass&apos;
 &#9;----------------
 &#9;--SUB SETTINGS--
+&#9;local resolution = 4&#9;&#9;&#9;--This is the size of voxels on Roblox. Why is this a variable? ;)
 &#9;local minSelectionSize = 1
 &#9;local maxSelectionSize = 16
 &#9;local brushTypes = {&apos;Sphere&apos;, &apos;Box&apos;}
 &#9;local materialSelections = {&apos;Grass&apos;, &apos;Sand&apos;, &apos;Slate&apos;, &apos;Water&apos;, &apos;Wood Planks&apos;, &apos;Brick&apos;, &apos;Concrete&apos;}
-&#9;local resolution = 4
 &#9;local clickThreshold = .1
 &#9;----------------
 
@@ -373,102 +397,111 @@ function FirstTimeSetUp()
 &#9;&#9;local region = Region3.new(minBounds, maxBounds)
 
 &#9;&#9;local materials, occupancies = terrain:ReadVoxels(region, resolution)
-        for ix, vx in ipairs(occupancies) do
-&#9;&#9;&#9;for iy, vy in pairs(vx) do
-&#9;&#9;&#9;&#9;for iz, cellOccupancy in pairs(vy) do
 
-&#9;&#9;&#9;&#9;&#9;local cellWorldPos = minBounds + (Vector3.new(ix, iy, iz) - Vector3.new(.5, .5, .5)) * resolution
-&#9;&#9;&#9;&#9;&#9;local distance = (cellWorldPos - centerPoint).magnitude
+&#9;&#9;if modules[currentTool] then
+&#9;&#9;&#9;if modules[currentTool][&apos;operation&apos;] then
+&#9;&#9;&#9;&#9;modules[currentTool][&apos;operation&apos;](centerPoint, materials, occupancies, resolution, selectionSize, strength, materialSelection)
+&#9;&#9;&#9;end
+&#9;&#9;else
 
-&#9;&#9;&#9;&#9;&#9;local magnitudePercent = 1
-&#9;&#9;&#9;&#9;&#9;local brushOccupancy = 1
-&#9;&#9;&#9;&#9;&#9;if brushType == &apos;Sphere&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;magnitudePercent = math.cos(math.min(1, distance / (radius + resolution * .5)) * math.pi * .5)
-&#9;&#9;&#9;&#9;&#9;&#9;brushOccupancy = math.max(0, math.min(1, (radius + .5 * resolution - distance) / resolution))
-&#9;&#9;&#9;&#9;&#9;elseif brushType == &apos;Box&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;--leave as default
-&#9;&#9;&#9;&#9;&#9;end
-
-&#9;&#9;&#9;&#9;&#9;if currentTool == &apos;Add&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;if selectionSize &lt;= 2 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = 1
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;end 
-&#9;&#9;&#9;&#9;&#9;&#9;else
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; cellOccupancy then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = brushOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;        for ix, vx in ipairs(occupancies) do
+&#9;&#9;&#9;&#9;for iy, vy in pairs(vx) do
+&#9;&#9;&#9;&#9;&#9;for iz, cellOccupancy in pairs(vy) do
+&#9;
+&#9;&#9;&#9;&#9;&#9;&#9;local cellWorldPos = minBounds + (Vector3.new(ix, iy, iz) - Vector3.new(.5, .5, .5)) * resolution
+&#9;&#9;&#9;&#9;&#9;&#9;local distance = (cellWorldPos - centerPoint).magnitude
+&#9;
+&#9;&#9;&#9;&#9;&#9;&#9;local magnitudePercent = 1
+&#9;&#9;&#9;&#9;&#9;&#9;local brushOccupancy = 1
+&#9;&#9;&#9;&#9;&#9;&#9;if brushType == &apos;Sphere&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;magnitudePercent = math.cos(math.min(1, distance / (radius + resolution * .5)) * math.pi * .5)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;brushOccupancy = math.max(0, math.min(1, (radius + .5 * resolution - distance) / resolution))
+&#9;&#9;&#9;&#9;&#9;&#9;elseif brushType == &apos;Box&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--leave as default
 &#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Subtract&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;if selectionSize &lt;= 2 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = 0
+&#9;
+&#9;&#9;&#9;&#9;&#9;&#9;if currentTool == &apos;Add&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if selectionSize &lt;= 2 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = 1
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = brushOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;else
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = 1 - brushOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if desiredOccupancy &lt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Subtract&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if selectionSize &lt;= 2 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = 0
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = 1 - brushOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if desiredOccupancy &lt; cellOccupancy then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Grow&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies, fullNeighbor = getNeighborOccupancies(occupancies, ix, iy, iz)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &gt; 0 or fullNeighbor then&#9;--problem if selection size is small.
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy + neighborOccupancies * (strength + .1) * .25 * brushOccupancy * magnitudePercent
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Grow&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies, fullNeighbor = getNeighborOccupancies(occupancies, ix, iy, iz)
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &gt; 0 or fullNeighbor then&#9;--problem if selection size is small.
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy + neighborOccupancies * (strength + .1) * .25 * brushOccupancy * magnitudePercent
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Erode&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;local flippedBrushOccupancy = 1 - brushOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;if flippedBrushOccupancy &lt;= .5 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;local emptyNeighbor = false
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies = 6
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;for axis = 1, 3 do
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;for offset = -1, 1, 2 do
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighbor = nil
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if axis == 1 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix + offset] and occupancies[ix + offset][iy][iz]
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif axis == 2 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix][iy + offset] and occupancies[ix][iy + offset][iz]
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif axis == 3 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix][iy][iz + offset]
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if neighbor then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if neighbor &lt;= 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;emptyNeighbor = true
+&#9;&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Erode&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local flippedBrushOccupancy = 1 - brushOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if flippedBrushOccupancy &lt;= .5 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local emptyNeighbor = false
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies = 6
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;for axis = 1, 3 do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;for offset = -1, 1, 2 do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighbor = nil
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if axis == 1 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix + offset] and occupancies[ix + offset][iy][iz]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif axis == 2 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix][iy + offset] and occupancies[ix][iy + offset][iz]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif axis == 3 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighbor = occupancies[ix][iy][iz + offset]
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighborOccupancies = neighborOccupancies - neighbor
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if neighbor then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if neighbor &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;emptyNeighbor = true
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;neighborOccupancies = neighborOccupancies - neighbor
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &lt; 1 or emptyNeighbor then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy - (neighborOccupancies / 6) * (strength + .1) * .25 * brushOccupancy * magnitudePercent
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &lt; 1 or emptyNeighbor then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy - (neighborOccupancies / 6) * (strength + .1) * .25 * brushOccupancy * magnitudePercent
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Paint&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; 0 and cellOccupancy &gt; 0 then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Paint&apos; then
-&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; 0 and cellOccupancy &gt; 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
 &#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;end
+
+&#9;&#9;&#9;terrain:WriteVoxels(region, resolution, materials, occupancies)
 &#9;&#9;end
-&#9;&#9;terrain:WriteVoxels(region, resolution, materials, occupancies)
 &#9;end
 
 &#9;
@@ -480,101 +513,108 @@ function FirstTimeSetUp()
 &#9;&#9;end
 &#9;&#9;on = true
 &#9;&#9;currentTool = toolName
-&#9;&#9;gui.Parent = coreGui
 
-&#9;&#9;forcePlaneLock = toolName == &apos;Add&apos; or toolName == &apos;Subtract&apos;
-&#9;&#9;updatePlaneLock()
-
-&#9;&#9;local loopTag = {}&#9;--using table as a unique value for debouncing
-&#9;&#9;currentLoopTag = loopTag
-
-&#9;&#9;while currentLoopTag and currentLoopTag == loopTag do
-&#9;&#9;&#9;local t = tick()
-&#9;&#9;&#9;local radius = selectionSize * .5 * resolution
-&#9;&#9;&#9;
-&#9;&#9;&#9;local mainPoint = mouse.Hit.p
-
-&#9;&#9;&#9;if toolName == &apos;Add&apos; then
-&#9;&#9;&#9;&#9;mainPoint = mainPoint - mouse.UnitRay.Direction * .05
-&#9;&#9;&#9;elseif toolName == &apos;Subtract&apos; or toolName == &apos;Paint&apos; or toolName == &apos;Grow&apos; then
-&#9;&#9;&#9;&#9;mainPoint = mainPoint + mouse.UnitRay.Direction * .05
-&#9;&#9;&#9;end
-
-&#9;&#9;&#9;if mouse.Target == nil then&#9;--cage the cursor so that it does not fly away
-&#9;&#9;&#9;&#9;mainPoint = game.Workspace.CurrentCamera.CoordinateFrame.p + mouse.UnitRay.Direction * lastCursorDistance --limits the distance of the mainPoint if the mouse is not hitting an object
-&#9;&#9;&#9;end
-
-&#9;&#9;&#9;if not mouseDown or click then
-&#9;&#9;&#9;&#9;lastPlanePoint = mainPoint
-&#9;&#9;&#9;&#9;lastNormal = findFace()
-&#9;&#9;&#9;end
-
-&#9;&#9;&#9;if planeLock or forcePlaneLock then
-&#9;&#9;&#9;&#9;mainPoint = lineToPlaneIntersection(mouse.Hit.p, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)
-&#9;&#9;&#9;end
-
-&#9;&#9;&#9;if snapToGrid or forceSnapToGrid then
-&#9;&#9;&#9;&#9;local snapOffset = Vector3.new(1, 1, 1) * (radius % resolution)&#9;&#9;--in studs
-&#9;&#9;&#9;&#9;local tempMainPoint = (mainPoint - snapOffset) / resolution + Vector3.new(.5, .5, .5)&#9;--in voxels
-&#9;&#9;&#9;&#9;mainPoint = Vector3.new(math.floor(tempMainPoint.x), math.floor(tempMainPoint.y), math.floor(tempMainPoint.z)) * resolution + snapOffset
-&#9;&#9;&#9;end
-
-&#9;&#9;&#9;if mouseDown then
-&#9;&#9;&#9;&#9;if click then
-&#9;&#9;&#9;&#9;&#9;firstOperation = t
-&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
+&#9;&#9;if modules[toolName] then
+&#9;&#9;&#9;modules[toolName].On(mouse)
+&#9;&#9;end
+&#9;&#9;if not modules[toolName] or modules[toolName][&apos;operation&apos;] then
+&#9;
+&#9;&#9;&#9;gui.Parent = coreGui
+&#9;
+&#9;&#9;&#9;forcePlaneLock = toolName == &apos;Add&apos; or toolName == &apos;Subtract&apos;
+&#9;&#9;&#9;updatePlaneLock()
+&#9;
+&#9;&#9;&#9;local loopTag = {}&#9;--using table as a unique value for debouncing
+&#9;&#9;&#9;currentLoopTag = loopTag
+&#9;
+&#9;&#9;&#9;while currentLoopTag and currentLoopTag == loopTag do
+&#9;&#9;&#9;&#9;local t = tick()
+&#9;&#9;&#9;&#9;local radius = selectionSize * .5 * resolution
+&#9;&#9;&#9;&#9;
+&#9;&#9;&#9;&#9;local mainPoint = mouse.Hit.p
+&#9;
+&#9;&#9;&#9;&#9;if toolName == &apos;Add&apos; then
+&#9;&#9;&#9;&#9;&#9;mainPoint = mainPoint - mouse.UnitRay.Direction * .05
+&#9;&#9;&#9;&#9;elseif toolName == &apos;Subtract&apos; or toolName == &apos;Paint&apos; or toolName == &apos;Grow&apos; then
+&#9;&#9;&#9;&#9;&#9;mainPoint = mainPoint + mouse.UnitRay.Direction * .05
 &#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;if click or t &gt; firstOperation + clickThreshold then
-&#9;&#9;&#9;&#9;&#9;click = false
-&#9;&#9;&#9;&#9;&#9;local difference = mainPoint - lastMainPoint
-&#9;&#9;&#9;&#9;&#9;local dragDistance = (difference).magnitude
-&#9;&#9;&#9;&#9;&#9;local crawlDistance = radius * .5&#9;&#9;&#9;--Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
-&#9;&#9;&#9;&#9;&#9;if dragDistance &gt; crawlDistance then
-&#9;&#9;&#9;&#9;&#9;&#9;local differenceVector = difference.unit
-&#9;&#9;&#9;&#9;&#9;&#9;local dragDistance = math.min(dragDistance, crawlDistance * 2 + 20)&#9;--limiting this so that it does not attempt too many operations within a single drag.
-&#9;&#9;&#9;&#9;&#9;&#9;local samples=math.ceil(dragDistance / crawlDistance - .1)
-&#9;&#9;&#9;&#9;&#9;&#9;for i = 1, samples do
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;operation(lastMainPoint + differenceVector * dragDistance * (i / samples))
-&#9;&#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;&#9;mainPoint = lastMainPoint + differenceVector * dragDistance
-&#9;&#9;&#9;&#9;&#9;else
-&#9;&#9;&#9;&#9;&#9;&#9;operation(mainPoint)
+&#9;
+&#9;&#9;&#9;&#9;if mouse.Target == nil then&#9;--cage the cursor so that it does not fly away
+&#9;&#9;&#9;&#9;&#9;mainPoint = game.Workspace.CurrentCamera.CoordinateFrame.p + mouse.UnitRay.Direction * lastCursorDistance --limits the distance of the mainPoint if the mouse is not hitting an object
+&#9;&#9;&#9;&#9;end
+&#9;
+&#9;&#9;&#9;&#9;if not mouseDown or click then
+&#9;&#9;&#9;&#9;&#9;lastPlanePoint = mainPoint
+&#9;&#9;&#9;&#9;&#9;lastNormal = findFace()
+&#9;&#9;&#9;&#9;end
+&#9;
+&#9;&#9;&#9;&#9;if planeLock or forcePlaneLock then
+&#9;&#9;&#9;&#9;&#9;mainPoint = lineToPlaneIntersection(mouse.Hit.p, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)
+&#9;&#9;&#9;&#9;end
+&#9;
+&#9;&#9;&#9;&#9;if snapToGrid or forceSnapToGrid then
+&#9;&#9;&#9;&#9;&#9;local snapOffset = Vector3.new(1, 1, 1) * (radius % resolution)&#9;&#9;--in studs
+&#9;&#9;&#9;&#9;&#9;local tempMainPoint = (mainPoint - snapOffset) / resolution + Vector3.new(.5, .5, .5)&#9;--in voxels
+&#9;&#9;&#9;&#9;&#9;mainPoint = Vector3.new(math.floor(tempMainPoint.x), math.floor(tempMainPoint.y), math.floor(tempMainPoint.z)) * resolution + snapOffset
+&#9;&#9;&#9;&#9;end
+&#9;
+&#9;&#9;&#9;&#9;if mouseDown then
+&#9;&#9;&#9;&#9;&#9;if click then
+&#9;&#9;&#9;&#9;&#9;&#9;firstOperation = t
+&#9;&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
 &#9;&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
+&#9;&#9;&#9;&#9;&#9;if click or t &gt; firstOperation + clickThreshold then
+&#9;&#9;&#9;&#9;&#9;&#9;click = false
+&#9;&#9;&#9;&#9;&#9;&#9;local difference = mainPoint - lastMainPoint
+&#9;&#9;&#9;&#9;&#9;&#9;local dragDistance = (difference).magnitude
+&#9;&#9;&#9;&#9;&#9;&#9;local crawlDistance = radius * .5&#9;&#9;&#9;--Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
+&#9;&#9;&#9;&#9;&#9;&#9;if dragDistance &gt; crawlDistance then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local differenceVector = difference.unit
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local dragDistance = math.min(dragDistance, crawlDistance * 2 + 20)&#9;--limiting this so that it does not attempt too many operations within a single drag.
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local samples=math.ceil(dragDistance / crawlDistance - .1)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;for i = 1, samples do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;operation(lastMainPoint + differenceVector * dragDistance * (i / samples))
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;mainPoint = lastMainPoint + differenceVector * dragDistance
+&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;operation(mainPoint)
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;lastMainPoint = mainPoint
+&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;end
+&#9;
+&#9;&#9;&#9;&#9;if not selectionPart then
+&#9;&#9;&#9;&#9;&#9;selectionPart = Instance.new(&apos;Part&apos;)
+&#9;&#9;&#9;&#9;&#9;selectionPart.Name = &apos;SelectionPart&apos;
+&#9;&#9;&#9;&#9;&#9;selectionPart.Transparency = 1
+&#9;&#9;&#9;&#9;&#9;selectionPart.TopSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;&#9;selectionPart.BottomSurface = &apos;Smooth&apos;
+&#9;&#9;&#9;&#9;&#9;selectionPart.Anchored = true
+&#9;&#9;&#9;&#9;&#9;selectionPart.CanCollide = false
+&#9;&#9;&#9;&#9;&#9;selectionPart.formFactor = &apos;Custom&apos;
+&#9;&#9;&#9;&#9;&#9;selectionPart.Size = Vector3.new(1, 1, 1) * selectionSize * resolution + Vector3.new(.1, .1, .1)
+&#9;&#9;&#9;&#9;&#9;selectionPart.Parent = gui
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;if not selectionObject then
+&#9;&#9;&#9;&#9;&#9;selectionObject = Instance.new(brushType == &apos;Sphere&apos; and &apos;SelectionSphere&apos; or &apos;SelectionBox&apos;)
+&#9;&#9;&#9;&#9;&#9;selectionObject.Name = &apos;SelectionObject&apos;
+&#9;&#9;&#9;&#9;&#9;selectionObject.Color = BrickColor.new(&apos;Toothpaste&apos;)
+&#9;&#9;&#9;&#9;&#9;selectionObject.SurfaceTransparency = .9 - strength * .5
+&#9;&#9;&#9;&#9;&#9;selectionObject.SurfaceColor = BrickColor.new(&apos;Toothpaste&apos;)
+&#9;&#9;&#9;&#9;&#9;selectionObject.Adornee = selectionPart
+&#9;&#9;&#9;&#9;&#9;selectionObject.Parent = selectionPart
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;selectionPart.CFrame = CFrame.new(mainPoint)
+&#9;
+&#9;&#9;&#9;&#9;if planeLock or forcePlaneLock then
+&#9;&#9;&#9;&#9;&#9;local mainPointIntersect = lineToPlaneIntersection(mainPoint, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)&#9;--we need to get this otherwise the plane can shift whiel drawing
+&#9;&#9;&#9;&#9;&#9;drawGrid(mainPointIntersect, lastNormal, mouseDown and .8)
+&#9;&#9;&#9;&#9;end
+&#9;
+&#9;&#9;&#9;&#9;lastCursorDistance = math.max(20 + selectionSize * resolution * 1.5,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
+&#9;
+&#9;&#9;&#9;&#9;quickWait()
 &#9;&#9;&#9;end
-
-&#9;&#9;&#9;if not selectionPart then
-&#9;&#9;&#9;&#9;selectionPart = Instance.new(&apos;Part&apos;)
-&#9;&#9;&#9;&#9;selectionPart.Name = &apos;SelectionPart&apos;
-&#9;&#9;&#9;&#9;selectionPart.Transparency = 1
-&#9;&#9;&#9;&#9;selectionPart.TopSurface = &apos;Smooth&apos;
-&#9;&#9;&#9;&#9;selectionPart.BottomSurface = &apos;Smooth&apos;
-&#9;&#9;&#9;&#9;selectionPart.Anchored = true
-&#9;&#9;&#9;&#9;selectionPart.CanCollide = false
-&#9;&#9;&#9;&#9;selectionPart.formFactor = &apos;Custom&apos;
-&#9;&#9;&#9;&#9;selectionPart.Size = Vector3.new(1, 1, 1) * selectionSize * resolution + Vector3.new(.1, .1, .1)
-&#9;&#9;&#9;&#9;selectionPart.Parent = gui
-&#9;&#9;&#9;end
-&#9;&#9;&#9;if not selectionObject then
-&#9;&#9;&#9;&#9;selectionObject = Instance.new(brushType == &apos;Sphere&apos; and &apos;SelectionSphere&apos; or &apos;SelectionBox&apos;)
-&#9;&#9;&#9;&#9;selectionObject.Name = &apos;SelectionObject&apos;
-&#9;&#9;&#9;&#9;selectionObject.Color = BrickColor.new(&apos;Toothpaste&apos;)
-&#9;&#9;&#9;&#9;selectionObject.SurfaceTransparency = .9 - strength * .5
-&#9;&#9;&#9;&#9;selectionObject.SurfaceColor = BrickColor.new(&apos;Toothpaste&apos;)
-&#9;&#9;&#9;&#9;selectionObject.Adornee = selectionPart
-&#9;&#9;&#9;&#9;selectionObject.Parent = selectionPart
-&#9;&#9;&#9;end
-&#9;&#9;&#9;selectionPart.CFrame = CFrame.new(mainPoint)
-
-&#9;&#9;&#9;if planeLock or forcePlaneLock then
-&#9;&#9;&#9;&#9;local mainPointIntersect = lineToPlaneIntersection(mainPoint, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)&#9;--we need to get this otherwise the plane can shift whiel drawing
-&#9;&#9;&#9;&#9;drawGrid(mainPointIntersect, lastNormal, mouseDown and .8)
-&#9;&#9;&#9;end
-
-&#9;&#9;&#9;lastCursorDistance = math.max(20 + selectionSize * resolution * 1.5,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
-
-&#9;&#9;&#9;quickWait()
 &#9;&#9;end
 &#9;end
 &#9;
@@ -588,6 +628,9 @@ function FirstTimeSetUp()
 &#9;&#9;end
 &#9;&#9;mouseDown = false
 &#9;&#9;on = false
+&#9;&#9;if modules[currentTool] then
+&#9;&#9;&#9;modules[currentTool].Off()
+&#9;&#9;end
 &#9;end
 
 &#9;function scrollwheel(change)
@@ -645,11 +688,11 @@ end
 </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX9B3D708B695B4467B568DA7CDE6A2189">
+		<Item class="ScreenGui" referent="RBX2D768DBF6A9C40EAACD5F78D27BE044F">
 			<Properties>
 				<string name="Name">TerrainPluginGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX5225120D325843588CDD651F3542BB9D">
+			<Item class="Frame" referent="RBX9496FBD4F80C4F119B9DB018F1312552">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -677,7 +720,7 @@ end
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX8AD0565CA5C14BB2A7FCB65357771949">
+				<Item class="TextButton" referent="RBX1BB54B1075AC44EE95DF378B9AE21BC5">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -720,7 +763,7 @@ end
 						<int name="ZIndex">3</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX66455AAB517142C2B3ED7B6F72EC9A7A">
+				<Item class="TextLabel" referent="RBXCBE68FFBC9D444CB8AB92C7AF9756005">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -759,7 +802,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX2CB207EDB2584BD28AD5AB5A42AA9256">
+				<Item class="TextLabel" referent="RBXAF29461FA606461E93F0988C2D14450A">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -798,7 +841,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXC9D4240FBF884627BCDC625DB4BDEA60">
+				<Item class="TextLabel" referent="RBX2D2B4CDCD4BF465B8ABBB89CE1DAC755">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -837,7 +880,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX1231F9507CF748B197E6EBE567C209F2">
+				<Item class="TextLabel" referent="RBX1857C12C78134F848560B59C278C1616">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -876,7 +919,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX7AF234303DD14F8E9A2A47B1F0C5C89A">
+				<Item class="TextLabel" referent="RBXD345510A07BF463C98CA5ABA14CC15CD">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -915,7 +958,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXDE54CD3D1BEC48AA858D5A0F35174925">
+				<Item class="TextButton" referent="RBX6A54E159C71F48828524B6C6FED10CEE">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -957,7 +1000,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX35ACF1ADE4BA4CF8A0F9D9D5174289A2">
+					<Item class="TextLabel" referent="RBXE9BD899132524A79BD5E1AE73B1CBC07">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -997,7 +1040,7 @@ end
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextButton" referent="RBX2AC6EF3C0932459495741892819D98EE">
+				<Item class="TextButton" referent="RBX937BC729B5684B719A3B47203139E766">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -1039,7 +1082,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX1B73DC89FB7D42B5ADA0C686446BDF3A">
+					<Item class="TextLabel" referent="RBXCE520CDB0DA549AEADCB783093F5921B">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -1080,6 +1123,2621 @@ end
 					</Item>
 				</Item>
 			</Item>
+		</Item>
+		<Item class="ModuleScript" referent="RBX06F3B1F9EC214F82B26151288DB43D34">
+			<Properties>
+				<string name="Name">GenerationModule</string>
+				<ProtectedString name="Source">-- Wait for the things we need to arrive
+game:WaitForChild(&quot;Workspace&quot;)
+game.Workspace:WaitForChild(&quot;Terrain&quot;)
+
+-- Local copy of terrain to call on throughout the script for speed
+local terrain = game.Workspace.Terrain
+
+
+-----------------------------------
+--DEFAULT SETTINGS FOR GENERATION--
+-----------------------------------
+local TerrainOptions = {}
+do
+--============== General Settings ============--
+&#9;-- Offset to create terrain at.
+&#9;-- note, offset can&apos;t be set in the GUI, but it&apos;s useful
+&#9;-- to at least have it available.
+&#9;TerrainOptions.xpos = 0
+&#9;TerrainOptions.zpos = 0
+&#9;-- Size of area to generate
+&#9;TerrainOptions.width = 400  -- width  ~ x size
+&#9;TerrainOptions.length = 300 -- length ~ z size
+&#9;-- How how the base of the world should be.
+&#9;TerrainOptions.baseHeight = 1
+
+
+--=============== Hill Settings ===============--
+&#9;-- How sharp or smooth to make the hills
+&#9;TerrainOptions.hillSizeModifier = 1
+&#9;-- Should cliffs be generated?
+&#9;TerrainOptions.enableCliffs = true
+&#9;-- How dense is the cliff generation?
+&#9;TerrainOptions.cliffDensityModifier = 1
+
+
+--============= Mountain Settings =============--
+&#9;-- What region to apply mountains to?
+&#9;TerrainOptions.mountainMode = &quot;Ridge&quot;
+&#9;-- Mountain Frequency, how often mountains occur in the region?
+&#9;-- This is a global mask value to apply to mountains, with the formula:
+&#9;-- Terrain = mountainlayerAndMask * mountainFrequency + 
+&#9;--           otherlayers * 1-mountainFrequency
+&#9;TerrainOptions.mountainFrequency = 1
+&#9;-- the max height of mountains
+&#9;TerrainOptions.mountainHeight = 60
+&#9;-- The average size of mountains to make, in terms of a fraction of the map size
+&#9;TerrainOptions.mountainSize = 0.15
+
+
+--============== Water Settings ===============--
+&#9;-- Lake frequency, how many lakes to place per square in the generated terrain. 
+&#9;TerrainOptions.lakesPerSquare = 1/10000
+&#9;-- how large can the lakes be?
+&#9;TerrainOptions.lakeMaxSize = 3000
+&#9;-- what should the sea level be?
+&#9;TerrainOptions.sealevel = 0
+
+
+--============= Vegetation Settings ===========--
+-- Note: Vegetation generation is not included,
+--       in the GUI, but still present in the
+--       code if someone wants to play with it.
+&#9;-- vegetation mode
+&#9;TerrainOptions.vegetationMode = false
+&#9;-- vegetation density
+&#9;TerrainOptions.vegetationDensity = 1/100
+
+
+--============== Material Settings ============--
+&#9;-- How to color the level
+&#9;TerrainOptions.baseColor = 1               -- What material to use for solid color,
+&#9;                                           -- and for the main parts of the generation.
+&#9;TerrainOptions.colorMode = &quot;Auto Color&quot; -- Values: [Solid Color, Auto Color]
+&#9;TerrainOptions.colorMountains = true       -- color steep slopes in a grey color
+&#9;TerrainOptions.snowtoppedMountains = false -- color mountain peaks with white
+&#9;TerrainOptions.addSandyRegions = false     -- color some of the base with sand
+&#9;TerrainOptions.colorCliffs = true          -- color clif faces with a marbled texture
+&#9;TerrainOptions.soilDepth = 4               -- where soil is, how deep should it be? (with rock below)
+end
+
+
+-- This will store a copy of TerrainOptions when the generate button is pressed.
+-- This will then be used for the generation instead of TerrainOptions.  This way 
+-- TerrainOptions can be changed while generating without messing up what is being 
+-- generated.
+local GenerateOptions = nil
+
+
+---------------------
+--UTILITY FUNCTIONS--
+---------------------
+-- Create a deep copy of a table.
+-- Copies the elements.
+function CopyTable(object)
+    local holdTable = {}
+    local function Copy(object)
+        if type(object) ~= &quot;table&quot; then
+            return object
+        elseif holdTable[object] then
+            return holdTable[object]
+        end
+        local clone = {}
+        holdTable[object] = clone
+        for index, value in pairs(object) do
+            clone[Copy(index)] = Copy(value)
+        end
+        return setmetatable(clone, getmetatable(object))
+    end
+    return Copy(object)
+end
+
+
+------------------
+--DEFAULT VALUES--
+------------------
+-- has the plugin been loaded?
+local loaded = false
+
+-- is the plugin currently active?
+local on = false
+
+-- Stores the conformation popup when confirming a choice.  If not nil then some actions should be blocked.
+local ConfirmationPopupObject = nil
+
+-- If true, the clear terrain conformation won&apos;t be shown.
+local hideClearConformation = false
+
+-- If true, the genearte terrain conformation won&apos;t be shown.
+local hideGenerateConformation = false
+
+
+----------------
+--PLUGIN SETUP--
+----------------
+-- an event that is fired before the plugin deactivates
+local deactivatingEvent = Instance.new(&quot;BindableEvent&quot;)
+
+-- create the plugin and toolbar, and connect them to the On/Off activation functions
+--[[local plugin = PluginManager():CreatePlugin()
+plugin.Deactivation:connect(function()
+&#9;Off()
+end)
+local toolbar = plugin:CreateToolbar(&quot;Terrain&quot;)
+local toolbarbutton = toolbar:CreateButton(&quot;New Smooth Terrain&quot;, &quot;Terrain Generator&quot;, &quot;&quot;)
+toolbarbutton.Click:connect(function()
+&#9;if on then
+&#9;&#9;deactivatingEvent:Fire()
+&#9;&#9;Off()
+&#9;elseif loaded then
+&#9;&#9;On()
+&#9;end
+end)]]
+
+
+--==========================================================================================================--
+--                                       Noise generation code                                            ==--
+--==========================================================================================================--
+--
+local perm = {
+&#9;151,160,137,91,90,15,
+&#9;131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+&#9;190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
+&#9;88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+&#9;77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+&#9;102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+&#9;135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
+&#9;5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+&#9;223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
+&#9;129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+&#9;251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
+&#9;49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+&#9;138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180,
+&#9;151,160,137,91,90,15,
+&#9;131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+&#9;190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
+&#9;88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+&#9;77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+&#9;102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+&#9;135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
+&#9;5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+&#9;223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
+&#9;129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+&#9;251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
+&#9;49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+&#9;138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
+}
+local floor = math.floor
+local function grad( hash, x, y )
+    local h = hash%8;          -- Convert low 3 bits of hash code
+    local u = h&lt;4 and x or y;  -- into 8 simple gradient directions,
+    local v = h&lt;4 and y or x;  -- and compute the dot product with (x,y).
+    return ((h%2==1) and -u or u) + ((floor(h/2)%2==1) and -2.0*v or 2.0*v);
+end
+local function PerlinNoise(x,y)
+    local ix0, iy0, ix1, iy1;
+    local fx0, fy0, fx1, fy1;
+    local s, t, nx0, nx1, n0, n1;
+
+    ix0 = floor(x); -- Integer part of x
+    iy0 = floor(y); -- Integer part of y
+    fx0 = x - ix0;        -- Fractional part of x
+    fy0 = y - iy0;        -- Fractional part of y
+    fx1 = fx0 - 1.0;
+    fy1 = fy0 - 1.0;
+    ix1 = (ix0 + 1) % 255;  -- Wrap to 0..255
+    iy1 = (iy0 + 1) % 255;
+    ix0 = ix0 % 255;
+    iy0 = iy0 % 255;
+    
+&#9;t=(fy0*fy0*fy0*(fy0*(fy0*6-15)+10));
+&#9;s=(fx0*fx0*fx0*(fx0*(fx0*6-15)+10));
+
+    nx0 = grad(perm[ix0 + perm[iy0+1]+1], fx0, fy0);
+    nx1 = grad(perm[ix0 + perm[iy1+1]+1], fx0, fy1);
+    n0 = nx0 + t*(nx1-nx0);
+
+    nx0 = grad(perm[ix1 + perm[iy0+1]+1], fx1, fy0);
+    nx1 = grad(perm[ix1 + perm[iy1+1]+1], fx1, fy1);
+    n1 = nx0 + t*(nx1-nx0);
+
+    return 0.5*(1 + (0.507 * (n0 + s*(n1-n0))))
+end
+function PerlinNoiseMap(lambda)
+&#9;local key = math.random()*10000
+&#9;local map = {}
+&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;map[x] = {}
+&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;map[x][z] = PerlinNoise(x/lambda, z/lambda + key)
+&#9;&#9;end
+&#9;end
+&#9;return map
+end
+-- end perlin noise generation code
+
+
+--==========================================================================================================--
+--                                       GUI Utility functions                                            ==--
+--==========================================================================================================--
+
+-- UI gui load.  Required for all the GUI code
+local RbxGui = LoadLibrary(&quot;RbxGui&quot;)
+
+-- Create a standard text label.  Use this for all lables in the popup so it is easy to standardize.
+-- labelName - What to set the text label name as.
+-- pos    &#9; - Where to position the label.  Should be of type UDim2.
+-- size   &#9; - How large to make the label.&#9; Should be of type UDim2.
+-- text   &#9; - Text to display.
+-- parent &#9; - What to set the text parent as.
+-- Return:
+-- Value is the created label.
+function CreateStandardLabel(labelName,
+                             pos,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9; size,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9; text,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9; parent)
+&#9;local label = Instance.new(&quot;TextLabel&quot;, parent)
+&#9;label.Name = labelName
+&#9;label.Position = pos
+&#9;label.Size = size
+&#9;label.Text = text
+&#9;label.TextColor3 = Color3.new(0.95, 0.95, 0.95)
+&#9;label.Font = Enum.Font.ArialBold
+&#9;label.FontSize = Enum.FontSize.Size14
+&#9;label.TextXAlignment = Enum.TextXAlignment.Left
+&#9;label.BackgroundTransparency = 1&#9;
+&#9;label.Parent = parent&#9;
+&#9;
+&#9;return label
+end
+
+-- Create a standardized slider.
+-- name  - Name to use for the slider.
+-- pos   - Position to display the slider at.
+-- steps - How many steps there are in the slider.
+-- funcOnChange - Function to call when the slider changes.
+-- initValue    - Initial value to set the slider to.  If nil the slider stays at the default. 
+-- parent       - What to set as the parent.
+-- Return:
+-- sliderGui      - Slider gui object.
+-- sliderPosition - Object that can set the slider value.
+function CreateStandardSlider(name,
+                              pos,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  lengthBarPos,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  steps,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  funcOnChange,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  initValue,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  parent)
+&#9;local sliderGui, sliderPosition = RbxGui.CreateSlider(steps, 0, UDim2.new(0,0,0,0))
+&#9;
+&#9;sliderGui.Name = name
+&#9;sliderGui.Parent = parent
+&#9;sliderGui.Position = pos
+&#9;sliderGui.Size = UDim2.new(1,0,0,20)
+&#9;local lengthBar = sliderGui:FindFirstChild(&quot;Bar&quot;)
+&#9;lengthBar.Size = UDim2.new(1, -21, 0, 5)
+&#9;lengthBar.Position = lengthBarPos
+&#9;
+&#9;if nil ~= funcOnChange then
+&#9;&#9;sliderPosition.Changed:connect(function() funcOnChange(sliderPosition) end)
+&#9;end
+&#9;
+&#9;if nil ~= initValue then 
+&#9;&#9;sliderPosition.Value = initValue
+&#9;end
+&#9;
+&#9;return sliderGui, sliderPosition 
+end
+
+-- Create a standard dropdown.  Use this for all dropdowns in the popup so it is easy to standardize.
+-- name - What to set the text label name as.
+-- pos    &#9; &#9; - Where to position the label.  Should be of type UDim2.
+-- values    &#9; - A table of the values that will be in the dropbox, in the order they are to be shown.
+-- initValue&#9; - Initial value the dropdown should be set to.
+-- funcOnChange  - Function to run when a dropdown selection is made.
+-- parent &#9; &#9; - What to set the parent as.
+-- Return:
+-- dropdown &#9;   - The dropdown gui.
+-- updateSelection - Object to use to change the current dropdown.&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;
+function CreateStandardDropdown(name,
+&#9;&#9;&#9;&#9;&#9;&#9;        pos,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;values,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;initValue,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;funcOnChange,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;parent)&#9;&#9;&#9;&#9;&#9;
+&#9;-- Create a dropdown selection for the modes to fill in a river
+&#9;local dropdown, updateSelection=RbxGui.CreateDropDownMenu(values, funcOnChange);
+&#9;dropdown.Name = name
+&#9;dropdown.Position = pos
+&#9;dropdown.Active = true
+&#9;dropdown.Size = UDim2.new(0,150,0,32)
+&#9;dropdown.Parent = parent
+
+&#9;updateSelection(initValue)&#9;&#9;
+
+&#9;return dropdown, updateSelection
+end&#9;&#9;
+
+-- Keep common button properties here to make it easer to change them all at once.
+-- These are the default properties to use for a button.
+buttonTextColor = Color3.new(1, 1, 1);
+buttonFont = Enum.Font.ArialBold;
+buttonFontSize = Enum.FontSize.Size18;
+
+-- Create a standard dropdown.  Use this for all dropdowns in the popup so it is easy to standardize.
+-- name - What to use.
+-- pos    &#9; &#9;- Where to position the button.  Should be of type UDim2.
+-- text         - Text to show in the button.
+-- funcOnPress  - Function to run when the button is pressed.
+-- parent &#9; &#9;- What to set the parent as.
+-- Return:
+-- button &#9;   - The button gui.&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;
+function CreateStandardButton(name,
+  &#9;&#9;&#9;&#9;&#9;&#9;&#9;  pos,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  text,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  funcOnPress,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  parent,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;  size)&#9;&#9;&#9;&#9;&#9;
+&#9;button = Instance.new(&quot;TextButton&quot;, parent)
+&#9;button.Name = name
+&#9;button.Position = pos
+
+&#9;button.Size = UDim2.new(0,120,0,40)
+&#9;button.Text = text
+
+&#9;if size then
+&#9;&#9;button.Size = size
+&#9;end
+&#9;
+&#9;button.Style = Enum.ButtonStyle.RobloxButton
+
+&#9;button.TextColor3 = buttonTextColor
+&#9;button.Font = buttonFont
+&#9;button.FontSize = buttonFontSize
+
+&#9;button.MouseButton1Click:connect(funcOnPress)
+&#9;
+&#9;return button
+end&#9;
+
+
+-- Create a standard accordion, which contains many child areas that can be
+-- swiched between
+-- name
+-- pos           - Where to put it
+-- childList     - List of children to add, format: [{Name = ..., Gui = ..., Height = ...}]
+-- 
+function CreateStandardAccordion(name, 
+&#9;                             pos, 
+&#9;                             size, 
+&#9;                             childList, 
+&#9;                             parent)
+&#9;frame = Instance.new(&apos;Frame&apos;, parent)
+&#9;frame.Position = pos
+&#9;frame.Size = size
+&#9;frame.Name = name
+&#9;frame.ClipsDescendants = true
+&#9;frame.BackgroundTransparency = 1
+&#9;--
+&#9;local childContainerList = {}
+&#9;--
+&#9;local function doLayout(pressedItem)
+&#9;&#9;local atY = 0
+&#9;&#9;for _, child in pairs(childContainerList) do
+&#9;&#9;&#9;child.Gui.Position = UDim2.new(0, 0, 0, atY)
+&#9;&#9;&#9;if child == pressedItem then
+&#9;&#9;&#9;&#9;child.Gui.Size = UDim2.new(1, 0, 0, child.DesiredHeight)
+&#9;&#9;&#9;&#9;child.Gui.HeadingButton.TextColor3 = Color3.new(1, 0.7, 0.7)
+&#9;&#9;&#9;&#9;child.ChildGui.Visible = true
+&#9;&#9;&#9;&#9;atY = atY + child.DesiredHeight
+&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;child.Gui.Size = UDim2.new(1, 0, 0, 40)
+&#9;&#9;&#9;&#9;child.Gui.HeadingButton.TextColor3 = buttonTextColor
+&#9;&#9;&#9;&#9;child.ChildGui.Visible = false
+&#9;&#9;&#9;&#9;atY = atY + 25
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+&#9;--
+&#9;for _, childData in pairs(childList) do
+&#9;&#9;local childContainer = Instance.new(&apos;Frame&apos;, frame)
+&#9;&#9;childContainer.BackgroundTransparency = 1
+&#9;&#9;childContainer.ClipsDescendants = true
+&#9;&#9;--
+&#9;&#9;local childHeader = Instance.new(&apos;TextButton&apos;, childContainer)
+&#9;&#9;childHeader.Name = &apos;HeadingButton&apos;
+&#9;&#9;childHeader.Style = Enum.ButtonStyle.RobloxButton
+&#9;&#9;childHeader.Size = UDim2.new(1, 0, 0, 30)
+&#9;&#9;childHeader.TextColor3 = buttonTextColor
+&#9;&#9;childHeader.Font = buttonFont
+&#9;&#9;childHeader.FontSize = buttonFontSize
+&#9;&#9;childHeader.Text = &quot; v &quot;..childData.Name..&quot; v &quot;
+&#9;&#9;--
+&#9;&#9;childData.Gui.BackgroundTransparency = 1
+&#9;&#9;childData.Gui.Position = UDim2.new(0, 0, 0, 30)
+&#9;&#9;childData.Gui.Size = UDim2.new(1, 0, 1, -30)
+&#9;&#9;childData.Gui.Parent = childContainer
+&#9;&#9;--
+&#9;&#9;local data = {
+&#9;&#9;&#9;Gui = childContainer;
+&#9;&#9;&#9;ChildGui = childData.Gui;
+&#9;&#9;&#9;DesiredHeight = childData.Height + 30;
+&#9;&#9;}
+&#9;&#9;childContainerList[#childContainerList+1] = data
+&#9;&#9;--
+&#9;&#9;childHeader.MouseButton1Click:connect(function() doLayout(data) end)
+&#9;end
+&#9;--do an initial layout
+&#9;doLayout(childContainerList[1])
+&#9;--
+&#9;return frame
+end
+
+-- Confirmation Popup GUI
+ConfirmationPopup = {}
+ConfirmationPopup.__index = ConfirmationPopup&#9;&#9;&#9;&#9;&#9; 
+do 
+&#9;-- Create a confirmation popup.
+&#9;--
+&#9;-- confirmText       - What to display in the popup.
+&#9;-- confirmButtonText - What to display in the popup.
+&#9;-- declineButtonText - What to display in the popup.
+&#9;-- confirmFunction   - Function to run on confirmation.
+&#9;-- declineFunction   - Function to run when declining.
+&#9;--
+&#9;-- Return:
+&#9;-- Value a table with confirmation gui and options.&#9;
+&#9;function ConfirmationPopup.Create(confirmText,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;  confirmButtonText,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;  declineButtonText,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      confirmFunction,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      declineFunction)&#9;&#9;&#9;  
+&#9;&#9;local popup = {}
+&#9;&#9;popup.confirmButton = nil&#9;&#9;&#9;-- Hold the button to confirm a choice.
+&#9;&#9;popup.declineButton = nil&#9;&#9;&#9;-- Hold the button to decline a choice.&#9;&#9; &#9;&#9;&#9; 
+&#9;&#9;popup.confirmationFrame = nil       -- Hold the conformation frame.
+&#9;&#9;popup.confirmationText = nil        -- Hold the text label to display the conformation message.
+&#9;&#9;popup.confirmationHelpText = nil    -- Hold the text label to display the conformation message help.
+
+
+&#9;&#9;popup.confirmationFrame = Instance.new(&quot;Frame&quot;, MainScreenGui)
+&#9;&#9;popup.confirmationFrame.Name = &quot;ConfirmationFrame&quot;
+&#9;&#9;popup.confirmationFrame.Size = UDim2.new(0, 280, 0, 140)
+&#9;&#9;popup.confirmationFrame.Position = UDim2.new(.5, -popup.confirmationFrame.Size.X.Offset/2, 0.5, -popup.confirmationFrame.Size.Y.Offset/2)
+&#9;&#9;popup.confirmationFrame.Style = Enum.FrameStyle.RobloxRound
+&#9;&#9;popup.confirmLabel = CreateStandardLabel(&quot;ConfirmLabel&quot;, UDim2.new(0,0,0,15), UDim2.new(1, 0, 0, 24), confirmText, popup.confirmationFrame)
+&#9;&#9;popup.confirmLabel.FontSize = Enum.FontSize.Size18
+&#9;&#9;popup.confirmLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+&#9;&#9;-- Confirm
+&#9;&#9;popup.confirmButton = CreateStandardButton(&quot;ConfirmButton&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;UDim2.new(0.5, -120, 1, -50),
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;    confirmButtonText,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;    confirmFunction,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;    popup.confirmationFrame)&#9;
+
+&#9;&#9;-- Decline
+&#9;&#9;popup.declineButton  = CreateStandardButton(&quot;DeclineButton&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;UDim2.new(0.5, 0, 1, -50),
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;    declineButtonText,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;    declineFunction,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;    popup.confirmationFrame)&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;
+
+&#9;&#9;setmetatable(popup, ConfirmationPopup)
+
+&#9;&#9;return popup
+&#9;end&#9;
+
+&#9;-- Clear the popup, free up assets.
+&#9;function ConfirmationPopup:Clear()
+
+&#9;&#9;if nil ~= self.confirmButton then
+&#9;&#9;&#9;self.confirmButton.Parent = nil
+&#9;&#9;end
+
+&#9;&#9;if nil ~= self.declineButton then
+&#9;&#9;&#9;self.declineButton.Parent = nil&#9;
+&#9;&#9;end
+
+&#9;&#9;if nil ~= self.confirmationFrame then
+&#9;&#9;&#9;self.confirmationFrame.Parent = nil
+&#9;&#9;end
+
+&#9;&#9;if nil ~= self.confirmLabel then
+&#9;&#9;&#9;self.confirmLabel.Parent = nil    
+&#9;&#9;end
+
+&#9;&#9;self.confirmButton = nil
+&#9;&#9;self.declineButton = nil&#9;&#9;&#9; 
+&#9;&#9;self.conformationFrame = nil
+&#9;&#9;self.conformText = nil      
+&#9;end
+end
+
+--==========================================================================================================--
+--                                        Progres Bar Handling                                            ==--
+--==========================================================================================================--
+
+-- Container used to store the data about the progress bar. The style of the stupid 
+-- RbxGui library gives us a whole bunch of return values when creating one, and
+-- sticking them all in a table is the best way to deal with them.
+CancelValues = {cancelAction = false, -- Used to cancel currently occuring actions.  If set to true then terrain generation will stop.
+&#9;&#9;&#9;&#9;progressBar = nil, &#9;  -- Will store the progress bar when needed.
+&#9;&#9;&#9;&#9;setAmountFunc = nil,  -- Stores a function tied to the progres bar that sets the progress bar precentage done.
+&#9;&#9;&#9;&#9;bindForCancel = nil}  -- Stores a function bind that will be set with the function to run when the cancel button is pressed in the progress bar.
+
+-- Load the progress bar to display when drawing a river.
+-- text - Text to display.
+function LoadProgressBar(text)
+&#9;if CancelValues.progressBar == nil then
+&#9;&#9;CancelValues.isDrawing = true
+&#9;&#9;
+&#9;&#9;-- Start the progress bar.
+&#9;&#9;CancelValues.progressBar, CancelValues.setAmountFunc, CancelValues.bindForCancel = RbxGui.CreateLoadingFrame(text)
+&#9;&#9;CancelValues.progressBar.Position = UDim2.new(.5, -CancelValues.progressBar.Size.X.Offset/2, 0, 15)
+&#9;&#9;CancelValues.progressBar.Parent = MainScreenGui
+&#9;&#9;CancelValues.bindForCancel.Event:connect(function(arguments)
+&#9;&#9;&#9;CancelValues.cancelActions = true&#9;&#9;-- Set the flag that everything should stop.
+&#9;&#9;&#9;coroutine.yield()   -- No idea why this is here?????? Breaks without it, don&apos;t remove.
+&#9;&#9;end)
+&#9;else
+&#9;&#9;print(&apos;Tried to start the progress bar when it was already running.&apos;)
+&#9;end
+end
+
+-- Unload the progress bar.
+function UnloadProgressBar()
+&#9;CancelValues.isDrawing = false
+&#9;CancelValues.cancelActions = false
+&#9;
+&#9;if nil ~= CancelValues.progressBar then
+&#9;&#9;CancelValues.progressBar.Parent = nil
+&#9;&#9;CancelValues.progressBar = nil
+&#9;&#9;CancelValues.setAmountFunc = nil
+&#9;&#9;CancelValues.bindForCancel = nil
+&#9;end
+end&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;
+
+
+--==========================================================================================================--
+--                           Main Terrain generation and clearing code                                    ==--
+--==========================================================================================================--
+
+-- Set the camera to look at the terrain from a distance so that all terrain will be in view.
+-- centerX, centerZ - Center coordinate of land.  This doesn&apos;t take into account clipping.
+-- length, width    - Land dimensions.
+function SetCamera(centerX, centerZ, length, width)
+&#9;local currCamera = game.Workspace.CurrentCamera
+&#9;local cameraPos = Vector3.new(0, 400, 1600)
+&#9;local cameraFocus = Vector3.new(0, 255, 0)
+&#9;
+&#9;-- Nothing set so use the default.
+&#9;if nil ~= centerX then
+&#9;&#9;local scale = 0
+&#9;&#9;local lengthScale = 0
+&#9;&#9;local widthScale = 0
+&#9;&#9;
+&#9;&#9;if length &lt;= 64 then
+&#9;&#9;&#9;lengthScale = .35
+&#9;&#9;elseif length &lt;= 128 then
+&#9;&#9;&#9;lengthScale = .5
+&#9;&#9;elseif length &lt;= 256 then
+&#9;&#9;&#9;lengthScale = .7
+&#9;&#9;else
+&#9;&#9;&#9;lengthScale = 1.3
+&#9;&#9;end
+&#9;&#9;
+&#9;&#9;if width &lt;= 64 then
+&#9;&#9;&#9;widthScale = .35
+&#9;&#9;elseif width &lt;= 128 then
+&#9;&#9;&#9;widthScale = .4
+&#9;&#9;elseif width &lt;= 256 then
+&#9;&#9;&#9;widthScale = .4
+&#9;&#9;else
+&#9;&#9;&#9;widthScale = .7
+&#9;&#9;end&#9;&#9;
+&#9;&#9;
+&#9;&#9;if widthScale &gt; lengthScale then
+&#9;&#9;&#9;scale = widthScale
+&#9;&#9;else
+&#9;&#9;&#9;scale = lengthScale
+&#9;&#9;end
+
+&#9;&#9;local distance = Vector3.new(0, (200*scale) + 200, (1100*scale))
+&#9;&#9;cameraPos = Vector3.new(centerX + distance.X, distance.Y, centerZ + distance.Z)
+&#9;&#9;cameraFocus = Vector3.new(centerX, 0, centerZ)
+&#9;end&#9;
+&#9;
+&#9;currCamera.CoordinateFrame = CFrame.new(cameraPos.X, cameraPos.Y, cameraPos.Z)
+&#9;currCamera.Focus = CFrame.new(cameraFocus.X, cameraFocus.Y, cameraFocus.Z)&#9;
+end
+
+-- Function used by the clear button.  Prompts the user first.
+-- Will not show if disabled or terrain is being processed.
+function ConfirmClearTerrain()
+&#9;-- Only do if something isn&apos;t already being processed.
+&#9;if nil == CancelValues.progressBar then
+&#9;&#9;if nil == ConfirmationPopupObject then
+&#9;&#9;&#9;if not hideClearConformation then
+&#9;&#9;&#9;&#9;ConfirmationPopupObject = ConfirmationPopup.Create(&quot;Clear Terrain?&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;     &quot;Clear&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;     &quot;Cancel&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; function()
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; ClearConformation()
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; ClearTerrain()
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; end, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; ClearConformation,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; function() 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;hideClearConformation = not hideClearConformation 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;return not hideClearConformation
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end)
+&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;ClearTerrain()
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+end
+
+-- Function used by the generate button.  Prompts the user first.
+-- Will not show if disabled or terrain is being processed.
+function ConfirmGenerateTerrain()
+&#9;-- Only do if something isn&apos;t already being processed.
+&#9;if nil == CancelValues.progressBar then&#9;
+&#9;&#9;if nil == ConfirmationPopupObject then
+&#9;&#9;&#9;if not hideGenerateConformation then
+&#9;&#9;&#9;&#9;ConfirmationPopupObject = ConfirmationPopup.Create(&quot;Generate Terrain?&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; &quot;Generate&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; &quot;Cancel&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; function()
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; ClearConformation()
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; GenerateTerrain()
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; end, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; ClearConformation,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; function() 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;hideGenerateConformation = not hideGenerateConformation 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;return not hideGenerateConformation
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; end)
+&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;GenerateTerrain()
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+end
+
+-- Unload the conformation popup if it exists.&#9;&#9;&#9;   
+-- Does nothing if the popup isn&apos;t set.
+function ClearConformation()
+&#9;if nil ~= ConfirmationPopupObject then
+&#9;&#9;ConfirmationPopupObject:Clear()
+&#9;&#9;ConfirmationPopupObject = nil
+&#9;end
+end&#9;
+
+-- Create terrain based on the current properties.
+function GenerateTerrain()
+&#9;-- don&apos;t let the user fiddle with things while we&apos;re running the generator
+&#9;--toolbarbutton:SetActive(false)
+&#9;
+&#9;-- Make the cache of the TerrainOptions to use for our generation settings, that can&apos;t get messed with
+&#9;-- while we&apos;re generating.
+&#9;GenerateOptions = CopyTable(TerrainOptions)
+
+&#9;-- Turn off the plugin to give the user a better view, and disuade them from trying something silly
+&#9;-- like generating twice at the same time.
+&#9;Off()
+&#9;
+&#9;-- Create the progress bar that will track terrain creation completion.
+&#9;LoadProgressBar(&quot;Generating Terrain&quot;)
+
+&#9;-- Reposition to get a good view.
+&#9;SetCamera(GenerateOptions.xpos, GenerateOptions.zpos, GenerateOptions.length, GenerateOptions.width)
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Update the message displayed to the user durring generation
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function UpdateGenerationProgressMessage(text)
+&#9;&#9;CancelValues.progressBar.loadingName.Text = text
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Easy pausing code, which will only wait at most once every 1/9 second
+&#9;-- Lets us generate faster without completely freezing the game from the user&apos;s perspective.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local LastPause = tick()
+&#9;local function pause()
+&#9;&#9;if tick()-LastPause &gt; 1/6 then
+&#9;&#9;&#9;wait()
+&#9;&#9;&#9;LastPause = tick()
+&#9;&#9;end
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Tree model management. Vegetation is placed in here if enabled.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function GetTreeModel()
+&#9;&#9;local model = game.Workspace:FindFirstChild(&apos;TreeModel&apos;)
+&#9;&#9;if not model then
+&#9;&#9;&#9;model = Instance.new(&apos;Model&apos;, game.Workspace)
+&#9;&#9;&#9;model.Name = &apos;TreeModel&apos;
+&#9;&#9;end
+&#9;&#9;return model
+&#9;end
+
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Some fixed settings that haven&apos;t migrated to the TerrainOptions yet because they&apos;re carefully
+&#9;-- hard coded values.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local CLIFFS_PER_SQ = 1/2000
+&#9;--
+&#9;local MIDDLE_RIDGE_RADIUS =   40  --the base radius of the middle ridge
+&#9;local MIDDLE_RIDGE_VARIANCE = 50  --how much to vary the boundary by
+&#9;local MIDDLE_RIDGE_FADE =     35  --how large a distance to fade the mountains on around the boundary
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Utility functions
+&#9;------------------------------------------------------------------------------------------------------
+&#9;--is a coord in the bounds? ( x elemof [1,GenerateOptions.width], z elemof [1,GenerateOptions.length] )
+&#9;local function InBound(x, z)
+&#9;&#9;return x &gt;= 1 and x &lt;= GenerateOptions.width and
+&#9;&#9;       z &gt;= 1 and z &lt;= GenerateOptions.length
+&#9;end
+&#9;local function at(heightMap, x, z)
+&#9;&#9;if x &gt; GenerateOptions.width  then x = GenerateOptions.width  end
+&#9;&#9;if x &lt; 1      then x = 1      end
+&#9;&#9;if z &gt; GenerateOptions.length then z = GenerateOptions.length end
+&#9;&#9;if z &lt; 1      then z = 1      end
+&#9;&#9;return heightMap[x][z]
+&#9;end
+
+&#9;--local copies of the standard mathematical functions for speed
+&#9;local floor =  math.floor
+&#9;local ceil =   math.ceil
+&#9;local sqrt =   math.sqrt
+&#9;local sin =    math.sin
+&#9;local cos =    math.cos
+&#9;local max =    math.max
+&#9;local min =    math.min
+&#9;local abs =    math.abs
+&#9;local random = math.random
+
+&#9;--curving functions. They are smooth curves that may values in [0,1] -&gt; [0,1] in usefull ways. In 
+&#9;--particular they are used to change the distribution of perlin noise to generate more natural hills
+&#9;local function quad_curve(n) --slightly S shaped curve, with tangent -&gt; 2 as x -&gt; 0.5
+&#9;&#9;if n &lt; 0.5 then
+&#9;&#9;&#9;return n*n + 0.5*n
+&#9;&#9;else
+&#9;&#9;&#9;return -n*n +2.5*n -0.5
+&#9;&#9;end
+&#9;end
+&#9;local function root2_curve(n) --S shaped with a vertical tangent as x -&gt; .5
+&#9;&#9;if n &lt; 0.5 then
+&#9;&#9;&#9;return 0.5-sqrt(0.5^2 - n^2)
+&#9;&#9;else
+&#9;&#9;&#9;return sqrt(0.5^2 - (1-n)^2)+0.5
+&#9;&#9;end
+&#9;end
+&#9;local function sin4_smallbias_curve(n) --Like quad_curve but biased to smaller outputs
+&#9;&#9;return sin((0.5*3.141592653)*n)^4
+&#9;end
+&#9;local function sin4_largebias_curve(n) --like quad_curve but biased to larger outputs
+&#9;&#9;return 1-sin((0.5*3.141592653)*(1-n))^4
+&#9;end
+
+&#9;-- main generation functions begin:
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Clear the terrain, readying the game for a new generation.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function ClearTerrain()
+&#9;&#9;CancelValues.setAmountFunc(0)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(1/10) Clearing Old Terrain&quot;)
+
+&#9;&#9;--first, clear the foliage. If we don&apos;t clear the foliage the game will crash when clearing the
+&#9;&#9;--terrain with so many parts colliding with it. We can just destroy it as it will be generated
+&#9;&#9;--again when the code needs it, we haven&apos;t stored a reference to it yet here.
+&#9;&#9;GetTreeModel():Destroy()
+&#9;&#9;wait()
+
+&#9;&#9;--now we clear the terrain. With the new terrain, a naked :Clear() call will work performantly enough
+&#9;&#9;--to use over clearing in slices.
+&#9;&#9;terrain:Clear()
+&#9;end&#9;
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Make the base layer, a hieghtmap that is relatively flat hills and valleys covering the
+&#9;-- whole map.
+&#9;-- Returns: A GenerateOptions.widthxGenerateOptions.length table heightmop representing the base of the map.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function MakeBaseLayer()
+&#9;&#9;CancelValues.setAmountFunc(0)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(2/10) Generating Base Layer&quot;)
+&#9;&#9;--first, get all of the perlin maps that we need
+&#9;&#9;local mod = 1/GenerateOptions.hillSizeModifier
+&#9;&#9;local BaseLayer =     PerlinNoiseMap(70*mod)
+&#9;&#9;--
+&#9;&#9;local IsPlainsMap =   PerlinNoiseMap(80*mod) --where should the area be flatter?
+&#9;&#9;local MedFreqHills =  PerlinNoiseMap(28*mod)
+&#9;&#9;local HighFreqHills = PerlinNoiseMap(14*mod)
+&#9;&#9;local SmallNoiseMap = PerlinNoiseMap( 4*mod)
+&#9;&#9;local Quantity =      PerlinNoiseMap(60*mod) --how sparse or dense areas of hills should be
+&#9;&#9;local IsCrags =       PerlinNoiseMap(100*mod)
+&#9;&#9;local CragsMap =      PerlinNoiseMap(30*mod)
+&#9;&#9;--
+&#9;&#9;local baseLayer = {}
+&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;CancelValues.setAmountFunc(x/GenerateOptions.width)
+&#9;&#9;&#9;pause()
+&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;baseLayer[x] = {}
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;--------
+&#9;&#9;&#9;&#9;-- I hope this is readable enough.... that&apos;s the best that I can do. Rest assured, it&apos;s
+&#9;&#9;&#9;&#9;-- doing a whole pile of fiddling with perlin noise. The general strategy uses 3 parts:
+&#9;&#9;&#9;&#9;-- 1) A Base Layer -     Just typical perlin noise scaled by some amount.
+&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;-- 2) A Mask Layer -     Determines where the base layer should show up, through 
+&#9;&#9;&#9;&#9;--                       multiplication with the base layer.
+&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;-- 3) A Freqency Layer - The mask layer is also raised to a power. The higher the power,
+&#9;&#9;&#9;&#9;--                       The more sparsely distributed the feature will be.
+&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;local quant = Quantity[x][z]
+&#9;&#9;&#9;&#9;local hf = quad_curve( HighFreqHills[x][z] )
+&#9;&#9;&#9;&#9;local mf = quad_curve( MedFreqHills[x][z]  )
+&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;baseLayer[x][z] =   quad_curve(BaseLayer[x][z])*8
+&#9;&#9;&#9;&#9;                  + max( 
+&#9;&#9;&#9;&#9;                      85* CragsMap[x][z]^(2.5+  0  ) * max(0, IsCrags[x][z]-0.3    ),
+&#9;&#9;&#9;&#9;                      12*             mf^(1.5+quant) * min(1, IsPlainsMap[x][z]+0.5)
+&#9;&#9;&#9;&#9;                    )
+&#9;&#9;&#9;&#9;                  + 6* hf^(2.0+quant) *IsPlainsMap[x][z]
+&#9;&#9;&#9;&#9;                  + GenerateOptions.baseHeight 
+&#9;&#9;&#9;&#9;                  + SmallNoiseMap[x][z]*0.9
+&#9;&#9;&#9;&#9;--------
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;&#9;return baseLayer
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- A function which carves small cliff faces into the map.
+&#9;-- These small cliff faces give the map the appearance that water has been flowing through it, in
+&#9;-- contrast to just having the hilly terrain that raw noise will give you.
+&#9;-- The cliffs are made by choosing &quot;cleaving planes&quot;, and shearing the nearby terrain above and below 
+&#9;-- it away from it.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function ApplyCliffs(baseLayer)
+&#9;&#9;CancelValues.setAmountFunc(0)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(3/10) Eroding Cliffs&quot;)
+
+&#9;&#9;-- are cliffs enabled?
+&#9;&#9;if not GenerateOptions.enableCliffs then return end
+
+&#9;&#9;--First get a noise map of how cliffey different areas of the map are. This gives some variation
+&#9;&#9;--rather than just having all parts of the map have cliffs on them.
+&#9;&#9;local CliffMap = PerlinNoiseMap(70)
+
+&#9;&#9;-- generate an inermediary hight map to store changes to the map as a result of applying cliffs.
+&#9;&#9;-- this is important because we want to clamp the maximum effect that cliffs can have on the map 
+&#9;&#9;-- to something around +/-5. Which is most efficiently done with another hight map.
+&#9;&#9;local cliffs = {}
+&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;cliffs[x] = {}
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;cliffs[x][z] = 0 --for summing, initialize to 0 
+&#9;&#9;&#9;end
+&#9;&#9;end
+
+&#9;&#9;--Now, we need to apply the cliffs in two phases. For every cliff we first see exactly what kind
+&#9;&#9;--of feature it would create, and then if it creates a &quot;good&quot; one go through again and actually
+&#9;&#9;--apply it to the heightmap. For example, if a cliff ends up being a &quot;pothole&quot;, that is, a really
+&#9;&#9;--small circular dent, then discard it.
+&#9;&#9;--It turns out that the fastest way to do things is just guessing cliffs and seeing which ones
+&#9;&#9;--end up good, rather than using a more complex approach.
+
+&#9;&#9;--generate a good number of cliffs. 1 cliff / 2000 studs^2 turns out to be best
+&#9;&#9;local cliffsToGenerate = math.floor(GenerateOptions.width*GenerateOptions.length*CLIFFS_PER_SQ*GenerateOptions.cliffDensityModifier)
+&#9;&#9;for CliffNum = 1, cliffsToGenerate do 
+&#9;&#9;&#9;pause()
+&#9;&#9;&#9;CancelValues.setAmountFunc(CliffNum/cliffsToGenerate)
+&#9;&#9;&#9;pause()
+&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;--
+&#9;&#9;&#9;--first, generate the stats of this cliff
+&#9;&#9;&#9;local x, z = random(2,GenerateOptions.width-1), random(2,GenerateOptions.length-1) --random position
+&#9;&#9;&#9;local radius = random(20,50)                       --random radius of effect
+&#9;&#9;&#9;local amplitude = random(4,9)                      --random amplitude the +/- of heigh generated
+
+&#9;&#9;&#9;--TODO: We can improve this function by finding the &quot;normal&quot; of the terrain surface and 
+&#9;&#9;&#9;--      putting the cleaving plane deliberately more perpendicular to it, but this is
+&#9;&#9;&#9;--      quite hard to do well in the general case.
+&#9;&#9;&#9;-- --get the average &quot;normal&quot; of the surface in question
+&#9;&#9;&#9;-- for dx = -radius,radius do
+&#9;&#9;&#9;-- &#9;for dz = -radius,radius do
+&#9;&#9;&#9;-- &#9;&#9;local xp,zp = x+dx,z+dz
+&#9;&#9;&#9;-- &#9;&#9;local r_2 = dx*dx + dz*dz
+&#9;&#9;&#9;-- &#9;&#9;--
+&#9;&#9;&#9;-- &#9;&#9;if (r_2 &lt; radius*radius) then
+&#9;&#9;&#9;-- &#9;&#9;&#9;-- 
+&#9;&#9;&#9;-- &#9;&#9;end
+&#9;&#9;&#9;-- &#9;end
+&#9;&#9;&#9;-- end&#9;&#9;&#9;
+
+&#9;&#9;&#9;--the plane to make the &quot;cut&quot; at. We generate a normal and then solve for the plane at the
+&#9;&#9;&#9;--position chosen and with that normal. That plane is then used to find the height of the cut
+&#9;&#9;&#9;--at each affected cell.
+&#9;&#9;&#9;local cliffAtElevation = baseLayer[x][z]
+&#9;&#9;&#9;local norm = Vector3.new(random()*0.5-0.25,1,random()*0.5-0.25).unit
+&#9;&#9;&#9;local planeA, planeB, planeC = norm.x,norm.y,norm.z
+&#9;&#9;&#9;local planeD = -(planeA*x + planeB*cliffAtElevation + planeC*z) 
+&#9;&#9;&#9;local function elevationAt(x,z)
+&#9;&#9;&#9;&#9;return -(planeA*x + planeC*z + planeD)/planeB
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;--first, check for potholes (and other bad features that you may want to).
+&#9;&#9;&#9;--we do this by counting the number of squares pushed up and number pushed down. This may
+&#9;&#9;&#9;--seem odd but it is a good fast hueristic. Generally petholes occurr when less than 20%
+&#9;&#9;&#9;--of the squares are pushed down.
+&#9;&#9;&#9;--if we hit exactly on a straight line we would expect 50%-50%, and most good features are in
+&#9;&#9;&#9;--the 25%-75% range. 
+&#9;&#9;&#9;local upCount, downCount = 0,0
+&#9;&#9;&#9;for dx = -radius,radius do
+&#9;&#9;&#9;&#9;for dz = -radius,radius do
+&#9;&#9;&#9;&#9;&#9;local xp,zp = x+dx,z+dz
+&#9;&#9;&#9;&#9;&#9;local r_2 = dx*dx + dz*dz
+&#9;&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;&#9;if (r_2 &lt; radius*radius) and InBound(xp,zp) then
+&#9;&#9;&#9;&#9;&#9;&#9;local avrHeight = (at(baseLayer,xp+1,zp  ) + at(baseLayer,xp-1,zp  ) + 
+&#9;&#9;&#9;&#9;&#9;&#9;                   at(baseLayer,xp  ,zp  ) +
+&#9;&#9;&#9;&#9;&#9;&#9;                   at(baseLayer,xp  ,zp+1) + at(baseLayer,xp,  zp-1))/5
+&#9;&#9;&#9;&#9;&#9;&#9;if avrHeight &gt; cliffAtElevation then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;upCount = upCount+1
+&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;downCount = downCount+1
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;--now, if we aren&apos;t in that bad 20% on either end, apply the changes to the heightmap
+&#9;&#9;&#9;if downCount/(upCount+downCount) &gt; 0.2 and upCount/(upCount+downCount) &gt; 0.2 then
+&#9;&#9;&#9;&#9;for dx = -radius,radius do
+&#9;&#9;&#9;&#9;&#9;for dz = -radius,radius do
+&#9;&#9;&#9;&#9;&#9;&#9;local xp,zp = x+dx,z+dz
+&#9;&#9;&#9;&#9;&#9;&#9;local r = sqrt(dx*dx + dz*dz)
+&#9;&#9;&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;&#9;&#9;--for every square which in-bounds square in the range of the effect
+&#9;&#9;&#9;&#9;&#9;&#9;if (r &lt; radius) and InBound(xp,zp) then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--find the average hieght at this square, and compare it to the 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local avrHeight = (at(baseLayer,xp+1,zp  ) + at(baseLayer,xp-1,zp  ) + 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;                   at(baseLayer,xp  ,zp  ) +
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;                   at(baseLayer,xp  ,zp+1) + at(baseLayer,xp,  zp-1))/5
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local nearnessToCenter = sin4_smallbias_curve((radius-r)/radius)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local cliffiness = quad_curve(CliffMap[xp][zp])
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if avrHeight &gt; elevationAt(xp,zp) then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;cliffs[xp][zp] = cliffs[xp][zp] + nearnessToCenter*amplitude*cliffiness
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;cliffs[xp][zp] = cliffs[xp][zp] - nearnessToCenter*amplitude*cliffiness
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end&#9;&#9;&#9;
+&#9;&#9;&#9;end
+&#9;&#9;end
+
+&#9;&#9;--now, apply all of the changes stored in the cliffs map to the baseLayer, clamping the
+&#9;&#9;--cliffs value to +/- 4 in the process.
+&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;local v = cliffs[x][z]
+&#9;&#9;&#9;&#9;if v &gt;  4 then v =  4 end
+&#9;&#9;&#9;&#9;if v &lt; -4 then v = -4 end
+&#9;&#9;&#9;&#9;baseLayer[x][z] = baseLayer[x][z] + v
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end&#9;
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Next we have to generate a high mountain layer to separate the two sides of the combat.
+&#9;-- Rather than using some heavily built up recursive noise, only a couple layers of noise are used,
+&#9;-- this gives the effect of valleys between the peaks, that let players find a nice strategic path
+&#9;-- to get to the other side of the map or prevent the opponents from as a part of the gameplay.
+&#9;--
+&#9;-- Returns: MountainMask, MountainHeight
+&#9;------------------------------------------------------------------------------------------------------
+&#9;function ApplyMountains(baseLayer)
+&#9;&#9;CancelValues.setAmountFunc(0)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(4/10) Building Mountain Layer&quot;)
+
+&#9;&#9;-- first off, a sanity check: check that the mountain height is higher than the base layer.
+&#9;&#9;-- If not it doesn&apos;t make sense to place any mountains.
+&#9;&#9;-- Also do this if there are no mountains requested
+&#9;&#9;if GenerateOptions.mountainHeight &lt;= GenerateOptions.baseHeight or GenerateOptions.mountainMode == &quot;None&quot; then
+&#9;&#9;&#9;-- just return no mountains
+&#9;&#9;&#9;local mountains = {}
+&#9;&#9;&#9;local mask = {}
+&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;mountains[x] = {}
+&#9;&#9;&#9;&#9;mask[x] = {}
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;mountains[x][z] = 0
+&#9;&#9;&#9;&#9;&#9;mask[x][z] = 0
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;&#9;return mask, mountains
+&#9;&#9;end
+
+&#9;&#9;local minDimension = math.min(GenerateOptions.width, GenerateOptions.length)
+
+&#9;&#9;--first, we need the noise for the mountain layer itself
+&#9;&#9;local SteepMountains =   PerlinNoiseMap( minDimension*GenerateOptions.mountainSize*0.9 ) --40)
+&#9;&#9;local ShallowMountains = PerlinNoiseMap( minDimension*GenerateOptions.mountainSize*1.1 ) --50)
+&#9;&#9;local SwitchMap =        PerlinNoiseMap( minDimension*GenerateOptions.mountainSize*1.7 ) --90) --which of steep or shallow to use
+&#9;&#9;local MountainDetailA =  PerlinNoiseMap( 2.5 )
+&#9;&#9;local MountainDetailB =  PerlinNoiseMap( 5 )
+&#9;&#9;local MountainDetailC =  PerlinNoiseMap( 12 )
+&#9;&#9;local MountainHighDetailShow = PerlinNoiseMap( 20 )
+
+&#9;&#9;--
+&#9;&#9;-- now we need to generate the mountain &quot;mask&quot;, which is where the mountains will be shown
+&#9;&#9;-- down the center of the map.
+&#9;&#9;local mountainMask = {}
+&#9;&#9;if GenerateOptions.mountainMode == &quot;Ridge&quot; then
+&#9;&#9;&#9;-- Ridge mode, generates a ridge of mountains down the middle of the map
+&#9;&#9;&#9;-- We sort of need two copies of this code, as depending which dimension of the terrain
+&#9;&#9;&#9;-- is larger, we need to change the orientation of the ridge, but this is not easy.
+&#9;&#9;&#9;if GenerateOptions.width &lt; GenerateOptions.length then
+&#9;&#9;&#9;&#9;local RidgeWidthMap = PerlinNoiseMap(GenerateOptions.length/4) -- was 60
+&#9;&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;&#9;CancelValues.setAmountFunc(x / GenerateOptions.width)
+&#9;&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;&#9;&#9;mountainMask[x] = {}
+&#9;&#9;&#9;&#9;&#9;local radius = ceil(MIDDLE_RIDGE_RADIUS + MIDDLE_RIDGE_VARIANCE*RidgeWidthMap[x][1])
+&#9;&#9;&#9;&#9;&#9;local center = floor(GenerateOptions.length/2)
+&#9;&#9;&#9;&#9;&#9;--lead up to 
+&#9;&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;&#9;local distToCenter = abs(center-z)
+&#9;&#9;&#9;&#9;&#9;&#9;if distToCenter &lt; radius - MIDDLE_RIDGE_FADE then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 1
+&#9;&#9;&#9;&#9;&#9;&#9;elseif distToCenter &lt; radius + MIDDLE_RIDGE_FADE then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;((radius+MIDDLE_RIDGE_FADE)-distToCenter) / (MIDDLE_RIDGE_FADE*2)
+&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 0
+&#9;&#9;&#9;&#9;&#9;&#9;end 
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;local RidgeWidthMap = PerlinNoiseMap(GenerateOptions.width/4)
+&#9;&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;&#9;mountainMask[x] = {}
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;CancelValues.setAmountFunc(z / GenerateOptions.length)
+&#9;&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;&#9;&#9;local radius = ceil(MIDDLE_RIDGE_RADIUS + MIDDLE_RIDGE_VARIANCE*RidgeWidthMap[z][1])
+&#9;&#9;&#9;&#9;&#9;local center = floor(GenerateOptions.width/2)
+&#9;&#9;&#9;&#9;&#9;--lead up to 
+&#9;&#9;&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;&#9;&#9;local distToCenter = abs(center-x)
+&#9;&#9;&#9;&#9;&#9;&#9;if distToCenter &lt; radius - MIDDLE_RIDGE_FADE then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 1
+&#9;&#9;&#9;&#9;&#9;&#9;elseif distToCenter &lt; radius + MIDDLE_RIDGE_FADE then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;((radius+MIDDLE_RIDGE_FADE)-distToCenter) / (MIDDLE_RIDGE_FADE*2)
+&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 0
+&#9;&#9;&#9;&#9;&#9;&#9;end 
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+
+&#9;&#9;elseif GenerateOptions.mountainMode == &quot;Ring&quot; then
+&#9;&#9;&#9;-- quite similar to the ridge mode, however, the ridge is around the edge of the terrain
+&#9;&#9;&#9;-- rather than running down the middle.
+&#9;&#9;&#9;local RingWidthMap = PerlinNoiseMap(minDimension/4)
+&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;mountainMask[x] = {}
+&#9;&#9;&#9;&#9;CancelValues.setAmountFunc(x / GenerateOptions.width)
+&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;-- we need to find the distance to the nearest edge
+&#9;&#9;&#9;&#9;&#9;local distToEdge = math.min(GenerateOptions.width - MIDDLE_RIDGE_RADIUS - RingWidthMap[GenerateOptions.width][z]*MIDDLE_RIDGE_VARIANCE - x,
+&#9;&#9;&#9;&#9;&#9;&#9;                        x - MIDDLE_RIDGE_RADIUS - RingWidthMap[1][z]*MIDDLE_RIDGE_VARIANCE,
+&#9;&#9;&#9;&#9;&#9;&#9;                        GenerateOptions.length - MIDDLE_RIDGE_RADIUS - RingWidthMap[x][GenerateOptions.length]*MIDDLE_RIDGE_VARIANCE - z,
+&#9;&#9;&#9;&#9;&#9;&#9;                        z - MIDDLE_RIDGE_RADIUS - RingWidthMap[x][1]*MIDDLE_RIDGE_VARIANCE)
+&#9;&#9;&#9;&#9;&#9;if distToEdge &gt; MIDDLE_RIDGE_FADE then
+&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 0
+&#9;&#9;&#9;&#9;&#9;elseif distToEdge &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 1 - (distToEdge / MIDDLE_RIDGE_FADE)
+&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 1
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+
+&#9;&#9;elseif GenerateOptions.mountainMode == &quot;Whole Map&quot; then
+&#9;&#9;&#9;-- whole map mode, mountains make up the whole map
+&#9;&#9;&#9;-- just fill the mask with 1s
+&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;mountainMask[x] = {}
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 1
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end&#9;
+
+&#9;&#9;elseif GenerateOptions.mountainMode == &quot;Random&quot; then
+&#9;&#9;&#9;-- random mode, place mountains randomly around the map
+&#9;&#9;&#9;-- the mask is just a perlin noise map
+&#9;&#9;&#9;mountainMask = PerlinNoiseMap(minDimension*GenerateOptions.mountainSize)
+&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = (mountainMask[x][z]*2 - 1)^3 / 2 + 0.5
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+
+&#9;&#9;elseif GenerateOptions.mountainMode == &quot;Interactive&quot; then
+&#9;&#9;&#9;-- interactive mode: TODO user fills in exactly where they want mountains.
+&#9;&#9;&#9;--local xc = x-floor(GenerateOptions.width/2) + GenerateOptions.xpos
+&#9;&#9;&#9;--local zc = z-floor(GenerateOptions.length/2) + GenerateOptions.zpos
+&#9;&#9;&#9;local minx, minz = -floor(GenerateOptions.width/2) + GenerateOptions.xpos, -floor(GenerateOptions.length/2) + GenerateOptions.zpos
+&#9;&#9;&#9;local maxx, maxz =  floor(GenerateOptions.width/2) + GenerateOptions.xpos,  floor(GenerateOptions.length/2) + GenerateOptions.zpos
+
+&#9;&#9;&#9;-- draw the canvas for the user to draw on
+&#9;&#9;&#9;--local region = Region3int16.new(Vector3int16.new(minx, 0, minz), Vector3int16.new(maxx, 0, maxz))
+&#9;&#9;&#9;local region = Region3.new(Vector3.new(minx, -4, minz)*4, Vector3.new(maxx, 0, maxz)*4)
+&#9;&#9;&#9;terrain:FillRegion(region, 4, Enum.Material.Sand)
+
+&#9;&#9;&#9;-- events to handle the tool being otherwise used or progress being cancelled
+&#9;&#9;&#9;local orEvent = Instance.new(&quot;BindableEvent&quot;)
+&#9;&#9;&#9;local deactivatingC = deactivatingEvent.Event:connect(function() orEvent:Fire({Type = &quot;Deactivated&quot;}) end)
+&#9;&#9;&#9;local cancelC = CancelValues.bindForCancel.Event:connect(function() orEvent:Fire({Type = &quot;Canceled&quot;}) end)
+
+&#9;&#9;&#9;-- activate the plugin temporarily to get the mouse
+&#9;&#9;&#9;--plugin:Activate(true)
+&#9;&#9;&#9;--local mouse = plugin:GetMouse()
+
+&#9;&#9;&#9;local messageBox = RbxGui.CreateMessageDialog(&quot;Interactive Mode&quot;, &quot;Draw where you want mountains to be located in the level.\n&quot;..
+&#9;&#9;&#9;&#9;                                                              &quot;Click and drag to draw.\n&quot;..
+&#9;&#9;&#9;&#9;                                                              &quot;Hold down shift to erase instead.&quot;, 
+&#9;&#9;&#9;                                              {{Text = &quot;Done&quot;, Function = function()
+&#9;&#9;&#9;                                              &#9;orEvent:Fire({Type = &quot;ClickDone&quot;})
+&#9;&#9;&#9;                                              end}})
+&#9;&#9;&#9;messageBox.Parent = MainScreenGui
+&#9;&#9;&#9;messageBox:TweenSizeAndPosition(UDim2.new(0, 320, 0, 170), UDim2.new(0, 10, 0, 10), &apos;Out&apos;, &apos;Quad&apos;, 2)
+
+&#9;&#9;&#9;-- initialize the terrain map
+&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;mountainMask[x] = {}
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = false
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;-- set up the mouse
+&#9;&#9;&#9;local mouseDown = false
+&#9;&#9;&#9;local shiftHeld = false
+&#9;&#9;&#9;local function doPaint()
+&#9;&#9;&#9;&#9;if mouse.Target and mouse.Target:IsA(&apos;Terrain&apos;) then
+&#9;&#9;&#9;&#9;&#9;local cell = mouse.Target:WorldToCellPreferSolid(mouse.Hit.p)
+
+&#9;&#9;&#9;&#9;&#9;-- do a paint. Note: We paint into the mountain mask with true/false rather than 0/1 in order
+&#9;&#9;&#9;&#9;&#9;-- to make the AA algorithm that we apply to the results faster.
+&#9;&#9;&#9;&#9;&#9;for dx = -10, 10 do
+&#9;&#9;&#9;&#9;&#9;&#9;for dz = -10, 10 do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local x, z = cell.x + dx, cell.z + dz
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local datax, dataz = x - minx + 1, z - minz + 1
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if x &gt;= minx and x &lt;= maxx and z &gt;= minz and z &lt;= maxz and dx*dx + dz*dz &lt; 10*10 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if shiftHeld then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--terrain:SetCell(x, 0, z, 5, 0, 0) -- asphalt
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;terrain:FillRegion(
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;Region3.new(Vector3.new(x*4, -4, z*4), Vector3.new((x+1)*4, 0, (z+1)*4)),
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;4,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;Enum.Material.Sand)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[datax][dataz] = false
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--terrain:SetCell(x, 0, z, 16, 0, 0) --blue plastic
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;terrain:FillRegion(
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;Region3.new(Vector3.new(x*4, -4, z*4), Vector3.new((x+1)*4, 0, (z+1)*4)),
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;4,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;Enum.Material.Slate)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[datax][dataz] = true
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;&#9;local mouseC1 = mouse.Button1Down:connect(function()
+&#9;&#9;&#9;&#9;mouseDown = true
+&#9;&#9;&#9;&#9;doPaint()
+&#9;&#9;&#9;end)
+&#9;&#9;&#9;local mouseC2 = mouse.Button1Up:connect(function()
+&#9;&#9;&#9;&#9;mouseDown = false
+&#9;&#9;&#9;end)
+&#9;&#9;&#9;local mouseC3 = mouse.Move:connect(function()
+&#9;&#9;&#9;&#9;if mouseDown then
+&#9;&#9;&#9;&#9;&#9;doPaint()
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end)
+&#9;&#9;&#9;local mouseC4 = mouse.KeyDown:connect(function(key)
+&#9;&#9;&#9;&#9;if string.byte(key) == 48 then -- shift key = 48, for both right and left shift
+&#9;&#9;&#9;&#9;&#9;shiftHeld = true
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end)
+&#9;&#9;&#9;local mouseC5 = mouse.KeyUp:connect(function(key)
+&#9;&#9;&#9;&#9;if string.byte(key) == 48 then -- shift key = 48, for both right and left shift
+&#9;&#9;&#9;&#9;&#9;shiftHeld = false
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end)
+
+&#9;&#9;&#9;-- wait for the user to be done
+&#9;&#9;&#9;local hresult = orEvent.Event:wait()
+
+&#9;&#9;&#9;-- disconnect all of the events that we made
+&#9;&#9;&#9;deactivatingC:disconnect()
+&#9;&#9;&#9;cancelC:disconnect()
+&#9;&#9;&#9;mouseC1:disconnect()
+&#9;&#9;&#9;mouseC2:disconnect()
+&#9;&#9;&#9;mouseC3:disconnect()
+&#9;&#9;&#9;mouseC4:disconnect()
+&#9;&#9;&#9;mouseC5:disconnect()
+
+&#9;&#9;&#9;-- kill the message box
+&#9;&#9;&#9;messageBox:Destroy()
+
+&#9;&#9;&#9;-- get rid of the canvas
+&#9;&#9;&#9;terrain:FillRegion(region, 4, Enum.Material.Air)
+
+&#9;&#9;&#9;-- depending on why they are done, do stuff
+&#9;&#9;&#9;local AA_SIZE = 8
+&#9;&#9;&#9;if hresult.Type == &quot;ClickDone&quot; then
+&#9;&#9;&#9;&#9;local newMask = {}
+
+&#9;&#9;&#9;&#9;UpdateGenerationProgressMessage(&quot;(4/10) Antialiasing selection&quot;)
+
+&#9;&#9;&#9;&#9;-- cache some stuff into locals for a faster runtime
+&#9;&#9;&#9;&#9;local _w, _l = GenerateOptions.width, GenerateOptions.length
+
+&#9;&#9;&#9;&#9;-- generate a bucket map so that we can easily find what areas need to be anti-aliased
+&#9;&#9;&#9;&#9;local bucketMap = {} -- [][] = 0 =&gt; ground, 1 =&gt; mountain, 2 =&gt; both
+&#9;&#9;&#9;&#9;local bwidth = math.ceil(_w/AA_SIZE)
+&#9;&#9;&#9;&#9;local blength = math.ceil(_l/AA_SIZE)
+&#9;&#9;&#9;&#9;for bx = 1, bwidth do
+&#9;&#9;&#9;&#9;&#9;bucketMap[bx] = {}
+&#9;&#9;&#9;&#9;&#9;for bz = 1, blength do
+&#9;&#9;&#9;&#9;&#9;&#9;bucketMap[bx][bz] = false
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;for bx = 1, bwidth do
+&#9;&#9;&#9;&#9;&#9;CancelValues.setAmountFunc(bx / bwidth * 0.5)
+&#9;&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;&#9;for bz = 1, blength do
+&#9;&#9;&#9;&#9;&#9;&#9;local foundMountain = false
+&#9;&#9;&#9;&#9;&#9;&#9;local foundGround = false
+&#9;&#9;&#9;&#9;&#9;&#9;for x = (bx-1)*AA_SIZE + 1, math.min(bx*AA_SIZE, _w) do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;for z = (bz-1)*AA_SIZE + 1, math.min(bz*AA_SIZE, _l) do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if mountainMask[x][z] then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;foundMountain = true
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;foundGround = true
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;if foundGround and foundMountain then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;-- this and all adjancent buckets need anti aliasing
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;for dx = -1, 1 do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;for dz = -1, 1 do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local xc, zc = bx+dx, bz+dz
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if xc &gt; 0 and zc &gt; 0 and xc &lt;= bwidth and zc &lt;= blength then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;bucketMap[xc][zc] = true
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;for x = 1, _w do
+&#9;&#9;&#9;&#9;&#9;newMask[x] = {}
+&#9;&#9;&#9;&#9;&#9;for z = 1, _l do
+&#9;&#9;&#9;&#9;&#9;&#9;newMask[x][z] = mountainMask[x][z] and 1 or 0
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;-- now, for each bucket, if it needs AA, then we AA all of the cells within it
+&#9;&#9;&#9;&#9;for bx = 1, bwidth do
+&#9;&#9;&#9;&#9;&#9;CancelValues.setAmountFunc(bx / bwidth * 0.5 + 0.5)
+&#9;&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;&#9;for bz = 1, blength do
+&#9;&#9;&#9;&#9;&#9;&#9;if bucketMap[bx][bz] then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;for x = (bx-1)*AA_SIZE + 1, math.min(bx*AA_SIZE, GenerateOptions.width) do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;for z = (bz-1)*AA_SIZE + 1, math.min(bz*AA_SIZE, GenerateOptions.length) do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local count, total = 0, 0
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;for dx = -AA_SIZE,AA_SIZE do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;for dz = -AA_SIZE,AA_SIZE do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local xc, zc = x + dx, z + dz
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if xc &lt;= _w and xc &gt; 0 and zc &gt; 0 and zc &lt;= _l then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;total = total + (mountainMask[xc][zc] and 1 or 0)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;count = count + 1
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end&#9;
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;newMask[x][z] = total / count&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end&#9;&#9;&#9;
+
+&#9;&#9;&#9;&#9;mountainMask = newMask
+
+&#9;&#9;&#9;elseif hresult.Type == &quot;Deactivated&quot; or hresult.Type == &quot;Canceled&quot; then
+&#9;&#9;&#9;&#9;-- return an empty mask
+&#9;&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;&#9;mountainMask[x][z] = 0
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;return mountainMask, SteepMountains
+
+&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;assert(&quot;unreachable&quot;)
+&#9;&#9;&#9;end
+
+&#9;&#9;-- none is handled at the start of the function
+&#9;&#9;else
+&#9;&#9;&#9;assert(&quot;unreachable&quot;)
+&#9;&#9;end
+
+&#9;&#9;--now, using the mountainMap weighted average between the mountain values and the base values
+&#9;&#9;--once we&apos;ve done that we have to scale them up to make maximum usage of our available vertical
+&#9;&#9;--space. The highest peok should be at exactly y=amplitude specified by the user
+&#9;&#9;--We reuse the SteepMountains array as a place to write the results out to before we do a
+&#9;&#9;--seoond round scaling them up.
+&#9;&#9;local maxValue = 0
+&#9;&#9;local minValue = math.huge
+&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;local steepFrac =   SwitchMap[x][z]
+&#9;&#9;&#9;&#9;local shallowFrac = 1-steepFrac
+&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;local mountainHeight =   steepFrac  *sin4_smallbias_curve(SteepMountains[x][z])
+&#9;&#9;&#9;&#9;                       + shallowFrac*ShallowMountains[x][z]
+&#9;&#9;&#9;&#9;if mountainHeight &gt; maxValue then maxValue = mountainHeight end
+&#9;&#9;&#9;&#9;if mountainHeight &lt; minValue then minValue = mountainHeight end
+&#9;&#9;&#9;&#9;SteepMountains[x][z] = mountainHeight
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;&#9;local usedFrac = (maxValue-minValue) / (GenerateOptions.mountainHeight-GenerateOptions.baseHeight) --1 less or else we get cut off without doing an extra floor()
+
+&#9;&#9;--now, scale and add the mountain layer to the baseLayer. We can do both of these steps in the
+&#9;&#9;--same loop. This time we will re-use the SteepMountain layer as the total scaled mountain layer
+&#9;&#9;--to.
+&#9;&#9;--here we apply the mountain frequency option from the options.
+&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do 
+&#9;&#9;&#9;&#9;local mountainLayer = GenerateOptions.baseHeight + (SteepMountains[x][z]-minValue)*(1/usedFrac)
+&#9;&#9;&#9;&#9;mountainLayer = 
+&#9;&#9;&#9;&#9;&#9;mountainLayer 
+&#9;&#9;&#9;&#9;&#9;- 6*MountainDetailB[x][z]
+&#9;&#9;&#9;&#9;&#9;+ 5*MountainDetailC[x][z]
+&#9;&#9;&#9;&#9;local highDetailShow = MountainHighDetailShow[x][z] 
+&#9;&#9;&#9;&#9;local highDetailFrac;
+&#9;&#9;&#9;&#9;if highDetailShow &gt; 0.25 and highDetailShow &lt; 0.75 then
+&#9;&#9;&#9;&#9;&#9;highDetailFrac = 1
+&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;highDetailFrac = (math.abs(highDetailShow - 0.5)-0.25) / 0.25
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;mountainLayer = mountainLayer + highDetailFrac*4*MountainDetailA[x][z]
+&#9;&#9;&#9;&#9;SteepMountains[x][z] = mountainLayer
+&#9;&#9;&#9;&#9;local mask = mountainMask[x][z]*GenerateOptions.mountainFrequency -- TODO: What&apos;s the problem here??
+&#9;&#9;&#9;&#9;baseLayer[x][z] =  (1-mask)*baseLayer[x][z]
+&#9;&#9;&#9;&#9;                  +(  mask)*mountainLayer
+&#9;&#9;&#9;end
+&#9;&#9;end
+
+&#9;&#9;--return the values
+&#9;&#9;return mountainMask, SteepMountains
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- There may be some holes left over, fill them.
+&#9;-- Any areas which are &lt;= 0 in the base layer we&apos;re building are holes, and should be changed to
+&#9;-- a value of 1
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function FillHoles(baseLayer)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(5/10) Filling Holes&quot;)
+&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;CancelValues.setAmountFunc(x / GenerateOptions.width)
+&#9;&#9;&#9;pause()
+&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;if baseLayer[x][z] &lt; 2 then
+&#9;&#9;&#9;&#9;&#9;baseLayer[x][z] = 2
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Now that the heightmap is fully constructed, coloring.
+&#9;-- All of the coloring is done as post-process using only various hightmaps from previous phases. The
+&#9;-- advantage of this is that it is easy to change the look and feel of the map when adding new
+&#9;-- features, as opposed to if a persistent coloring state were maintained as the heigh-map is
+&#9;-- build up, where you would have to worry about ovecdraw from following phases.
+&#9;-- It also turns out to be faster to do it this way. It is qutie tricky to decide how to color in
+&#9;-- phases based on what previous and furture phases do, as opposed to in a single coloring pass here.
+&#9;--
+&#9;-- Returns: A map of CellMaterial codes, or special color codes, that can be used in drawing out the
+&#9;--          heightmap to the terrain.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function ColorMap(baseLayer, mountainMask, mountainMap)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(6/10) Coloring Map&quot;)
+&#9;&#9;--first, make a map that we will use to decide where to put sand, and where to put grass
+&#9;&#9;local SandMapA = PerlinNoiseMap(100)
+&#9;&#9;local SandMapB = PerlinNoiseMap(50)
+&#9;&#9;local SandMapC = PerlinNoiseMap(25)
+
+&#9;&#9;-- Flecks
+&#9;&#9;local FlecksMapA = PerlinNoiseMap(40)
+&#9;&#9;local FlecksMapB = PerlinNoiseMap(25)
+&#9;&#9;local FlecksMapC = PerlinNoiseMap(15)
+
+&#9;&#9;--the map to write the colors out to
+&#9;&#9;local ColorMap = {}
+
+&#9;&#9;--now, we do a single pass over every square in the map, and color it
+&#9;&#9;if GenerateOptions.colorMode == &quot;Auto Color&quot; then
+&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;CancelValues.setAmountFunc(x / GenerateOptions.width)
+&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;&#9;ColorMap[x] = {}
+&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;--first, weneed to find all the heights of all of the nearby squares, so we can calculate
+&#9;&#9;&#9;&#9;&#9;--both an average height at this location, and a total variance at this location.
+&#9;&#9;&#9;&#9;&#9;local _1,_2,_3,_4,_5,_6,_7,_8,_9 =
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x+1,z+1),
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x+1,z  ),
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x+1,z-1),
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x  ,z+1),
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x  ,z  ),
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x  ,z-1),
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x-1,z+1),
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x-1,z  ),
+&#9;&#9;&#9;&#9;&#9;&#9;at(baseLayer,x-1,z-1)
+&#9;&#9;&#9;&#9;&#9;local h = _5
+&#9;&#9;&#9;&#9;&#9;local avr = (_1+_2+_3+_4+_5+_6+_7+_8+_9)/9
+&#9;&#9;&#9;&#9;&#9;local tot = (abs(_1-avr) + abs(_2-avr) + abs(_3-avr) + 
+&#9;&#9;&#9;&#9;&#9;             abs(_4-avr) + abs(_5-avr) + abs(_6-avr) + 
+&#9;&#9;&#9;&#9;&#9;             abs(_7-avr) + abs(_8-avr) + abs(_9-avr))
+
+&#9;&#9;&#9;&#9;&#9;--now, using those values, color the map.
+&#9;&#9;&#9;&#9;&#9;if abs(h-avr) &gt; 1 and GenerateOptions.colorCliffs then
+&#9;&#9;&#9;&#9;&#9;&#9;--~~if the average is far from the height then we are in a sharp slope region. We give
+&#9;&#9;&#9;&#9;&#9;&#9;--these areas a special color code so that where they are drawn they will not just
+&#9;&#9;&#9;&#9;&#9;&#9;--be single color columns like the rest, which would lead to vertical striping~~
+&#9;&#9;&#9;&#9;&#9;&#9;-- **REMOVED**, disabled until smooth terrain gets more materials to work with
+&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Slate
+&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;local mountainHeight = mountainMask[x][z]*mountainMap[x][z]*GenerateOptions.mountainFrequency
+&#9;&#9;&#9;&#9;&#9;&#9;local sandy = SandMapA[x][z]+SandMapB[x][z]+SandMapC[x][z]
+&#9;&#9;&#9;&#9;&#9;&#9;if not GenerateOptions.addSandyRegions then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;sandy = 0
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;&#9;&#9;if tot&gt;5 or (sandy &gt; 1.5 and mountainHeight &gt; 40) then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if tot&lt;5 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--we are are really high up, place snow here
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if GenerateOptions.snowtoppedMountains then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Slate --snowey: TODO: Needs new material under smooth terrain
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if GenerateOptions.colorMountains then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Slate
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Grass
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--we are in a steep area in the mountains, but not a really steep area
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--reuse the sandy map for a bit of variation in the mountain material
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if GenerateOptions.colorMountains then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if sandy &gt; 1.5 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Slate --TODO: find something else for this material
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Slate
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Grass
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;elseif mountainHeight &gt; 30 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--it&apos;s both not steep, and high in the mountains. These areas are snow-covered
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--peaks, color them snowey
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if GenerateOptions.snowtoppedMountains then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Slate -- todo: Should be snowey once material arrives
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if GenerateOptions.colorMountains then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Slate
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Grass
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--it&apos;s a smooth area. Decide whether to place sand or grass. Sand should only be
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--placed in concave areas which are not in the mountains:
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--        (not in mountains)             (concave)     (not too high either)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if (sandy*(1-mountainMask[x][z])&gt;1.5) and (h&lt;=avr) and (baseLayer[x][z] &lt; 15) then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Sand --sand
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Grass --grass
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;&#9;-- If the color would be grass, apply flecks
+&#9;&#9;&#9;&#9;&#9;if ColorMap[x][z] == Enum.Material.Grass then
+&#9;&#9;&#9;&#9;&#9;&#9;local flecks = 0.4*FlecksMapA[x][z] + 0.3*FlecksMapB[x][z] + 0.3*FlecksMapC[x][z]
+&#9;&#9;&#9;&#9;&#9;&#9;if flecks &lt; math.random()*0.55 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Slate
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;elseif GenerateOptions.colorMode == &quot;Solid Color&quot; then
+&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;ColorMap[x] = {}
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;ColorMap[x][z] = Enum.Material.Grass
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end&#9;&#9;
+&#9;&#9;end
+
+&#9;&#9;--done, return the color map
+&#9;&#9;return ColorMap
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Now, we actually draw out the level to the Terrain instance.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local SharpColors = {4,11,12,13}
+&#9;local function DrawTerrain(baseLayer, colormap)
+&#9;&#9;CancelValues.setAmountFunc(0)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(7/10) Drawing Terrain&quot;)
+&#9;&#9;--
+&#9;&#9;-- Occupancy and material arrays
+&#9;&#9;local materialVoxels = {}
+&#9;&#9;local occupancyVoxels = {}
+&#9;&#9;local globalMaxHeight = 0
+&#9;&#9;--
+&#9;&#9;for x = 1, GenerateOptions.width do 
+&#9;&#9;&#9;materialVoxels[x] = {}
+&#9;&#9;&#9;occupancyVoxels[x] = {}
+&#9;&#9;&#9;--
+&#9;&#9;&#9;CancelValues.setAmountFunc(x/GenerateOptions.width)
+&#9;&#9;&#9;pause()
+&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do 
+&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;local color = colormap[x][z]
+&#9;&#9;&#9;&#9;local y = baseLayer[x][z]
+&#9;&#9;&#9;&#9;local xc = x-floor(GenerateOptions.width/2) + GenerateOptions.xpos
+&#9;&#9;&#9;&#9;local zc = z-floor(GenerateOptions.length/2) + GenerateOptions.zpos
+&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;local columnHeight = ceil(y)
+&#9;&#9;&#9;&#9;globalMaxHeight = math.max(globalMaxHeight, columnHeight)
+
+&#9;&#9;&#9;&#9;-- Occupancy array
+&#9;&#9;&#9;&#9;for yc = 1, columnHeight do
+&#9;&#9;&#9;&#9;&#9;if not occupancyVoxels[x][yc] then
+&#9;&#9;&#9;&#9;&#9;&#9;occupancyVoxels[x][yc] = {}
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;occupancyVoxels[x][yc][z] = 1
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;occupancyVoxels[x][columnHeight][z] = 1 - (columnHeight - y)
+&#9;&#9;&#9;&#9;
+&#9;&#9;&#9;&#9;-- Material array
+&#9;&#9;&#9;&#9;for yc = 1, columnHeight do
+&#9;&#9;&#9;&#9;&#9;if not materialVoxels[x][yc] then
+&#9;&#9;&#9;&#9;&#9;&#9;materialVoxels[x][yc] = {}
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;if (columnHeight - yc) &lt; GenerateOptions.soilDepth then
+&#9;&#9;&#9;&#9;&#9;&#9;materialVoxels[x][yc][z] = color
+&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;materialVoxels[x][yc][z] = Enum.Material.Slate
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end 
+&#9;&#9;end
+
+&#9;&#9;-- Fill in and extra Y entries
+&#9;&#9;--print(&quot;Gen with size:&quot;, GenerateOptions.width, globalMaxHeight, GenerateOptions.length)
+&#9;&#9;for x = 1, GenerateOptions.width do 
+&#9;&#9;&#9;for y = 1, globalMaxHeight do
+&#9;&#9;&#9;&#9;if not materialVoxels[x][y] then
+&#9;&#9;&#9;&#9;&#9;materialVoxels[x][y] = {}
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;if not occupancyVoxels[x][y] then
+&#9;&#9;&#9;&#9;&#9;occupancyVoxels[x][y] = {}
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;if not materialVoxels[x][y][z] then
+&#9;&#9;&#9;&#9;&#9;&#9;materialVoxels[x][y][z] = Enum.Material.Air
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;if not occupancyVoxels[x][y][z] then
+&#9;&#9;&#9;&#9;&#9;&#9;occupancyVoxels[x][y][z] = 0
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+
+&#9;&#9;-- Do main draw (writing out the hieghtmap data &amp; colors to the Roblox terrain)
+&#9;&#9;local width = GenerateOptions.width
+&#9;&#9;local length = GenerateOptions.length
+&#9;&#9;local xbase = -floor(width/2) + GenerateOptions.xpos
+&#9;&#9;local zbase = -floor(length/2) + GenerateOptions.zpos
+&#9;&#9;
+&#9;&#9;-- Chunk in chucks of 10
+&#9;&#9;local CHUNK_SIZE = 20
+&#9;&#9;local chunkCount = ceil(width / CHUNK_SIZE)
+&#9;&#9;for chunkNum = 1, chunkCount - 1 do
+&#9;&#9;&#9;-- Calculate the chunk data
+&#9;&#9;&#9;local chunkMaterials = {}
+&#9;&#9;&#9;local chunkOccupancies = {}
+&#9;&#9;&#9;for i = 1, CHUNK_SIZE do
+&#9;&#9;&#9;&#9;chunkMaterials[i]   = materialVoxels[(chunkNum-1)*CHUNK_SIZE + i]
+&#9;&#9;&#9;&#9;chunkOccupancies[i] = occupancyVoxels[(chunkNum-1)*CHUNK_SIZE + i]
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;-- Calculate the chunk region
+&#9;&#9;&#9;local chunkRegion = Region3.new(
+&#9;&#9;&#9;&#9;Vector3.new(xbase + (chunkNum-1)*CHUNK_SIZE, 0,               zbase         )*4,
+&#9;&#9;&#9;&#9;Vector3.new(xbase + (chunkNum  )*CHUNK_SIZE, globalMaxHeight, zbase + length)*4
+&#9;&#9;&#9;)
+
+&#9;&#9;&#9;-- Draw the chunk
+&#9;&#9;&#9;terrain:WriteVoxels(chunkRegion, 4, chunkMaterials, chunkOccupancies)
+&#9;&#9;&#9;wait(0.5)
+&#9;&#9;end
+
+&#9;&#9;-- Final chunk, which may have an odd size
+&#9;&#9;do
+&#9;&#9;&#9;local finalChunkSize = width - (chunkCount-1)*CHUNK_SIZE
+
+&#9;&#9;&#9;-- Calculate the final chunk data
+&#9;&#9;&#9;local chunkMaterials = {}
+&#9;&#9;&#9;local chunkOccupancies = {}
+&#9;&#9;&#9;for i = 1, finalChunkSize do
+&#9;&#9;&#9;&#9;chunkMaterials[i]   = materialVoxels[(chunkCount-1)*finalChunkSize + i]
+&#9;&#9;&#9;&#9;chunkOccupancies[i] = occupancyVoxels[(chunkCount-1)*finalChunkSize + i]
+&#9;&#9;&#9;end
+
+&#9;&#9;&#9;-- Calculate the final chunk region
+&#9;&#9;&#9;local chunkRegion = Region3.new(
+&#9;&#9;&#9;&#9;Vector3.new(xbase + (chunkCount-1)*finalChunkSize, 0,               zbase         )*4,
+&#9;&#9;&#9;&#9;Vector3.new(xbase + (chunkCount  )*finalChunkSize, globalMaxHeight, zbase + length)*4
+&#9;&#9;&#9;)
+
+&#9;&#9;&#9;-- Draw the final chunk
+&#9;&#9;&#9;terrain:WriteVoxels(chunkRegion, 4, chunkMaterials, chunkOccupancies)
+&#9;&#9;end
+
+&#9;&#9;-- Non-chunked code
+&#9;&#9;-- local drawRegion = &#9;
+&#9;&#9;-- &#9;Region3.new(
+&#9;&#9;-- &#9;&#9;Vector3.new(xbase,       0,               zbase       )*4,
+&#9;&#9;-- &#9;&#9;Vector3.new(xbase+width, globalMaxHeight, zbase+length)*4)
+&#9;&#9;-- --print(&quot;Region:&quot;, drawRegion)
+&#9;&#9;-- terrain:WriteVoxels(
+&#9;&#9;-- &#9;drawRegion,
+&#9;&#9;-- &#9;4,
+&#9;&#9;-- &#9;materialVoxels,
+&#9;&#9;-- &#9;occupancyVoxels)
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Next we draw lakes into the map.
+&#9;-- The lake drawing process finds local minima in the map, and then flood-fills them to as
+&#9;-- high a level as it can without the flood-fill spilling into a very large area. This seems
+&#9;-- inefficient but it actually does not take that much time to fill a reasonable number of local
+&#9;-- minima using this approach.
+&#9;-- We need to take the base mask as a parameter so that we ensure the lake fills do not spill into
+&#9;-- the areas reserved for the bases.
+&#9;--
+&#9;-- Returns: A mask of where water was placed
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local Directions = {{1,0,1},         {-1,0,1},       {0,1,1},        {0,-1,1},
+                    {-1,-1,sqrt(2)}, {-1,1,sqrt(2)}, {1,-1,sqrt(2)}, {1,1,sqrt(2)}}
+&#9;local function PlaceLakes(baseLayer)
+&#9;&#9;CancelValues.setAmountFunc(0)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(8/10) Filling Lakes&quot;)
+&#9;&#9;wait()
+
+&#9;&#9;--first generate the water mask
+&#9;&#9;local waterMask = {}
+&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;waterMask[x] = {}
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do 
+&#9;&#9;&#9;&#9;waterMask[x][z] = 0
+&#9;&#9;&#9;end
+&#9;&#9;end
+
+&#9;&#9;-- generate lakes
+&#9;&#9;if GenerateOptions.waterMode == &quot;Lakes&quot; or GenerateOptions.waterMode == &quot;Both&quot; then
+&#9;&#9;&#9;--generate a certain density of lakes
+&#9;&#9;&#9;for i = 1, GenerateOptions.width*GenerateOptions.length*GenerateOptions.lakesPerSquare do
+&#9;&#9;&#9;&#9;CancelValues.setAmountFunc(i / GenerateOptions.width*GenerateOptions.length*GenerateOptions.lakesPerSquare * 0.5)
+&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;if CancelValues.cancelActions then return end
+
+&#9;&#9;&#9;&#9;--select a random position
+&#9;&#9;&#9;&#9;local x,z = random(1,GenerateOptions.width), random(1,GenerateOptions.length)
+
+&#9;&#9;&#9;&#9;--now, we need to find the local minimum nearest to this position
+&#9;&#9;&#9;&#9;local prevdx,prevdz;
+&#9;&#9;&#9;&#9;while true do
+&#9;&#9;&#9;&#9;&#9;--see if we will drop down in any of the directions
+&#9;&#9;&#9;&#9;&#9;local leastDir, leastChange = nil,100
+&#9;&#9;&#9;&#9;&#9;local h = baseLayer[x][z]
+&#9;&#9;&#9;&#9;&#9;for _, dir in pairs(Directions) do 
+&#9;&#9;&#9;&#9;&#9;&#9;local nx,nz = x+dir[1],z+dir[2]
+&#9;&#9;&#9;&#9;&#9;&#9;if InBound(nx,nz) then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;local hn = baseLayer[nx][nz]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if hn &lt; h and abs(hn-h) &lt; leastChange then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;leastDir = dir
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;leastChange = abs(hn-h)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;if not leastDir then
+&#9;&#9;&#9;&#9;&#9;&#9;break
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;x = x + leastDir[1]
+&#9;&#9;&#9;&#9;&#9;z = z + leastDir[2]
+&#9;&#9;&#9;&#9;&#9;if leastChange == 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;break
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;--(x,z) is now the local min nearest the random location. If there is not already a
+&#9;&#9;&#9;&#9;--water-feature there then try to generate one.
+&#9;&#9;&#9;&#9;if waterMask[x][z] == 0 then
+&#9;&#9;&#9;&#9;&#9;--now, in order to get the deepest possible lake, we try to generate one at sereval
+&#9;&#9;&#9;&#9;&#9;--heights, starting with the deepest. Doing anywhere from 1 deep to 3 deep works nicely.
+&#9;&#9;&#9;&#9;&#9;for y = floor(baseLayer[x][z])+5, floor(baseLayer[x][z])+1, -1 do
+&#9;&#9;&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;&#9;&#9;--we need to make a temporary map to store this attpmt&apos;s changes in, rather than
+&#9;&#9;&#9;&#9;&#9;&#9;--just applying them right to the water mask.
+&#9;&#9;&#9;&#9;&#9;&#9;local tmpWaterMask = {}
+&#9;&#9;&#9;&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;tmpWaterMask[x] = {}
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;tmpWaterMask[x][z] = waterMask[x][z]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;&#9;&#9;--now do a flood-fill
+&#9;&#9;&#9;&#9;&#9;&#9;local filledCount = 0
+&#9;&#9;&#9;&#9;&#9;&#9;local function FloodFill(x,z)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if not InBound(x,z) then return true end
+
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if tmpWaterMask[x][z] == 0 or y &gt; tmpWaterMask[x][z] then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if y &gt; floor(baseLayer[x][z]) then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--place water here
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;tmpWaterMask[x][z] = y
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;filledCount = filledCount+1
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if filledCount &gt; GenerateOptions.lakeMaxSize then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--bail out early, don&apos;t flood bases
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;return false
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if not FloodFill(x-1,z  ) then return false end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if not FloodFill(x+1,z  ) then return false end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if not FloodFill(x  ,z-1) then return false end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if not FloodFill(x  ,z+1) then return false end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;--flag as tested
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;tmpWaterMask[x][z] = -1
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;return true
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;if FloodFill(x,z) then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--we found a good lake, now add it to the waterMask (we can do this with just
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;--assignment because we were editing a copy of the old water mask)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;waterMask = tmpWaterMask
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;break&#9;&#9;&#9;
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+
+&#9;&#9;-- generate the ocean
+&#9;&#9;if GenerateOptions.waterMode == &quot;Ocean&quot; or GenerateOptions.waterMode == &quot;Both&quot; then
+&#9;&#9;&#9;local depth = GenerateOptions.sealevel
+&#9;&#9;&#9;for x = 1, GenerateOptions.width do
+&#9;&#9;&#9;&#9;for z = 1, GenerateOptions.length do
+&#9;&#9;&#9;&#9;&#9;if waterMask[x][z] &lt; depth then
+&#9;&#9;&#9;&#9;&#9;&#9;waterMask[x][z] = depth
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+
+&#9;&#9;--now, draw out the water
+&#9;&#9;for x = 1, GenerateOptions.width do 
+&#9;&#9;&#9;CancelValues.setAmountFunc(x / GenerateOptions.width * 0.5 + 0.5)
+&#9;&#9;&#9;pause()
+&#9;&#9;&#9;if CancelValues.cancelActions then return end
+&#9;&#9;&#9;for z = 1, GenerateOptions.length do 
+&#9;&#9;&#9;&#9;local tx,tz = floor(x-GenerateOptions.width/2)+GenerateOptions.xpos,
+&#9;&#9;&#9;&#9;              floor(z-GenerateOptions.length/2)+GenerateOptions.zpos
+&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;for y = floor(baseLayer[x][z])+1, waterMask[x][z] do
+&#9;&#9;&#9;&#9;&#9;terrain:SetWaterCell(tx-1,y-1,tz-1,0,0)
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+
+&#9;&#9;--and return the waterMask
+&#9;&#9;return waterMask
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Next we smooth the terrain. 
+&#9;-- Now that both the main terrain and water are placed, we smooth things.
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function SmoothTerrain()
+&#9;&#9;-- Terrain smoothing, obsolete for smooth terrain
+&#9;&#9;-- CancelValues.setAmountFunc(0)
+&#9;&#9;-- UpdateGenerationProgressMessage(&quot;(9/10) Smoothing Terrain&quot;)
+&#9;&#9;-- wait()
+&#9;&#9;-- terrain:AutowedgeCells(terrain.MaxExtents)
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- Finally we draw trees to the surface.
+&#9;-- We generate a noise treemap, and then trees are placed:
+&#9;--   In grassy areas
+&#9;--   Which are not covered in water
+&#9;------------------------------------------------------------------------------------------------------
+&#9;local function DrawTrees(baseLayer, waterMask, colormap)
+&#9;&#9;CancelValues.setAmountFunc(0)
+&#9;&#9;UpdateGenerationProgressMessage(&quot;(10/10) Drawing Trees&quot;)
+&#9;&#9;wait()
+
+&#9;&#9;-- if the is no vegetation, then stop right away
+&#9;&#9;if not GenerateOptions.vegetationMode then return end
+
+&#9;&#9;local Base = Instance.new(&quot;Part&quot;)
+&#9;&#9;Base.Name = &quot;Trunk&quot;
+&#9;&#9;Base.formFactor = &quot;Custom&quot;
+&#9;&#9;Base.TopSurface = 0
+&#9;&#9;Base.BottomSurface = 0
+&#9;&#9;Base.Anchored = false
+&#9;&#9;Base.BrickColor = BrickColor.new(&quot;Reddish brown&quot;)
+&#9;&#9;local Leaves = Base:Clone()
+&#9;&#9;Leaves.Name = &quot;Leaves&quot;
+&#9;&#9;Leaves.CanCollide = false
+&#9;&#9;Leaves.Anchored = false
+&#9;&#9;Leaves.BrickColor = BrickColor.new(&quot;Dark green&quot;)
+&#9;&#9;local leafmesh = Instance.new(&quot;SpecialMesh&quot;)
+&#9;&#9;leafmesh.MeshType = &quot;FileMesh&quot;
+&#9;&#9;leafmesh.MeshId = &quot;http://www.roblox.com/asset/?id=1290033&quot;
+&#9;&#9;leafmesh.TextureId = &quot;http://www.roblox.com/asset/?id=2861779&quot; 
+&#9;&#9;leafmesh.Parent = Leaves
+&#9;&#9;local basemesh = Instance.new(&quot;SpecialMesh&quot;,Base)
+&#9;&#9;basemesh.MeshType = &quot;Head&quot;
+&#9;&#9;local leaf_mult = {
+&#9;&#9;&#9;Vector3.new(1.5,1.5,1.2);
+&#9;&#9;&#9;Vector3.new(1.5,1,  1.5);
+&#9;&#9;&#9;Vector3.new(1.2,1.5,1.5);
+&#9;&#9;&#9;Vector3.new(1.5,1.5,1.5);
+&#9;&#9;}
+&#9;&#9;local function dot(c1,c2)
+&#9;&#9;&#9;local m = CFrame.Angles(math.pi/2,0,0)
+&#9;&#9;&#9;return (c1*m).lookVector:Dot((c2*m).lookVector)
+&#9;&#9;end
+&#9;&#9;local function weldit(a,b,cf)
+&#9;&#9;&#9;b.CFrame=a.CFrame*cf
+&#9;&#9;&#9;local w=Instance.new(&quot;Weld&quot;)
+&#9;&#9;&#9;w.Part0=a
+&#9;&#9;&#9;w.Part1=b
+&#9;&#9;&#9;w.C0=cf
+&#9;&#9;&#9;w.Parent=a
+&#9;&#9;end
+&#9;&#9;local function Branch(base,c)
+&#9;&#9;&#9;if c &lt;= 0 then
+&#9;&#9;&#9;&#9;local leaves = Leaves:Clone()
+&#9;&#9;&#9;&#9;local vol = base.Size.x+base.Size.y+base.Size.z
+&#9;&#9;&#9;&#9;leaves.Mesh.Scale = leaf_mult[math.random(1,#leaf_mult)]*math.random(vol/3*10,vol/3*12)/10
+&#9;&#9;&#9;&#9;leaves.Size = leaves.Mesh.Scale*0.75
+&#9;&#9;&#9;&#9;weldit(base,leaves,CFrame.new(0,base.Size.y/2,0))
+&#9;&#9;&#9;&#9;leaves.Parent = base.Parent
+&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;local pos = base.CFrame*CFrame.new(0,base.Size/2,0)
+&#9;&#9;&#9;&#9;local height = base.Size.y
+&#9;&#9;&#9;&#9;local width = base.Size.x
+&#9;&#9;&#9;&#9;local nb = math.random(2,2) 
+&#9;&#9;&#9;&#9;local r = math.random(45,135) 
+&#9;&#9;&#9;&#9;local da = math.random(20+55/c,40+40/c)
+&#9;&#9;&#9;&#9;local ba = math.random(-da/3,da/3)
+&#9;&#9;&#9;&#9;for i=0,nb-1 do
+&#9;&#9;&#9;&#9;&#9;local branch = base:Clone()
+&#9;&#9;&#9;&#9;&#9;branch.Name = &quot;Branch&quot;
+&#9;&#9;&#9;&#9;&#9;local h = height*math.random(95,115)/100 
+&#9;&#9;&#9;&#9;&#9;local new = CFrame.new(0,height/2,0) * CFrame.Angles(0,0,math.rad(ba))
+&#9;&#9;&#9;&#9;&#9;new = new * CFrame.Angles(0,i*(math.pi*2/nb)+r,math.rad(da/2)) * CFrame.new(0,h/2,0)
+&#9;&#9;&#9;&#9;&#9;local w = dot(new,branch.CFrame)*width*0.9
+&#9;&#9;&#9;&#9;&#9;branch.Size = Vector3.new(w,h,w)
+&#9;&#9;&#9;&#9;&#9;weldit(base,branch,new)
+&#9;&#9;&#9;&#9;&#9;branch.Parent = base.Parent
+&#9;&#9;&#9;&#9;&#9;Branch(branch,c-1)
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;&#9;local function GenerateTree(location,complexity,width,height)
+&#9;&#9;&#9;local tree = Instance.new(&quot;Model&quot;)
+&#9;&#9;&#9;tree.Name = &quot;Tree&quot;
+&#9;&#9;&#9;tree.Parent = GetTreeModel()
+&#9;&#9;&#9;local foundation=Instance.new(&quot;Part&quot;)
+&#9;&#9;&#9;foundation.Name=&quot;Foundation&quot;
+&#9;&#9;&#9;foundation.Anchored=true
+&#9;&#9;&#9;foundation.CanCollide=false
+&#9;&#9;&#9;foundation.formFactor=&quot;Custom&quot;
+&#9;&#9;&#9;foundation.Size=Vector3.new(.2,.2,.2)
+&#9;&#9;&#9;foundation.CFrame=CFrame.new(location)
+&#9;&#9;&#9;foundation.Parent=tree
+&#9;&#9;&#9;local base = Base:Clone()
+&#9;&#9;&#9;base.Parent = tree
+&#9;&#9;&#9;base.Size = Vector3.new(width,height,width)
+&#9;&#9;&#9;basecf = CFrame.new(0,height/2,0)*CFrame.Angles(0,math.rad(math.random(1,360)),0)
+&#9;&#9;&#9;weldit(foundation,base,basecf)
+&#9;&#9;&#9;Branch(base,complexity)
+&#9;&#9;&#9;return tree
+&#9;&#9;end
+&#9;&#9;------------------------------------------------------------------------
+&#9;&#9;local TreeMapA = PerlinNoiseMap(200)
+&#9;&#9;local TreeMapB = PerlinNoiseMap(100)
+&#9;&#9;--
+&#9;&#9;for i = 1, GenerateOptions.width*GenerateOptions.length*GenerateOptions.vegetationDensity do --1 tree / ~100 blocks^2
+&#9;&#9;&#9;local x,z = random(4,GenerateOptions.width-4),random(4,GenerateOptions.length-4)
+&#9;&#9;&#9;local treeDensity = TreeMapA[x][z]+TreeMapB[x][z]
+&#9;&#9;&#9;--
+&#9;&#9;&#9;if treeDensity &gt; 1.1 and colormap[x][z] == 1 and waterMask[x][z] &lt;= 0 then
+&#9;&#9;&#9;&#9;pause()
+&#9;&#9;&#9;&#9;local tree_at_h = baseLayer[x][z]
+&#9;&#9;&#9;&#9;local tx,tz = floor(x-GenerateOptions.width/2)+GenerateOptions.xpos, 
+&#9;&#9;&#9;&#9;              floor(z-GenerateOptions.length/2)+GenerateOptions.zpos
+&#9;&#9;&#9;&#9;local tree_at = terrain:CellCenterToWorld(tx, tree_at_h, tz)
+&#9;&#9;&#9;&#9;GenerateTree(tree_at, random(1,random(1,2)), random(4,7), random(11,18))
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+
+
+&#9;------------------------------------------------------------------------------------------------------
+&#9;-- And finally call on all of the generation code
+&#9;------------------------------------------------------------------------------------------------------
+&#9;UpdateGenerationProgressMessage(&quot;Generating Terrain&quot;)
+&#9;wait(0.3)
+&#9;do
+&#9;&#9;                                  ClearTerrain()
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;local baseLayer =                 MakeBaseLayer()
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;                                  ApplyCliffs(baseLayer)
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;local mountainMask, mountainMap = ApplyMountains(baseLayer)
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;                                  FillHoles(baseLayer)
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;local colormap =                  ColorMap(baseLayer, mountainMask, mountainMap)
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;                                  DrawTerrain(baseLayer, colormap)
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;local waterMask =                 PlaceLakes(baseLayer)
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;                                  SmoothTerrain()
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;&#9;                                  wait(0.3)
+&#9;&#9;                                  DrawTrees(baseLayer, waterMask, colormap)
+&#9;&#9;                                  if CancelValues.cancelActions then On(); return UnloadProgressBar() end
+&#9;end
+&#9;UpdateGenerationProgressMessage(&quot;Finishing Generation&quot;)
+&#9;wait(0.3)
+
+&#9;-- Clean up the progress bar.
+&#9;UnloadProgressBar()
+
+&#9;--Generate Terrain End
+&#9;game:GetService(&quot;ChangeHistoryService&quot;):SetWaypoint(&quot;Generate&quot;)
+
+&#9;--Turn on the plugin again
+&#9;On()
+end
+
+-- Clears all terrain.
+function ClearTerrain()
+&#9;toolbarbutton:SetActive(false)
+&#9;Off()
+&#9;
+&#9;--Erase Terrain
+&#9;terrain:Clear()
+&#9;
+&#9;--Erase Terrain End
+&#9;UnloadProgressBar()
+&#9;game:GetService(&quot;ChangeHistoryService&quot;):SetWaypoint(&quot;Reset&quot;)
+end
+
+
+--==========================================================================================================--
+--                                       Main Plugin GUI Setup                                            ==--
+--==========================================================================================================--
+
+--screengui
+MainScreenGui = Instance.new(&quot;ScreenGui&quot;, game:GetService(&quot;CoreGui&quot;))
+MainScreenGui.Name = &apos;TerrainCreatorGui&apos;
+
+-- Gui frame for the plugin.
+local terrainPropertiesDragBar, terrainFrame, terrainHelpFrame, terrainCloseEvent = RbxGui.CreatePluginFrame(&quot;Terrain Generator&quot;,UDim2.new(0,186,0,487),UDim2.new(0,0,0,0),false,MainScreenGui)
+terrainPropertiesDragBar.Visible = false
+terrainCloseEvent.Event:connect(function()
+&#9;Off()
+end)
+
+terrainHelpFrame.Size = UDim2.new(0,300,0,539)
+
+-- Create the help text:
+
+local terrainHelpText = Instance.new(&quot;TextLabel&quot;,terrainHelpFrame)
+terrainHelpText.Name = &quot;HelpText&quot;
+terrainHelpText.Font = Enum.Font.ArialBold
+terrainHelpText.FontSize = Enum.FontSize.Size12
+terrainHelpText.TextColor3 = Color3.new(227/255,227/255,227/255)
+terrainHelpText.TextXAlignment = Enum.TextXAlignment.Left
+terrainHelpText.TextYAlignment = Enum.TextYAlignment.Top
+terrainHelpText.Position = UDim2.new(0,4,0,4)
+terrainHelpText.Size = UDim2.new(1,-8,0,132)
+terrainHelpText.BackgroundTransparency = 1
+terrainHelpText.TextWrap = true
+terrainHelpText.Text = [[                         &lt;&gt; Generate Terrain &lt;&gt;
+================= Basic Options =================
+ - Width: Terrain size in the X direction.
+ - Length: Terrain size in the Z direction.
+ - Base Height: The lowest point that will be present in
+     the terrain.
+================== Hill Options =================
+ - Hill Density: A smaller value gives fewer, smoother 
+     hills, while a larger value gives more sharp 
+     frequent hills.
+ - Enable Cliffs: If enabled, cliffs will be sliced into
+]]
+
+local helpSecondText = terrainHelpText:clone()
+helpSecondText.Name = &quot;HelpSecondText&quot;
+helpSecondText.Position = UDim2.new(0,0,1,0)
+helpSecondText.Size = UDim2.new(1,0,0,157)
+helpSecondText.Text = [[     random locations on the map.
+ - Cliff Density: If cliffs are enabled, the larger the
+     value the more cliffs will be added to the map.
+================ Mountain Options ==============
+ - Region Dropdown: Mountains can be placed in one 
+     of several different regions around the map, or 
+     placed in a custom region of your choice by using 
+     the &quot;Interactive&quot; mode.
+ - Max Mountain Height: The maximum elevation that
+     mountains placed in the region will reach.
+ - Mountainous %: How mountainous is the chosen 
+     region? 100% = place only mountains there,
+     0% = place only hills there.
+]]
+helpSecondText.Parent = terrainHelpText
+
+local helpThirdText = helpSecondText:clone()
+helpThirdText.Name = &quot;HelpThirdText&quot;
+helpThirdText.Position = UDim2.new(0,0,1,0)
+helpThirdText.Size = UDim2.new(1,0,0,157)
+helpThirdText.Text = [[ - Mountain Size: How wide are the mountains to be, 
+     in terms of the width of the whole map?
+================== Water Options ===============
+ - Water Dropdown: A sea level can be chosen to fill
+     the whole level to, or lakes can be placed around
+     the level, or both.
+ - Lake Density: How many lakes to place in the level?
+ - Lake max size: How large should the lakes be?
+ - Sea level: What water-level to fill the level up to?
+================ Material Options ===============
+ - Material Dropdown: Select to either color the level
+    one solid color, or automatically color it based on 
+    the landscape and some settings.
+]]
+helpThirdText.Parent = helpSecondText
+
+local helpFourthText = helpThirdText:clone()
+helpFourthText.Name = &quot;HelpFourthText&quot;
+helpFourthText.Position = UDim2.new(0,0,1,0)
+helpFourthText.Size = UDim2.new(1,0,0,120)
+helpFourthText.Text = [[ - Color Mountains: Color steep slopes and high 
+    places with a grey color?
+ - Snow on Mountaintops: Color the tops of high 
+    mountains with a white color?
+ - Color Cliffs: Color sharp cliffs with a grey color?
+ - Add Sandy Regions: Color some low, flat areas with
+    a yellow color?
+]]
+helpFourthText.Parent = helpThirdText
+
+--==========================================================================================================--
+--                            Population of the GUI with all the setting controlls                        ==--
+--==========================================================================================================--
+
+-- small  utility to easily change the position of GUI elements while still having them
+-- relatively positioned.
+local curY = 10
+local function setY(v) curY = v end
+local function addY(v) curY = curY + v end
+
+-- Slider for controlling the width of the terran area.  Terran is created in a region this wide.
+widthLabel = CreateStandardLabel(&quot;WidthLabel&quot;, UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), &quot;&quot;, terrainFrame)
+addY(16)
+widthSliderGui, widthSliderPosition = CreateStandardSlider(&apos;WidthSliderGui&apos;, UDim2.new(0,1,0,curY), UDim2.new(0,10,0.5,-2), 512, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;function(widthSliderPosition) 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;TerrainOptions.width = widthSliderPosition.Value
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;widthLabel.Text = &quot;Width: &quot;..TerrainOptions.width
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end, nil, terrainFrame)
+addY(25)
+widthSliderPosition.Value = TerrainOptions.width
+
+-- Slider for controlling the length of the terran area.  Terran is created in a region this long.
+lengthLabel = CreateStandardLabel(&quot;LengthLabel&quot;, UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), &quot;&quot;, terrainFrame)
+addY(16)
+lengthSliderGui, lengthSliderPosition = CreateStandardSlider(&apos;LengthSliderGui&apos;, UDim2.new(0,1,0,curY), UDim2.new(0,10,0.5,-2), 512, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;function(lengthSliderPosition) 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;TerrainOptions.length = lengthSliderPosition.Value
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;lengthLabel.Text = &quot;Length: &quot;..TerrainOptions.length
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end, nil, terrainFrame)
+addY(25)
+lengthSliderPosition.Value = TerrainOptions.length
+
+
+-- Slider for controlling the baseHeight, how deep the base terrain should be.
+baseHeightLabel = CreateStandardLabel(&quot;BaseHeightLabel&quot;, UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), &quot;&quot;, terrainFrame)
+addY(16)
+baseHeightSliderGui, baseHeightSliderPosition = CreateStandardSlider(&apos;BaseHeightSliderGui&apos;, UDim2.new(0,1,0,curY), UDim2.new(0,10,0.5,-2), game.Workspace.Terrain.MaxExtents.Max.Y, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;function(baseHeightSliderPosition) 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;TerrainOptions.baseHeight = baseHeightSliderPosition.Value - 1
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;baseHeightLabel.Text = &quot;Base Height: &quot;.. (TerrainOptions.baseHeight)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end, nil, terrainFrame)
+addY(25)
+baseHeightSliderPosition.Value = TerrainOptions.baseHeight
+local accordionBoxAtY = curY
+
+
+-----------------------
+-- hill settings
+hillSettingsFrame = Instance.new(&quot;Frame&quot;)
+
+-- hill size slider
+hillDensityLabel = CreateStandardLabel(&quot;DensityLabel&quot;, UDim2.new(0, 8, 0, 0), UDim2.new(0, 67, 0, 14), &quot;&quot;, hillSettingsFrame)
+hillDensitySliderGui, hillDensitySliderPosition = CreateStandardSlider(&apos;DensitySliderGui&apos;, UDim2.new(0,1,0,16), UDim2.new(0,10,0.5,-2), 21, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;function(hillDensitySliderPosition) 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;TerrainOptions.hillSizeModifier = 2^((hillDensitySliderPosition.Value - 11)/10)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;hillDensityLabel.Text = &quot;Hill density modifier: &quot;..string.format(&quot;%1.2fx&quot;, TerrainOptions.hillSizeModifier)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end, nil, hillSettingsFrame)
+hillDensitySliderPosition.Value = math.log(TerrainOptions.hillSizeModifier)/math.log(2)*10 + 11
+
+-- cliffs modifier
+function onEnableCliffs()
+&#9;TerrainOptions.enableCliffs = not TerrainOptions.enableCliffs
+&#9;if TerrainOptions.enableCliffs then
+&#9;&#9;enableCliffsCheckbox.Text = &quot;X&quot;
+&#9;&#9;cliffDensitySliderGui.Visible = true
+&#9;&#9;cliffDensityLabel.Visible = true
+&#9;else
+&#9;&#9;enableCliffsCheckbox.Text = &quot;&quot;
+&#9;&#9;cliffDensitySliderGui.Visible = false
+&#9;&#9;cliffDensityLabel.Visible = false
+&#9;end
+end
+enableCliffsLabel = CreateStandardLabel(&quot;EnableCliffsLabel&quot;, UDim2.new(0, 44, 0, 41), UDim2.new(0, 50, 0, 24), &quot;Enable Cliffs&quot;, hillSettingsFrame)
+enableCliffsCheckbox = CreateStandardButton(&quot;EnableCliffsCheckbox&quot;, UDim2.new(0, 10, 0, 41), &apos;&apos;, 
+&#9;                                           onEnableCliffs, hillSettingsFrame, UDim2.new(0, 24, 0, 24))
+
+cliffDensityLabel = CreateStandardLabel(&quot;CliffDensityLabel&quot;, UDim2.new(0, 8, 0, 65), UDim2.new(0, 67, 0, 14), &quot;&quot;, hillSettingsFrame)
+cliffDensitySliderGui, cliffDensitySliderPosition = CreateStandardSlider(&apos;CliffDensitySliderGui&apos;, UDim2.new(0,1,0,81), UDim2.new(0,10,0.5,-2), 21, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;function(cliffDensitySliderPosition) 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;TerrainOptions.cliffDensityModifier = 2^((cliffDensitySliderPosition.Value - 11)/10)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;cliffDensityLabel.Text = &quot;Cliff density modifier: &quot;..string.format(&quot;%1.2fx&quot;, TerrainOptions.cliffDensityModifier)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end, nil, hillSettingsFrame)
+cliffDensitySliderPosition.Value = math.log(TerrainOptions.cliffDensityModifier)/math.log(2)*10 + 11
+
+onEnableCliffs()
+onEnableCliffs()
+
+
+
+-----------------------
+-- mountain settings
+mountainSettingsFrame = Instance.new(&apos;Frame&apos;)
+
+function onMountainPatternDropdown(value) 
+&#9;TerrainOptions.mountainMode = value
+&#9;for _, o in pairs(mountainControlSet) do
+&#9;&#9;o.Visible = (value ~= &quot;None&quot;)
+&#9;end
+&#9;if value == &quot;None&quot; then
+&#9;&#9;mountainPatternDescriptionLabel.Text = &quot;(No mountains)&quot;
+&#9;elseif value == &quot;Whole Map&quot; then
+&#9;&#9;mountainPatternDescriptionLabel.Text = &quot;(The entire map contains mountains)&quot;
+&#9;elseif value == &quot;Ridge&quot; then
+&#9;&#9;mountainPatternDescriptionLabel.Text = &quot;(One ridge of mountains down the middle of the map)&quot;
+&#9;elseif value == &quot;Ring&quot; then
+&#9;&#9;mountainPatternDescriptionLabel.Text = &quot;(Edges of map contain mountains, with hills in the middle)&quot;
+&#9;elseif value == &quot;Random&quot; then
+&#9;&#9;mountainPatternDescriptionLabel.Text = &quot;(Mountains are randomly placed around the map)&quot;
+&#9;elseif value == &quot;Interactive&quot; then
+&#9;&#9;mountainPatternDescriptionLabel.Text = &quot;(Draw a custom region where you want mountains to be located)&quot;
+&#9;end
+end
+mountainPatternDropdown, mountainPatternSet = CreateStandardDropdown(&quot;MountainPatternDropdown&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;        UDim2.new(0,0,0,0),
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;{&quot;None&quot;, &quot;Whole Map&quot;, &quot;Ridge&quot;, &quot;Ring&quot;, &quot;Random&quot;, &quot;Interactive&quot;},
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&quot;Ridge&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;onMountainPatternDropdown, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainSettingsFrame)
+
+mountainPatternDescriptionLabel = CreateStandardLabel(&quot;DescriptionLabel&quot;, UDim2.new(0, 10, 0, 29), UDim2.new(0, 186, 0, 44), &quot;&quot;, mountainSettingsFrame)
+mountainPatternDescriptionLabel.Font = &quot;Arial&quot;
+mountainPatternDescriptionLabel.TextWrap = true
+mountainPatternDescriptionLabel.TextYAlignment = &quot;Top&quot;
+
+mountainAmplitudeLabel = CreateStandardLabel(&quot;AmplitudeLabel&quot;, UDim2.new(0, 8, 0, 76), UDim2.new(0, 67, 0, 14), &quot;&quot;, mountainSettingsFrame)
+mountainAmplitudeSliderGui, mountainAmplitudeSliderPosition = CreateStandardSlider(&apos;AmplitudeSliderGui&apos;, UDim2.new(0,1,0,92), UDim2.new(0,10,0.5,-2), 62, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;function(mountainAmplitudeSliderPosition) 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;TerrainOptions.mountainHeight = mountainAmplitudeSliderPosition.Value + 1
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;mountainAmplitudeLabel.Text = &quot;Max mountain height: &quot;..TerrainOptions.mountainHeight
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end, nil, mountainSettingsFrame)
+mountainAmplitudeSliderPosition.Value = TerrainOptions.mountainHeight
+
+mountainFrequencyLabel = CreateStandardLabel(&quot;FrequencyLabel&quot;, UDim2.new(0, 8, 0, 117), UDim2.new(0, 67, 0, 14), &quot;&quot;, mountainSettingsFrame)
+mountainFrequencySlider, mountainFrequencySliderPosition = CreateStandardSlider(&apos;FrequencySlider&apos;, UDim2.new(0,1,0,133), UDim2.new(0,10,0.5,-2), 11,
+&#9;                                                                function(mountainFrequencySliderPosition)
+&#9;                                                                &#9;TerrainOptions.mountainFrequency = (mountainFrequencySliderPosition.Value-1)/10
+&#9;                                                                &#9;mountainFrequencyLabel.Text = &quot;Region is &quot;..(TerrainOptions.mountainFrequency*100)..&quot;% mountainous&quot;
+&#9;                                                                end, nil, mountainSettingsFrame)
+mountainFrequencySliderPosition.Value = TerrainOptions.mountainFrequency*10 + 1
+
+mountainFeatureSizeLabel = CreateStandardLabel(&quot;FeatureSizeLabel&quot;, UDim2.new(0, 8, 0, 158), UDim2.new(0, 67, 0, 14), &quot;&quot;, mountainSettingsFrame)
+mountainFeatureSizeSlider, mountainFeatureSizeSliderPosition = CreateStandardSlider(&apos;FeatureSizeSlider&apos;, UDim2.new(0,1,0,174), UDim2.new(0,10,0.5,-2), 41,
+&#9;                                                                function(mountainFeatureSizeSliderPosition)
+&#9;                                                                &#9;TerrainOptions.mountainSize = (mountainFeatureSizeSliderPosition.Value-1)/40
+&#9;                                                                &#9;mountainFeatureSizeLabel.Text = 
+&#9;                                                                &#9;&#9;&quot;Mountain Size: &quot;..(TerrainOptions.mountainSize*100)..&quot;% of map&quot;
+&#9;                                                                end, nil, mountainSettingsFrame)
+mountainFeatureSizeSliderPosition.Value = TerrainOptions.mountainSize*40 + 1
+
+mountainControlSet = {mountainAmplitudeLabel, mountainAmplitudeSliderGui, mountainFrequencyLabel, mountainFrequencySlider,
+                      mountainFeatureSizeLabel, mountainFeatureSizeSlider}
+onMountainPatternDropdown(&quot;Ridge&quot;)
+
+
+-----------------------
+-- water settings
+waterSettingsFrame = Instance.new(&apos;Frame&apos;)
+
+-- water mode dropdown
+function onSetWaterMode(value)
+&#9;TerrainOptions.waterMode = value
+&#9;--
+&#9;if value == &quot;None&quot; then
+&#9;&#9;sealevelLabel.Visible = false
+&#9;&#9;sealevelSliderGui.Visible = false
+&#9;end
+&#9;if value == &quot;Lakes&quot; or value == &quot;Both&quot; then
+&#9;&#9;lakeDensityLabel.Visible = true
+&#9;&#9;lakeDensitySliderGui.Visible = true
+&#9;&#9;lakeMaxSizeLabel.Visible = true
+&#9;&#9;lakeMaxSizeSliderGui.Visible = true
+&#9;&#9;lakeDensityLabel.Position = UDim2.new(0, 8, 0, 34)
+&#9;&#9;lakeDensitySliderGui.Position = UDim2.new(0, 0, 0, 50)
+&#9;&#9;lakeMaxSizeLabel.Position = UDim2.new(0, 8, 0, 75)
+&#9;&#9;lakeMaxSizeSliderGui.Position = UDim2.new(0, 0, 0, 91)
+&#9;else
+&#9;&#9;lakeDensityLabel.Visible = false
+&#9;&#9;lakeDensitySliderGui.Visible = false
+&#9;&#9;lakeMaxSizeLabel.Visible = false
+&#9;&#9;lakeMaxSizeSliderGui.Visible = false
+&#9;end
+&#9;if value == &quot;Ocean&quot; then
+&#9;&#9;sealevelLabel.Visible = true
+&#9;&#9;sealevelSliderGui.Visible = true
+&#9;&#9;sealevelLabel.Position = UDim2.new(0, 8, 0, 34)
+&#9;&#9;sealevelSliderGui.Position = UDim2.new(0, 0, 0, 50)
+&#9;elseif value == &quot;Both&quot; then
+&#9;&#9;sealevelLabel.Visible = true
+&#9;&#9;sealevelSliderGui.Visible = true
+&#9;&#9;sealevelLabel.Position = UDim2.new(0, 8, 0, 116)
+&#9;&#9;sealevelSliderGui.Position = UDim2.new(0, 0, 0, 132)
+&#9;else
+&#9;&#9;sealevelLabel.Visible = false
+&#9;&#9;sealevelSliderGui.Visible = false
+&#9;end
+end
+waterModeDropdown, waterModeSet = CreateStandardDropdown(&quot;WaterModeDropdown&quot;,
+                                                         UDim2.new(0,0,0,0),
+                                                         {&quot;None&quot;, &quot;Lakes&quot;, &quot;Ocean&quot;, &quot;Both&quot;},
+                                                         &quot;None&quot;,
+                                                         onSetWaterMode,
+                                                         waterSettingsFrame)
+
+-- Slider for controlling the waterHeight, how much water to fill.
+lakeDensityLabel = CreateStandardLabel(&quot;LakeFrequencyLabel&quot;, UDim2.new(0, 8, 0, 2), UDim2.new(0, 67, 0, 14), &quot;&quot;, waterSettingsFrame)
+lakeDensitySliderGui, lakeDensitySliderPosition = CreateStandardSlider(&apos;LakeFrequencySliderGui&apos;, UDim2.new(0,1,0,18), UDim2.new(0,10,0.5,-2), 4, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;function(lakeDensitySliderPosition) 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local val = lakeDensitySliderPosition.Value
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local str, num;
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if val == 1 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;str, num = &quot;No lakes.&quot;, 0
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif val == 2 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;str, num = &quot;1 lake / 20000 squares&quot;, 1/20000
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif val == 3 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;str, num = &quot;2 lakes/ 20000 squares&quot;, 1/10000
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;elseif val == 4 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;str, num = &quot;4 lakes/ 20000 squares&quot;, 1/5000
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;TerrainOptions.lakesPerSquare = num
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;lakeDensityLabel.Text = &quot;Lakes: &quot;..str
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end, nil, waterSettingsFrame)
+lakeDensitySliderPosition.Value = 3
+
+-- Slider for the lake max size
+lakeMaxSizeLabel = CreateStandardLabel(&quot;LakeMaxSizeLabel&quot;, UDim2.new(0, 8, 0, 2), UDim2.new(0, 67, 0, 14), &quot;&quot;, waterSettingsFrame)
+lakeMaxSizeSliderGui, lakeMaxSizeSliderPosition = CreateStandardSlider(&apos;LakeMaxSizeSliderGui&apos;, UDim2.new(0,1,0,18), UDim2.new(0,10,0.5,-2), 5, 
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;function(lakeMaxSizeSliderPosition)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;TerrainOptions.lakeMaxSize = lakeMaxSizeSliderPosition.Value*1000
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;lakeMaxSizeLabel.Text = &quot;Lake max size: &quot;..TerrainOptions.lakeMaxSize..&quot; squares&quot;
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end, nil, waterSettingsFrame)
+lakeMaxSizeSliderPosition.Value = TerrainOptions.lakeMaxSize/1000
+
+-- Slider for the sea level
+sealevelLabel = CreateStandardLabel(&quot;SeaLevelLabel&quot;, UDim2.new(0, 8, 0, 2), UDim2.new(0, 67, 0, 14), &quot;&quot;, waterSettingsFrame)
+sealevelSliderGui, sealevelSliderPosition = CreateStandardSlider(&quot;SealevelSliderGui&quot;, UDim2.new(0,1,0,18), UDim2.new(0,10,0.5,-2), 31,
+                                                                 function(sealevelSliderPosition)
+                                                                 &#9;TerrainOptions.sealevel = sealevelSliderPosition.Value - 1
+                                                                 &#9;sealevelLabel.Text = &quot;Sea level: &quot;..TerrainOptions.sealevel
+                                                                 end, nil, waterSettingsFrame)
+sealevelSliderPosition.Value = TerrainOptions.sealevel + 1
+
+waterModeSet(&quot;Lakes&quot;)
+-- programetrically setting the water mode does not call set callback oddly 
+-- enough, so it has to be manually called here to lay things out right.
+onSetWaterMode(&quot;Lakes&quot;) 
+
+
+
+--------------------------
+-- vegetation settings
+vegetationSettingsFrame = Instance.new(&apos;Frame&apos;)
+
+vegetationCheckBox = CreateStandardButton(&quot;GenerateButton&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      UDim2.new(0, 10, 0, 0),
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      &apos;&apos;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      function()
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      &#9;setVegetationMode(not TerrainOptions.vegetationMode)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      end,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      vegetationSettingsFrame,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;      UDim2.new(0, 24, 0, 24))
+function setVegetationMode(st)
+&#9;TerrainOptions.vegetationMode = st
+&#9;if st then
+&#9;&#9;vegetationCheckBox.Text = &quot;X&quot;
+&#9;&#9;vegetationSliderGui.Visible = true
+&#9;&#9;-- get the text to update to what it should be
+&#9;&#9;onVegetationSlider(vegetationSliderPosition)
+&#9;else
+&#9;&#9;vegetationCheckBox.Text = &quot;&quot;
+&#9;&#9;vegetationLabel.Text = &quot;Vegetation not enabled&quot;
+&#9;&#9;vegetationSliderGui.Visible = false
+&#9;end
+end
+
+function onVegetationSlider(vegetationSliderPosition)
+&#9;TerrainOptions.vegetationDensity = vegetationSliderPosition.Value / 200
+&#9;local suffix = (vegetationSliderPosition.Value &gt; 1) and &quot;s&quot; or &quot;&quot;
+&#9;vegetationLabel.Text = vegetationSliderPosition.Value..&quot; tree&quot;..suffix..&quot; / 200 squares&quot;
+end
+
+vegetationLabel = CreateStandardLabel(&quot;VegetationLabel&quot;, UDim2.new(0, 44, 0, 5), UDim2.new(0, 50, 0, 14), &quot;&quot;, vegetationSettingsFrame)
+vegetationSliderGui, vegetationSliderPosition = CreateStandardSlider(&quot;VegetationSliderGui&quot;, UDim2.new(0,1,0,24), UDim2.new(0,10,0.5,-2), 4,
+                                                                 onVegetationSlider, nil, vegetationSettingsFrame)
+vegetationSliderPosition.Value = TerrainOptions.vegetationDensity * 200
+setVegetationMode(TerrainOptions.vegetationMode)
+
+
+
+--------------------------
+-- material settings 
+materialSettingsFrame = Instance.new(&apos;Frame&apos;)
+
+function onSetColorMode(value)
+&#9;TerrainOptions.colorMode = value
+&#9;for _, o in pairs(materialControlSet) do
+&#9;&#9;o.Visible = (value == &quot;Auto Color&quot;)
+&#9;end
+end
+colorModeDropdown, colorModeSet = CreateStandardDropdown(&quot;ColorModeDropdown&quot;,
+                                                         UDim2.new(0,0,0,0),
+                                                         {&quot;Solid Color&quot;, &quot;Auto Color&quot;},
+                                                         &quot;Auto Color&quot;,
+                                                         onSetColorMode,
+                                                         materialSettingsFrame)
+
+function onColorMountainsMode()
+&#9;TerrainOptions.colorMountains = not TerrainOptions.colorMountains
+&#9;if TerrainOptions.colorMountains then
+&#9;&#9;colorMountainsCheckbox.Text = &quot;X&quot;
+&#9;else
+&#9;&#9;colorMountainsCheckbox.Text = &quot;&quot;
+&#9;end
+end
+colorMountainsLabel = CreateStandardLabel(&quot;ColorMountainsLabel&quot;, UDim2.new(0, 44, 0, 34), UDim2.new(0, 50, 0, 24), &quot;Color mountains&quot;, materialSettingsFrame)
+colorMountainsCheckbox = CreateStandardButton(&quot;ColorMountainsCheckbox&quot;, UDim2.new(0, 10, 0, 34), &apos;&apos;, 
+&#9;                                           onColorMountainsMode, materialSettingsFrame, UDim2.new(0, 24, 0, 24))
+onColorMountainsMode()
+onColorMountainsMode()
+
+function onSnowtoppedMountainsMode()
+&#9;TerrainOptions.snowtoppedMountains = not TerrainOptions.snowtoppedMountains
+&#9;if TerrainOptions.snowtoppedMountains then
+&#9;&#9;snowtoppedMountainsCheckbox.Text = &quot;X&quot;
+&#9;else
+&#9;&#9;snowtoppedMountainsCheckbox.Text = &quot;&quot;
+&#9;end
+end
+snowtoppedMountainsLabel = CreateStandardLabel(&quot;SnowtoppedMountainsLabel&quot;, UDim2.new(0, 44, 0, 56), UDim2.new(0, 50, 0, 24), &quot;Snow on mountaintops&quot;, materialSettingsFrame)
+snowtoppedMountainsCheckbox = CreateStandardButton(&quot;SnowtoppedMountaisCheckbox&quot;, UDim2.new(0, 10, 0, 56), &apos;&apos;, 
+&#9;                                           onSnowtoppedMountainsMode, materialSettingsFrame, UDim2.new(0, 24, 0, 24))
+onSnowtoppedMountainsMode()
+onSnowtoppedMountainsMode()
+
+function onColorCliffsMode()
+&#9;TerrainOptions.colorCliffs = not TerrainOptions.colorCliffs
+&#9;if TerrainOptions.colorCliffs then
+&#9;&#9;colorCliffsCheckbox.Text = &quot;X&quot;
+&#9;else
+&#9;&#9;colorCliffsCheckbox.Text = &quot;&quot;
+&#9;end
+end
+colorCliffsLabel = CreateStandardLabel(&quot;ColorCliffsLabel&quot;, UDim2.new(0, 44, 0, 78), UDim2.new(0, 50, 0, 24), &quot;Color cliffs&quot;, materialSettingsFrame)
+colorCliffsCheckbox = CreateStandardButton(&quot;ColorCliffsCheckbox&quot;, UDim2.new(0, 10, 0, 78), &apos;&apos;, 
+&#9;                                           onColorCliffsMode, materialSettingsFrame, UDim2.new(0, 24, 0, 24))
+onColorCliffsMode()
+onColorCliffsMode()
+
+function onAddSandyRegionsMode()
+&#9;TerrainOptions.addSandyRegions = not TerrainOptions.addSandyRegions
+&#9;if TerrainOptions.addSandyRegions then
+&#9;&#9;addSandyRegionsCheckbox.Text = &quot;X&quot;
+&#9;else
+&#9;&#9;addSandyRegionsCheckbox.Text = &quot;&quot;
+&#9;end
+end
+addSandyRegionsLabel = CreateStandardLabel(&quot;AddSandyRegionsLabel&quot;, UDim2.new(0, 44, 0, 100), UDim2.new(0, 50, 0, 24), &quot;Add sandy regions&quot;, materialSettingsFrame)
+addSandyRegionsCheckbox = CreateStandardButton(&quot;AddSandyRegionsCheckbox&quot;, UDim2.new(0, 10, 0, 100), &apos;&apos;, 
+&#9;                                           onAddSandyRegionsMode, materialSettingsFrame, UDim2.new(0, 24, 0, 24))
+onAddSandyRegionsMode()
+onAddSandyRegionsMode()
+
+materialControlSet = {colorMountainsLabel, colorMountainsCheckbox, snowtoppedMountainsLabel, snowtoppedMountainsCheckbox,
+                      colorCliffsLabel,    colorCliffsCheckbox,    addSandyRegionsLabel,     addSandyRegionsCheckbox}
+
+-----------------------
+-- main accordion for all of those settings
+mainSettingsAccordion = CreateStandardAccordion(&quot;MoreSettingsAccordion&quot;, 
+                                                UDim2.new(0, 0, 0, accordionBoxAtY), 
+                                                UDim2.new(1, 0, 0, 310),
+                                                {
+                                                &#9;{Name = &apos;Hills&apos;, Gui = hillSettingsFrame, Height = 200};
+                                                &#9;{Name = &apos;Mountains&apos;, Gui = mountainSettingsFrame, Height = 200};
+                                                &#9;{Name = &apos;Water&apos;, Gui = waterSettingsFrame, Height = 200};
+                                                &#9;{Name = &apos;Materials&apos;, Gui = materialSettingsFrame, Height = 200};
+                                                &#9;-- Uncomment to enable vegetation generation as an option.
+                                                &#9;-- {Name = &apos;Vegetation&apos;, Gui = vegetationSettingsFrame, Height = 200};
+                                                }, 
+                                                terrainFrame)
+
+
+-- Button to generate terrain using the current settings.
+generateButton = CreateStandardButton(&quot;GenerateButton&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   UDim2.new(0.5, 0, 0, 445),
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   &apos;Generate&apos;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   ConfirmGenerateTerrain,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   terrainFrame,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   UDim2.new(0, 100, 0, 40))&#9;
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   
+-- Button to clear terrain using.  All terrain will be removed.
+clearButton = CreateStandardButton(&quot;ClearButton&quot;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   UDim2.new(0.5, -100, 0, 445),
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   &apos;Clear&apos;,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   ConfirmClearTerrain,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   terrainFrame,
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   UDim2.new(0, 100, 0, 40))&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;   
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;
+--==========================================================================================================--
+--                           Final definition of main On/Off functions                                    ==--
+--==========================================================================================================--
+
+-- Run when the popup is activated.
+function On(mouseHandMeDown)
+&#9;--plugin:Activate(true)
+&#9;--toolbarbutton:SetActive(true)
+&#9;terrainPropertiesDragBar.Visible = true
+&#9;on = true
+&#9;mouse = mouseHandMeDown
+end
+
+-- Run when the popup is deactivated.
+function Off()
+&#9;--toolbarbutton:SetActive(false)
+&#9;ClearConformation()
+&#9;on = false
+
+&#9;-- Hide the popup gui.
+&#9;terrainPropertiesDragBar.Visible = false&#9;
+end
+
+-- and we&apos;re finally done loading
+loaded = true
+
+return {
+&#9;[&apos;On&apos;]=On,
+&#9;[&apos;Off&apos;] = Off,
+}
+
+
+</ProtectedString>
+			</Properties>
 		</Item>
 	</Item>
 </roblox>
