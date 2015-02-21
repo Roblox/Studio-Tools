@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBX0149DFDC29E349C5B78AB978C9B071D1">
+	<Item class="Model" referent="RBX082C684CB37A4883ADAD6E5AC3A9DC05">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXADE21B5871134E799F869AFC1A1B9A0E">
+		<Item class="Script" referent="RBXD327F295B5224273AB423102CBA94FEF">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -57,14 +57,15 @@ local currentTool = &apos;Create&apos;
 &#9;&#9;3. You win.
 
 &#9;How modules work
-&#9;&#9;Your ModuleScript should return a table. The table should can contain the following functions
+&#9;&#9;Your ModuleScript should return a table. The table can contain the following functions
 &#9;&#9;&#9;On&#9;= This function will be called when your tool is selected. Will hand in the mouse object
 &#9;&#9;&#9;Off&#9;= This function will be called when your tool is deselected.
-&#9;&#9;&#9;operation = If this function exists, it will be called when mouse operations take place.
-&#9;&#9;&#9;&#9;operation(centerPoint, materialsTable, occupanciesTable, resolution, selectionSize, strength, materialSelection)
+&#9;&#9;&#9;operation = This function will be called when this toolset&apos;s brushing functionality is used
+&#9;&#9;&#9;&#9;operation(centerPoint, materialsTable, occupanciesTable, resolution, selectionSize, strength, desiredMaterial, brushType, minBounds, maxBounds)
 ]]
 
 local modules = {
+&#9;[&apos;Smoother&apos;] = require(script.Parent.SmootherModule),
 &#9;[&apos;Generate&apos;] = require(script.Parent.GenerationModule),
 }
 
@@ -95,6 +96,11 @@ local pluginButtons = {
 &#9;[&apos;Erode&apos;] = toolBar:CreateButton(
 &#9;&#9;&apos;Erode&apos;,
 &#9;&#9;&apos;Click and hold to erode and remove terrain.&apos;,
+&#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;
+&#9;),
+&#9;[&apos;Smoother&apos;] = toolBar:CreateButton(
+&#9;&#9;&apos;Smoother&apos;,
+&#9;&#9;&apos;Brush to smooth out rough or jagged terrain.&apos;,
 &#9;&#9;&apos;http://www.roblox.com/asset/?id=180084957&apos;
 &#9;),
 &#9;[&apos;Generate&apos;] = toolBar:CreateButton(
@@ -190,7 +196,7 @@ function FirstTimeSetUp()
 &#9;strengthvalue.Changed:connect(function()
 &#9;&#9;strength = (strengthvalue.Value - 1) / 100
 &#9;&#9;if selectionObject then
-&#9;&#9;&#9;selectionObject.SurfaceTransparency = .9 - strength * .5
+&#9;&#9;&#9;selectionObject.SurfaceTransparency = .95 - strength * .3
 &#9;&#9;end
 &#9;end)
 &#9;strengthvalue.Value = strength * 100
@@ -335,10 +341,15 @@ function FirstTimeSetUp()
 &#9;&#9;end
 &#9;end
 
-&#9;function getNeighborOccupancies(list, x, y, z)
+&#9;function getCell(list, x, y, z)
+&#9;&#9;return list and list[x] and list[x][y] and list[x][y][z]
+&#9;end
+
+&#9;function getNeighborOccupancies(list, x, y, z, includeSelf)
 &#9;&#9;local fullNeighbor = false
-&#9;&#9;local neighborOccupancies = 0
-&#9;&#9;local totalNeighbors = 0
+&#9;&#9;local emptyNeighbor = false
+&#9;&#9;local neighborOccupancies = includeSelf and getCell(list, x, y, z) or 0
+&#9;&#9;local totalNeighbors = includeSelf and 1  or 0
 &#9;&#9;for axis = 1, 3 do
 &#9;&#9;&#9;for offset = -1, 1, 2 do
 &#9;&#9;&#9;&#9;local neighbor = nil
@@ -353,12 +364,15 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;if neighbor &gt;= 1 then
 &#9;&#9;&#9;&#9;&#9;&#9;fullNeighbor = true
 &#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;if neighbor &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;emptyNeighbor = true
+&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;totalNeighbors = totalNeighbors + 1
 &#9;&#9;&#9;&#9;&#9;neighborOccupancies = neighborOccupancies + neighbor
 &#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;end
 &#9;&#9;end
-&#9;&#9;return neighborOccupancies / (totalNeighbors == 0 and .5 or totalNeighbors), fullNeighbor
+&#9;&#9;return neighborOccupancies / (totalNeighbors ~= 0 and totalNeighbors or getCell(list, x, y, z)), fullNeighbor, emptyNeighbor
 &#9;end
 
 &#9;function round(n)
@@ -391,6 +405,8 @@ function FirstTimeSetUp()
 
 
 &#9;function operation(centerPoint)
+&#9;&#9;local desiredMaterial = materialDictionary[materialSelection]
+
 &#9;&#9;local radius = selectionSize * .5 * resolution
 &#9;&#9;local minBounds = Vector3.new(math.floor((centerPoint.x - radius) / resolution), math.floor((centerPoint.y - radius) / resolution), math.floor((centerPoint.z - radius) / resolution)) * resolution
 &#9;&#9;local maxBounds = Vector3.new(math.ceil((centerPoint.x + radius) / resolution), math.ceil((centerPoint.y + radius) / resolution), math.ceil((centerPoint.z + radius) / resolution)) * resolution
@@ -400,7 +416,7 @@ function FirstTimeSetUp()
 
 &#9;&#9;if modules[currentTool] then
 &#9;&#9;&#9;if modules[currentTool][&apos;operation&apos;] then
-&#9;&#9;&#9;&#9;modules[currentTool][&apos;operation&apos;](centerPoint, materials, occupancies, resolution, selectionSize, strength, materialSelection)
+&#9;&#9;&#9;&#9;modules[currentTool][&apos;operation&apos;](centerPoint, materials, occupancies, resolution, selectionSize, strength, desiredMaterial, brushType, minBounds, maxBounds)
 &#9;&#9;&#9;end
 &#9;&#9;else
 
@@ -424,14 +440,14 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;if selectionSize &lt;= 2 then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = desiredMaterial
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = 1
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end 
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;else
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; cellOccupancy then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = desiredMaterial
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = brushOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
@@ -455,7 +471,7 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy + neighborOccupancies * (strength + .1) * .25 * brushOccupancy * magnitudePercent
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = desiredMaterial
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
@@ -487,21 +503,20 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy - (neighborOccupancies / 6) * (strength + .1) * .25 * brushOccupancy * magnitudePercent
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and desiredOccupancy &gt; 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = desiredMaterial
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = desiredOccupancy
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Paint&apos; then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt; 0 and cellOccupancy &gt; 0 then
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = materialDictionary[materialSelection]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = desiredMaterial
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;end
-
-&#9;&#9;&#9;terrain:WriteVoxels(region, resolution, materials, occupancies)
 &#9;&#9;end
+&#9;&#9;terrain:WriteVoxels(region, resolution, materials, occupancies)
 &#9;end
 
 &#9;
@@ -514,7 +529,7 @@ function FirstTimeSetUp()
 &#9;&#9;on = true
 &#9;&#9;currentTool = toolName
 
-&#9;&#9;if modules[toolName] then
+&#9;&#9;if modules[toolName] and modules[toolName][&apos;On&apos;] then
 &#9;&#9;&#9;modules[toolName].On(mouse)
 &#9;&#9;end
 &#9;&#9;if not modules[toolName] or modules[toolName][&apos;operation&apos;] then
@@ -599,7 +614,7 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;selectionObject = Instance.new(brushType == &apos;Sphere&apos; and &apos;SelectionSphere&apos; or &apos;SelectionBox&apos;)
 &#9;&#9;&#9;&#9;&#9;selectionObject.Name = &apos;SelectionObject&apos;
 &#9;&#9;&#9;&#9;&#9;selectionObject.Color = BrickColor.new(&apos;Toothpaste&apos;)
-&#9;&#9;&#9;&#9;&#9;selectionObject.SurfaceTransparency = .9 - strength * .5
+&#9;&#9;&#9;&#9;&#9;selectionObject.SurfaceTransparency = .95 - strength * .3
 &#9;&#9;&#9;&#9;&#9;selectionObject.SurfaceColor = BrickColor.new(&apos;Toothpaste&apos;)
 &#9;&#9;&#9;&#9;&#9;selectionObject.Adornee = selectionPart
 &#9;&#9;&#9;&#9;&#9;selectionObject.Parent = selectionPart
@@ -628,7 +643,7 @@ function FirstTimeSetUp()
 &#9;&#9;end
 &#9;&#9;mouseDown = false
 &#9;&#9;on = false
-&#9;&#9;if modules[currentTool] then
+&#9;&#9;if modules[currentTool] and modules[currentTool][&apos;Off&apos;] then
 &#9;&#9;&#9;modules[currentTool].Off()
 &#9;&#9;end
 &#9;end
@@ -688,11 +703,11 @@ end
 </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX2D768DBF6A9C40EAACD5F78D27BE044F">
+		<Item class="ScreenGui" referent="RBXD347FDA02A1C47DF9FDE575FEB2DF222">
 			<Properties>
 				<string name="Name">TerrainPluginGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX9496FBD4F80C4F119B9DB018F1312552">
+			<Item class="Frame" referent="RBX2AE181CD180D474A8DE2ABE3E0BD5FA4">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -720,7 +735,7 @@ end
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX1BB54B1075AC44EE95DF378B9AE21BC5">
+				<Item class="TextButton" referent="RBXF1A78100D2434BF882C2C494F7DEC1E5">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -763,7 +778,7 @@ end
 						<int name="ZIndex">3</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXCBE68FFBC9D444CB8AB92C7AF9756005">
+				<Item class="TextLabel" referent="RBXF693E869BAD748D59E236C817D272929">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -802,7 +817,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXAF29461FA606461E93F0988C2D14450A">
+				<Item class="TextLabel" referent="RBX718A560F70C4493BA89A179E5EEEFD64">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -841,7 +856,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX2D2B4CDCD4BF465B8ABBB89CE1DAC755">
+				<Item class="TextLabel" referent="RBX8B741304B01443FEBE3D843323A34511">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -880,7 +895,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX1857C12C78134F848560B59C278C1616">
+				<Item class="TextLabel" referent="RBX275F27E849974E069A350723C64BF457">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -919,7 +934,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXD345510A07BF463C98CA5ABA14CC15CD">
+				<Item class="TextLabel" referent="RBX3835921B1C804804B92190FB11B1640E">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -958,7 +973,7 @@ end
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX6A54E159C71F48828524B6C6FED10CEE">
+				<Item class="TextButton" referent="RBXCE84418442694FEFB520CB877C4CFD20">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -1000,7 +1015,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXE9BD899132524A79BD5E1AE73B1CBC07">
+					<Item class="TextLabel" referent="RBX3E7F81CADA674E349BB111764AAE902A">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -1040,7 +1055,7 @@ end
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextButton" referent="RBX937BC729B5684B719A3B47203139E766">
+				<Item class="TextButton" referent="RBX2103658D5F5A438787240D1243350C81">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -1082,7 +1097,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXCE520CDB0DA549AEADCB783093F5921B">
+					<Item class="TextLabel" referent="RBX6B9A3123681E4E8380502DE1D8EB5ABF">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -1124,7 +1139,7 @@ end
 				</Item>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBX06F3B1F9EC214F82B26151288DB43D34">
+		<Item class="ModuleScript" referent="RBXB4FA377DDC824E91A408C5D979ACF5F5">
 			<Properties>
 				<string name="Name">GenerationModule</string>
 				<ProtectedString name="Source">-- Wait for the things we need to arrive
@@ -3199,7 +3214,7 @@ end
 
 -- Clears all terrain.
 function ClearTerrain()
-&#9;toolbarbutton:SetActive(false)
+&#9;--toolbarbutton:SetActive(false)
 &#9;Off()
 &#9;
 &#9;--Erase Terrain
@@ -3735,6 +3750,135 @@ return {
 &#9;[&apos;Off&apos;] = Off,
 }
 
+
+</ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBX044075C1BD824BE19ED00F0DF43DFB4E">
+			<Properties>
+				<string name="Name">SmootherModule</string>
+				<ProtectedString name="Source">--
+
+
+local terrain = game.Workspace.Terrain
+
+
+function getCell(list, x, y, z)
+&#9;return list and list[x] and list[x][y] and list[x][y][z]
+end
+
+function extendRange(x)&#9;&#9;--This is very important. It allows cells to fully diminish or fully fill by lying to the algorithm
+&#9;return x * 1.5 - .25
+end
+
+function getNeighborOccupanciesFast(list, x, y, z, includeSelf)
+&#9;local fullNeighbor = false
+&#9;local emptyNeighbor = false
+&#9;local neighborOccupancies = includeSelf and extendRange(getCell(list, x, y, z)) or 0
+&#9;local totalNeighbors = includeSelf and 1 or 0
+&#9;for axis = 1, 3 do
+&#9;&#9;for offset = -1, 1, 2 do
+&#9;&#9;&#9;local neighbor = nil
+&#9;&#9;&#9;if axis == 1 then
+&#9;&#9;&#9;&#9;neighbor = list[x + offset] and list[x + offset][y][z]
+&#9;&#9;&#9;elseif axis == 2 then
+&#9;&#9;&#9;&#9;neighbor = list[x][y + offset] and list[x][y + offset][z]
+&#9;&#9;&#9;elseif axis == 3 then
+&#9;&#9;&#9;&#9;neighbor = list[x][y][z + offset]
+&#9;&#9;&#9;end
+&#9;&#9;&#9;if neighbor then
+&#9;&#9;&#9;&#9;if neighbor &gt;= 1 then
+&#9;&#9;&#9;&#9;&#9;fullNeighbor = true
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;if neighbor &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;emptyNeighbor = true
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;neighbor = extendRange(neighbor)
+&#9;&#9;&#9;&#9;totalNeighbors = totalNeighbors + 1
+&#9;&#9;&#9;&#9;neighborOccupancies = neighborOccupancies + neighbor
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+&#9;return neighborOccupancies / (totalNeighbors &gt; 0 and totalNeighbors or extendRange(getCell(list, x, y, z))), fullNeighbor, emptyNeighbor
+end
+
+function getNeighborOccupancies(list, x, y, z, includeSelf, range)
+&#9;local fullNeighbor = false
+&#9;local emptyNeighbor = false
+&#9;local range = range or 1
+&#9;local neighborOccupancies = 0
+&#9;local totalNeighbors = 0
+&#9;for ix = -range, range do
+&#9;&#9;for iy = -range, range do
+&#9;&#9;&#9;for iz = -range, range do
+&#9;&#9;&#9;&#9;if includeSelf or not (ix == 0 and iy == 0 and iz == 0) then
+&#9;&#9;&#9;&#9;&#9;local neighbor = getCell(list, x + ix, y + iy, z + iz)
+&#9;&#9;&#9;&#9;&#9;if neighbor then
+&#9;&#9;&#9;&#9;&#9;&#9;local distanceScale = 1 - (Vector3.new(ix,iy,iz).magnitude / (range * 2))
+&#9;&#9;&#9;&#9;&#9;&#9;if neighbor &gt;= 1 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;fullNeighbor = true
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;if neighbor &lt;= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;emptyNeighbor = true
+&#9;&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;&#9;neighbor = extendRange(neighbor)
+&#9;&#9;&#9;&#9;&#9;&#9;totalNeighbors = totalNeighbors + 1 * distanceScale
+&#9;&#9;&#9;&#9;&#9;&#9;neighborOccupancies = neighborOccupancies + neighbor * distanceScale
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+&#9;return neighborOccupancies / (totalNeighbors &gt; 0 and totalNeighbors or extendRange(getCell(list, x, y, z))), fullNeighbor, emptyNeighbor
+end
+
+
+function operation(centerPoint, materials, occupancies, resolution, selectionSize, strength, desiredMaterial, brushType, minBounds, maxBounds)
+&#9;local region = Region3.new(minBounds, maxBounds)
+&#9;local readMaterials, readOccupancies = terrain:ReadVoxels(region, resolution)
+
+&#9;local radius = selectionSize * .5 * resolution
+    for ix, vx in ipairs(readOccupancies) do
+&#9;&#9;for iy, vy in pairs(vx) do
+&#9;&#9;&#9;for iz, cellOccupancy in pairs(vy) do
+
+&#9;&#9;&#9;&#9;local cellWorldPos = minBounds + (Vector3.new(ix, iy, iz) - Vector3.new(.5, .5, .5)) * resolution
+&#9;&#9;&#9;&#9;local distance = (cellWorldPos - centerPoint).magnitude
+
+&#9;&#9;&#9;&#9;local magnitudePercent = 1
+&#9;&#9;&#9;&#9;local brushOccupancy = 1
+&#9;&#9;&#9;&#9;if brushType == &apos;Sphere&apos; then
+&#9;&#9;&#9;&#9;&#9;magnitudePercent = math.cos(math.min(1, distance / (radius + resolution * .5)) * math.pi * .5)
+&#9;&#9;&#9;&#9;&#9;brushOccupancy = math.max(0, math.min(1, (radius + .5 * resolution - distance) / resolution))
+&#9;&#9;&#9;&#9;elseif brushType == &apos;Box&apos; then
+&#9;&#9;&#9;&#9;&#9;--leave as default
+&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
+&#9;&#9;&#9;&#9;&#9;local neighborOccupancies, fullNeighbor, emptyNeighbor = getNeighborOccupancies(readOccupancies, ix, iy, iz, true, 1)
+&#9;&#9;&#9;&#9;&#9;local difference = (neighborOccupancies - cellOccupancy) * (strength + .1) * .5 * brushOccupancy * magnitudePercent
+
+&#9;&#9;&#9;&#9;&#9;if not fullNeighbor and difference &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;difference = 0
+&#9;&#9;&#9;&#9;&#9;elseif not emptyNeighbor and difference &lt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;difference = 0
+&#9;&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;&#9;if readMaterials[ix][iy][iz] == Enum.Material.Air or cellOccupancy &lt;= 0 and difference &gt; 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;materials[ix][iy][iz] = desiredMaterial
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;&#9;if difference ~= 0 then
+&#9;&#9;&#9;&#9;&#9;&#9;occupancies[ix][iy][iz] = math.max(0, math.min(1, cellOccupancy + difference))
+&#9;&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+end
+
+return {
+&#9;[&apos;operation&apos;] = operation
+}
 
 </ProtectedString>
 			</Properties>
