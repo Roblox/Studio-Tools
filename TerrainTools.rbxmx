@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBX0DA8B7016562443EADC0863AA15BD32E">
+	<Item class="Model" referent="RBX88A3C7EABD2749B999F6B2AEFC0FABBC">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBX30C0C1CDCCE7462080126B938ABB0795">
+		<Item class="Script" referent="RBX2C7EEBF633A441CC961EC157FD4756B1">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -150,7 +150,7 @@ function FirstTimeSetUp()
 &#9;local minSelectionSize = 1
 &#9;local maxSelectionSize = 16
 &#9;local brushTypes = {&apos;Sphere&apos;, &apos;Box&apos;}
-&#9;local materialSelections = {&apos;Grass&apos;, &apos;Sand&apos;, &apos;Slate&apos;, &apos;Water&apos;, &apos;Wood Planks&apos;, &apos;Brick&apos;, &apos;Concrete&apos;}
+&#9;local materialSelections = {&apos;Grass&apos;, &apos;Sand&apos;, &apos;Slate&apos;, &apos;Water&apos;, &apos;Wood Planks&apos;, &apos;Brick&apos;, &apos;Concrete&apos;, &apos;Dynamic&apos;}
 &#9;local clickThreshold = .1
 &#9;----------------
 
@@ -163,6 +163,7 @@ function FirstTimeSetUp()
 &#9;&#9;[&apos;Water&apos;] = Enum.Material.Water,
 &#9;&#9;[&apos;Sand&apos;] = Enum.Material.Sand,
 &#9;&#9;[&apos;Wood Planks&apos;] = Enum.Material.WoodPlanks,
+&#9;&#9;[&apos;Dynamic&apos;] = Enum.Material.Grass,
 &#9;}
 &#9;local materialImageDictionary = {
 &#9;&#9;[&apos;Grass&apos;] = &apos;http://www.roblox.com/asset/?id=56563112&apos;,
@@ -172,6 +173,7 @@ function FirstTimeSetUp()
 &#9;&#9;[&apos;Water&apos;] = &apos;http://www.roblox.com/asset/?id=81407474&apos;,
 &#9;&#9;[&apos;Sand&apos;] = &apos;http://www.roblox.com/asset/?id=62356652&apos;,
 &#9;&#9;[&apos;Wood Planks&apos;] = &apos;http://www.roblox.com/asset/?id=67532015&apos;,
+&#9;&#9;[&apos;Dynamic&apos;] = &apos;http://www.roblox.com/asset/?id=220983525&apos;,
 &#9;}
 &#9;local forcePlaneLock = false
 &#9;local forceSnapToGrid = false
@@ -232,7 +234,7 @@ function FirstTimeSetUp()
 &#9;local scrollingMaterialFrame, controlMaterialFrame = library.CreateTrueScrollingFrame()
 &#9;scrollingMaterialFrame.Style = &apos;DropShadow&apos;
 &#9;scrollingMaterialFrame.Position = UDim2.new(1, 10, 0, 190)
-&#9;scrollingMaterialFrame.Size = UDim2.new(0, 157, 0, 157)
+&#9;scrollingMaterialFrame.Size = UDim2.new(0, 156, 0, 156)
 &#9;scrollingMaterialFrame.Parent = guiFrame
 &#9;local function setMaterialSelection(newMaterialSelection)
 &#9;&#9;scrollingMaterialFrame.Visible = false
@@ -393,7 +395,8 @@ function FirstTimeSetUp()
 &#9;&#9;local fullNeighbor = false
 &#9;&#9;local emptyNeighbor = false
 &#9;&#9;local neighborOccupancies = includeSelf and getCell(list, x, y, z) or 0
-&#9;&#9;local totalNeighbors = includeSelf and 1  or 0
+&#9;&#9;local totalNeighbors = includeSelf and 1 or 0
+&#9;&#9;local nearMaterial = materialDictionary[materialSelection]
 &#9;&#9;for axis = 1, 3 do
 &#9;&#9;&#9;for offset = -1, 1, 2 do
 &#9;&#9;&#9;&#9;local neighbor = nil
@@ -449,7 +452,7 @@ function FirstTimeSetUp()
 
 
 &#9;function operation(centerPoint)
-&#9;&#9;local desiredMaterial = materialDictionary[materialSelection]
+&#9;&#9;local desiredMaterial = materialSelection == &apos;Dynamic&apos; and nearMaterial or materialDictionary[materialSelection]
 
 &#9;&#9;local radius = selectionSize * .5 * resolution
 &#9;&#9;local minBounds = Vector3.new(math.floor((centerPoint.x - radius) / resolution), math.floor((centerPoint.y - radius) / resolution), math.floor((centerPoint.z - radius) / resolution)) * resolution
@@ -460,6 +463,9 @@ function FirstTimeSetUp()
 
 &#9;&#9;if modules[currentTool] then
 &#9;&#9;&#9;if modules[currentTool][&apos;operation&apos;] then
+&#9;&#9;&#9;&#9;if materials[1][1][1] ~= Enum.Material.Air then
+&#9;&#9;&#9;&#9;&#9;nearMaterial = materials[1][1][1]
+&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;modules[currentTool][&apos;operation&apos;](centerPoint, materials, occupancies, resolution, selectionSize, strength, desiredMaterial, brushType, minBounds, maxBounds)
 &#9;&#9;&#9;end
 &#9;&#9;else
@@ -467,7 +473,6 @@ function FirstTimeSetUp()
 &#9;        for ix, vx in ipairs(occupancies) do
 &#9;&#9;&#9;&#9;for iy, vy in pairs(vx) do
 &#9;&#9;&#9;&#9;&#9;for iz, cellOccupancy in pairs(vy) do
-&#9;
 &#9;&#9;&#9;&#9;&#9;&#9;local cellWorldPos = minBounds + (Vector3.new(ix, iy, iz) - Vector3.new(.5, .5, .5)) * resolution
 &#9;&#9;&#9;&#9;&#9;&#9;local distance = (cellWorldPos - centerPoint).magnitude
 &#9;
@@ -478,6 +483,13 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;brushOccupancy = math.max(0, math.min(1, (radius + .5 * resolution - distance) / resolution))
 &#9;&#9;&#9;&#9;&#9;&#9;elseif brushType == &apos;Box&apos; then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;--leave as default
+&#9;&#9;&#9;&#9;&#9;&#9;end
+
+&#9;&#9;&#9;&#9;&#9;&#9;if materials[ix][iy][iz] ~= Enum.Material.Air and materials[ix][iy][iz] ~= nearMaterial then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;nearMaterial = materials[ix][iy][iz]
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;if materialSelection == &apos;Dynamic&apos; then
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredMaterial = nearMaterial
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;&#9;&#9;&#9;&#9;&#9;end
 &#9;
 &#9;&#9;&#9;&#9;&#9;&#9;if currentTool == &apos;Add&apos; then
@@ -510,7 +522,7 @@ function FirstTimeSetUp()
 &#9;&#9;&#9;&#9;&#9;&#9;elseif currentTool == &apos;Grow&apos; then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;if brushOccupancy &gt;= .5 then
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local desiredOccupancy = cellOccupancy
-&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies, fullNeighbor = getNeighborOccupancies(occupancies, ix, iy, iz)
+&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;local neighborOccupancies, fullNeighbor ,emptyNeighbor = getNeighborOccupancies(occupancies, ix, iy, iz)
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;if cellOccupancy &gt; 0 or fullNeighbor then&#9;--problem if selection size is small.
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;desiredOccupancy = desiredOccupancy + neighborOccupancies * (strength + .1) * .25 * brushOccupancy * magnitudePercent
 &#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;end
@@ -747,7 +759,7 @@ end
 </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX717492059BA04444BE6BA01F567A62CC">
+		<Item class="ModuleScript" referent="RBXACDFED3E531E4C768098E2983A557F4F">
 			<Properties>
 				<string name="Name">GenerationModule</string>
 				<ProtectedString name="Source">-- Wait for the things we need to arrive
@@ -3362,7 +3374,7 @@ return {
 </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX8754271A6BA1485794206BC0C7A90DBE">
+		<Item class="ModuleScript" referent="RBXB421DF0E677644B8B98E154156F4948B">
 			<Properties>
 				<string name="Name">SmootherModule</string>
 				<ProtectedString name="Source">--
@@ -3491,11 +3503,11 @@ return {
 </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBXB79AD9D17B354899B59AED189A1FE428">
+		<Item class="ScreenGui" referent="RBXA6F8FEA61B794683B95C5EB6E4B868BC">
 			<Properties>
 				<string name="Name">TerrainPluginGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX4EB6C87A0D3B45A8B7082ED58ED4CC22">
+			<Item class="Frame" referent="RBX799680C87C9B4DFFB9C535F0CF2CAC24">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3523,7 +3535,7 @@ return {
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBXC0712133C96346AF978E3EC0F9C231D5">
+				<Item class="TextButton" referent="RBX2292F0196D8043609B9364A4C6A6FA7E">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -3566,7 +3578,7 @@ return {
 						<int name="ZIndex">3</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX56B426CFEB8D45EA8D08893A985D1268">
+				<Item class="TextLabel" referent="RBX6B051ADF13DF42F9B822C3FC1A02EEA4">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3605,7 +3617,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX86268D89456F48EDB50BA1358338DCB7">
+				<Item class="TextLabel" referent="RBXE0DA6104051A4392A0326B884E278E47">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3644,7 +3656,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX2E2780F5D1C34FC48EB45579BD457B4A">
+				<Item class="TextLabel" referent="RBXB8EE434ED4AD45EEBAD02B48C2293202">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3683,7 +3695,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX011C2AC9F91344D99D6887D25E4A9D89">
+				<Item class="TextLabel" referent="RBXD107F6EF571B438596C791297C7C05C9">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3722,7 +3734,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX71712BCCDCAF40CEAAA07D8228BEDEFB">
+				<Item class="TextLabel" referent="RBX7ECC33FDD96A48DFAABC5885CB3EE16A">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3761,7 +3773,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX41A857B5B57C4E7EBD0837934F4553D1">
+				<Item class="TextButton" referent="RBX255AD66AA4E44B91876F68D4383BFDEE">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -3803,7 +3815,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXB78DC2C73E374A5283AE03233B219F58">
+					<Item class="TextLabel" referent="RBXAE7AC46D2C9F4824BA4B4C2E84154FA0">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3843,7 +3855,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextButton" referent="RBXDDD76E38961E4F7CB26A96EC9C93A083">
+				<Item class="TextButton" referent="RBXAF054D85296C4D3399B1F35248A6E21E">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -3885,7 +3897,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXD7B132DA669B4024ACC1452FC353830C">
+					<Item class="TextLabel" referent="RBXE0671542C48C45A9805E6383D7EB1594">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3925,7 +3937,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="ImageButton" referent="RBXA09640C51B17499A812F0ACDC6C7FB3E">
+				<Item class="ImageButton" referent="RBXF4E08FB6396F41D3B3823621C9721969">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
