@@ -4609,6 +4609,7 @@ function FirstTimeSetUp()
 	local editColor1 = 'Institutional white'
 	local editColor2 = 'Light stone grey'
 	local rotationInterval = math.pi * .5
+	local regionLengthLimit = 125
 	----------------
 
 	--Variables--
