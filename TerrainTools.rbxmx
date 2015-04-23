@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBXDB7E8359ADA041BDA6209551C747BC90">
+	<Item class="Model" referent="RBX9F07780AD2EA46D5BCF2CC93ADA140E8">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXDA9A8140176F4F6CA6859FE631CDD9C4">
+		<Item class="Script" referent="RBXCE40FEAF0F3C40EDAE7DA35D039F3997">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -47,7 +47,7 @@ local currentTool = 'Create'
 
 	How modules work
 		Your ModuleScript should return a table. The table can contain the following functions
-			On	= This function will be called when your tool is selected. Will hand in the mouse object
+			On	= This function will be called when your tool is selected. Will hand in the mouse object, and a Deselect function to turn it off.
 			Off	= This function will be called when your tool is deselected.
 			operation = This function will be called when this toolset's brushing functionality is used
 				operation(centerPoint, materialsTable, occupanciesTable, resolution, selectionSize, strength, desiredMaterial, brushShape, minBounds, maxBounds)
@@ -665,7 +665,7 @@ function FirstTimeSetUp()
 		currentTool = toolName
 
 		if modules[toolName] and modules[toolName]['On'] then
-			modules[toolName].On(mouse)
+			modules[toolName].On(mouse,Deselected)
 		end
 		if not modules[toolName] or modules[toolName]['operation'] then
 
@@ -782,8 +782,10 @@ function FirstTimeSetUp()
 		end
 		mouseDown = false
 		on = false
-		if modules[currentTool] and modules[currentTool]['Off'] then
-			modules[currentTool].Off()
+		local lastCurrentTool = currentTool
+		currentTool = nil
+		if modules[lastCurrentTool] and modules[lastCurrentTool]['Off'] then
+			modules[lastCurrentTool].Off()
 		end
 	end
 
@@ -843,7 +845,7 @@ end
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXAAE807152E484210A107CF5252D2F26B">
+		<Item class="ModuleScript" referent="RBXF6CD41127B3947ADA439EC4C5648659F">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">GenerationModule</string>
@@ -2943,6 +2945,9 @@ MainScreenGui.Name = 'TerrainCreatorGui'
 local terrainPropertiesDragBar, terrainFrame, terrainHelpFrame, terrainCloseEvent = RbxGui.CreatePluginFrame("Terrain Generator",UDim2.new(0,186,0,487),UDim2.new(0,0,0,0),false,MainScreenGui)
 terrainPropertiesDragBar.Visible = false
 terrainCloseEvent.Event:connect(function()
+	if turnOff then
+		turnOff()
+	end
 	Off()
 end)
 
@@ -3429,12 +3434,13 @@ clearButton = CreateStandardButton("ClearButton",
 --==========================================================================================================--
 
 -- Run when the popup is activated.
-function On(mouseHandMeDown)
+function On(mouseHandMeDown,turnOffHandMeDown)
 	--plugin:Activate(true)
 	--toolbarbutton:SetActive(true)
 	terrainPropertiesDragBar.Visible = true
 	on = true
 	mouse = mouseHandMeDown
+	turnOff = turnOffHandMeDown
 end
 
 -- Run when the popup is deactivated.
@@ -3459,7 +3465,7 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX4626E377C0264DB9BD7BFEB6A47D9935">
+		<Item class="ModuleScript" referent="RBXD70D6015CEEB4A4AACC14C0CD0ABF365">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">SmootherModule</string>
@@ -3589,11 +3595,11 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX3076ABAD4ED5494D82DBABB668FE11C6">
+		<Item class="ScreenGui" referent="RBX630A72DEC8D149919E95E7EBFB65BABD">
 			<Properties>
 				<string name="Name">TerrainBrushGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX6CDF76CA4B05477A8FB2AEA16D2C20F2">
+			<Item class="Frame" referent="RBXE32CB9ED3C5D4D0783BAE27A32064676">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3621,7 +3627,7 @@ return {
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX0A29A2648C0A40DDA2D60AC6BC663F7F">
+				<Item class="TextButton" referent="RBX6BFF6E5FE34842EE857510D1D0934EDA">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -3664,7 +3670,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX19692BCA0A084947975CA09F26CA0FC7">
+				<Item class="TextLabel" referent="RBX22FB9406E2F84EE1B1DF4C1AEBEF0BB0">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3703,7 +3709,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX2F3859E2B6C94FB495A13C79515288FC">
+				<Item class="TextLabel" referent="RBXD1DD79A3F950401893901966485DF0C8">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3742,7 +3748,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXD68636B4C8D44DF78527242CE0E9AF62">
+				<Item class="TextLabel" referent="RBX2A9274474C4C46B8B0826659BE0D0FA9">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3781,7 +3787,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXD3A94D4DBEB449FC93760230006BE053">
+				<Item class="TextLabel" referent="RBX6304AD7EA35D41909550090824840AD8">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3820,7 +3826,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXF1E864F67F3E482195EA2B08A6039E19">
+				<Item class="TextLabel" referent="RBX7ECC3C002BB346DC923FBE267BDD5D8C">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3859,7 +3865,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXBC503EEC9CCA4EEDAAD3E50E9962AED4">
+				<Item class="TextButton" referent="RBXC9BE635E0C7F42778E1525A8E9CB8C31">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -3901,7 +3907,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX8B7CBDF88ACC49D5AA743A163F6E6892">
+					<Item class="TextLabel" referent="RBXA07E5588A61544EE856643886D993B07">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3941,7 +3947,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="ImageButton" referent="RBXF9818F5C72C042EF8EBAF48992FD48CB">
+				<Item class="ImageButton" referent="RBX7EA748527BBD4F3AA22A3F1E5C4E1BFF">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -3984,7 +3990,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="ImageButton" referent="RBX127499A7F46E4061B5B494D98EA05ED4">
+				<Item class="ImageButton" referent="RBX46F1454644BD4E01B718BE3D27305114">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -4027,7 +4033,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXAFEABE2480EC4BCE91649A0E2C280575">
+				<Item class="TextLabel" referent="RBXACFCB842CF924881BB1109C93EB0CD64">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4065,7 +4071,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXA8D5BBC0C0BE489E81E8469501B0877F">
+					<Item class="TextLabel" referent="RBX6679648C528C4FFD886608E67B017560">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4103,7 +4109,7 @@ return {
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">2</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBX6C6651DA83284E5B8FE55CCAF55ACA9D">
+						<Item class="TextLabel" referent="RBX486E6A3877CB4572AC2B8613B9303F29">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4286479998</Color3>
@@ -4144,7 +4150,7 @@ return {
 						</Item>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX31277A6F9CFE47B8BB8F7B43AC10DDED">
+				<Item class="TextLabel" referent="RBXFD7B576F74D4457D8919A419A82A97EF">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4183,7 +4189,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXF2C48AD68D4046E4AE177C17E04B5745">
+				<Item class="TextButton" referent="RBX9B4E33F2722A4F3683C8B22F332CDAB0">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -4225,7 +4231,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXFD54125D693D437EB379D131ECD7F383">
+					<Item class="TextLabel" referent="RBXA98DC5D61E414E1E94F52ACF8460EA3D">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4265,7 +4271,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX071E18EA4D344C44A52ED86FEF85328C">
+				<Item class="Frame" referent="RBXF4372669BE184B24BAA89148A3C8704F">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4294,7 +4300,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX51D86064FF5E44828F844690902C4A2C">
+				<Item class="TextButton" referent="RBX7DB47DDE275143EDB30AE535E8004F7F">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -4336,7 +4342,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXF91825CDCAB848169112BE542B9ECD43">
+					<Item class="TextLabel" referent="RBXE4A0E984F6994CA9BDBF2C5839182058">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4376,7 +4382,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBXFE06249D0D3048F3B544D149B01168F3">
+				<Item class="TextLabel" referent="RBXCCF9CDB96BC44A0E9301F5EED6CAEE76">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4414,7 +4420,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">3</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX059102E4BA9247E0A9D5D82CDC999E2A">
+					<Item class="TextLabel" referent="RBX14EEC90B707249AB84DECA153F9CE0C3">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4454,7 +4460,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX4F9F02A8AD5447168D82AF3C41663CFB">
+				<Item class="TextLabel" referent="RBX179D84333B674FDC991C8862AE36CA43">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4492,7 +4498,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">3</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXDB80533D5BE14925A2D817AF597F8019">
+					<Item class="TextLabel" referent="RBXEC8210094604476EA3DB86DEA59524CE">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4534,7 +4540,7 @@ return {
 				</Item>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBX5E573E9744A84911953073FB49CB8381">
+		<Item class="ModuleScript" referent="RBX19B2F0CA57834EA9A7ACA6507B1009D5">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">RegionEditorModule</string>
@@ -4635,6 +4641,8 @@ function FirstTimeSetUp()
 	local lockedRegion = nil
 	local behindThis = nil
 	local axis = 'X'
+	local floor = math.floor		--Scaling linear resize
+	local ceil = math.ceil
 	-------------
 
 
@@ -4681,10 +4689,20 @@ function FirstTimeSetUp()
 	buttonFillAir.MouseButton1Down:connect(function()
 		fillAir = not fillAir
 		buttonFillAir.Text = fillAir and 'X' or ''
+		if button=='Move' or button=='Resize' then
+			updateDragOperation()
+		elseif button=='Rotate' then
+			updateRotateOperation()
+		end
 	end)
 	buttonFillWater.MouseButton1Down:connect(function()
 		fillWater = not fillWater
 		buttonFillWater.Text = fillWater and 'X' or ''
+		if button=='Move' or button=='Resize' then
+			updateDragOperation()
+		elseif button=='Rotate' then
+			updateRotateOperation()
+		end
 	end)
 
 	function lockInMap()	--Should call this every time the terrain under your selection changes. Don't for resize though, it uses the original lockin for rescaling.
@@ -4737,7 +4755,7 @@ function FirstTimeSetUp()
 	end
 
 	local function positionWorldToVoxel(pos)
-		return Vector3.new(math.ceil(pos.x / resolution), math.ceil(pos.y / resolution), math.ceil(pos.z / resolution))
+		return Vector3.new(ceil(pos.x / resolution), ceil(pos.y / resolution), ceil(pos.z / resolution))
 	end
 
 	local function make3DTable(size,fill)
@@ -4776,233 +4794,241 @@ function FirstTimeSetUp()
 		--Maybe this extra dimension of unclamping might be desired for natural terrain, but not artificuial?
 	end
 
-	function dragHandles(face, delta)
-		local normal = faceToNormal[face]
-		local delta = delta
-		local newDragVector = normal * math.floor((delta + .5) / resolution)
-		dragStart = normal.x < 0 or normal.y < 0 or normal.z < 0	--This determines if we are dragging a side on the min or max bounds
-		if newDragVector ~= dragVector then
-			dragVector = newDragVector
-			local temporaryStart = selectionStart
-			local temporaryEnd = selectionEnd
-			if tool == 'Resize' then
+	function updateDragOperation()
+		local dragVector = dragVector or Vector3.new(0,0,0)
+		local temporaryStart = selectionStart
+		local temporaryEnd = selectionEnd
+		if tool == 'Resize' then
+			if dragStart then
+				temporaryStart = Vector3.new(
+					math.min(
+						math.max(temporaryStart.x+dragVector.x,temporaryEnd.x-regionLengthLimit),
+						temporaryEnd.x),
+					math.min(
+						math.max(temporaryStart.y+dragVector.y,temporaryEnd.y-regionLengthLimit),
+						temporaryEnd.y),
+					math.min(
+						math.max(temporaryStart.z+dragVector.z,temporaryEnd.z-regionLengthLimit),
+						temporaryEnd.z)
+				)
+			else
+				temporaryEnd = Vector3.new(
+					math.max(
+						math.min(temporaryEnd.x+dragVector.x,temporaryStart.x+regionLengthLimit),
+						temporaryStart.x),
+					math.max(
+						math.min(temporaryEnd.y+dragVector.y,temporaryStart.y+regionLengthLimit),
+						temporaryStart.y),
+					math.max(
+						math.min(temporaryEnd.z+dragVector.z,temporaryStart.z+regionLengthLimit),
+						temporaryStart.z)
+				)
+			end
+			if mode == 'Edit' then
+				--[[local loopx = #lockedMaterials		--Tiling resize		--fun but not too many use cases with natural terrain.
+				local loopy = #lockedMaterials[1]
+				local loopz = #lockedMaterials[1][1]
+				local tempRegionSize = Vector3.new(1,1,1) + temporaryEnd - temporaryStart
+				local newMat = {}
+				local newOcc = {}
+				local offsetx = -1
+				local offsety = -1
+				local offsetz = -1
 				if dragStart then
-					temporaryStart = Vector3.new(
-						math.min(
-							math.max(temporaryStart.x+dragVector.x,temporaryEnd.x-regionLengthLimit),
-							temporaryEnd.x),
-						math.min(
-							math.max(temporaryStart.y+dragVector.y,temporaryEnd.y-regionLengthLimit),
-							temporaryEnd.y),
-						math.min(
-							math.max(temporaryStart.z+dragVector.z,temporaryEnd.z-regionLengthLimit),
-							temporaryEnd.z)
-					)
-				else
-					temporaryEnd = Vector3.new(
-						math.max(
-							math.min(temporaryEnd.x+dragVector.x,temporaryStart.x+regionLengthLimit),
-							temporaryStart.x),
-						math.max(
-							math.min(temporaryEnd.y+dragVector.y,temporaryStart.y+regionLengthLimit),
-							temporaryStart.y),
-						math.max(
-							math.min(temporaryEnd.z+dragVector.z,temporaryStart.z+regionLengthLimit),
-							temporaryStart.z)
-					)
+					offsetx = offsetx + (-tempRegionSize.x % loopx)
+					offsety = offsety + (-tempRegionSize.y % loopy)
+					offsetz = offsetz + (-tempRegionSize.z % loopz)
 				end
-				if mode == 'Edit' then
-					--[[local loopx = #lockedMaterials		--Tiling resize		--fun but not too many use cases with natural terrain.
-					local loopy = #lockedMaterials[1]
-					local loopz = #lockedMaterials[1][1]
-					local tempRegionSize = Vector3.new(1,1,1) + temporaryEnd - temporaryStart
-					local newMat = {}
-					local newOcc = {}
-					local offsetx = -1
-					local offsety = -1
-					local offsetz = -1
-					if dragStart then
-						offsetx = offsetx + (-tempRegionSize.x % loopx)
-						offsety = offsety + (-tempRegionSize.y % loopy)
-						offsetz = offsetz + (-tempRegionSize.z % loopz)
+				for x=1, tempRegionSize.x do
+					local targetx = (offsetx + x) % loopx + 1
+					local xtm = {}
+					local xto = {}
+					for y=1, tempRegionSize.y do
+						local targety = (offsety + y) % loopy + 1
+						local ytm = {}
+						local yto = {}
+						for z=1, tempRegionSize.z do
+							local targetz = (offsetz + z) % loopz + 1
+							ytm[z] = lockedMaterials[targetx][targety][targetz]
+							yto[z] = lockedOccupancies[targetx][targety][targetz]
+						end
+						xtm[y] = ytm
+						xto[y] = yto
 					end
-					for x=1, tempRegionSize.x do
-						local targetx = (offsetx + x) % loopx + 1
-						local xtm = {}
-						local xto = {}
-						for y=1, tempRegionSize.y do
-							local targety = (offsety + y) % loopy + 1
-							local ytm = {}
-							local yto = {}
-							for z=1, tempRegionSize.z do
-								local targetz = (offsetz + z) % loopz + 1
-								ytm[z] = lockedMaterials[targetx][targety][targetz]
-								yto[z] = lockedOccupancies[targetx][targety][targetz]
-							end
-							xtm[y] = ytm
-							xto[y] = yto
+					newMat[x] = xtm
+					newOcc[x] = xto
+				end]]
+		
+				--[[local loopx = #lockedMaterials		--Scaling closest neightbor resize --not perfect
+				local loopy = #lockedMaterials[1]
+				local loopz = #lockedMaterials[1][1]
+				local tempRegionSize = Vector3.new(1,1,1) + temporaryEnd - temporaryStart
+				local tempSizeX = tempRegionSize.x
+				local tempSizeY = tempRegionSize.y
+				local tempSizeZ = tempRegionSize.z
+				local roundx = tempSizeX < loopx and math.floor or math.ceil
+				local roundy = tempSizeY < loopy and math.floor or math.ceil
+				local roundz = tempSizeZ < loopz and math.floor or math.ceil
+				local newMat = {}
+				local newOcc = {}
+				for x=1, tempSizeX do
+					local targetx = roundx(x/tempSizeX*loopx)
+					local xtm = {}
+					local xto = {}
+					for y=1, tempSizeY do
+						local targety = roundy(y/tempSizeY*loopy)
+						local ytm = {}
+						local yto = {}
+						for z=1, tempSizeZ do
+							local targetz = roundz(z/tempSizeZ*loopz)
+							ytm[z] = lockedMaterials[targetx][targety][targetz]
+							yto[z] = lockedOccupancies[targetx][targety][targetz]
 						end
-						newMat[x] = xtm
-						newOcc[x] = xto
-					end]]
-
-					--[[local loopx = #lockedMaterials		--Scaling closest neightbor resize --not perfect
-					local loopy = #lockedMaterials[1]
-					local loopz = #lockedMaterials[1][1]
-					local tempRegionSize = Vector3.new(1,1,1) + temporaryEnd - temporaryStart
-					local tempSizeX = tempRegionSize.x
-					local tempSizeY = tempRegionSize.y
-					local tempSizeZ = tempRegionSize.z
-					local roundx = tempSizeX < loopx and math.floor or math.ceil
-					local roundy = tempSizeY < loopy and math.floor or math.ceil
-					local roundz = tempSizeZ < loopz and math.floor or math.ceil
-					local newMat = {}
-					local newOcc = {}
-					for x=1, tempSizeX do
-						local targetx = roundx(x/tempSizeX*loopx)
-						local xtm = {}
-						local xto = {}
-						for y=1, tempSizeY do
-							local targety = roundy(y/tempSizeY*loopy)
-							local ytm = {}
-							local yto = {}
-							for z=1, tempSizeZ do
-								local targetz = roundz(z/tempSizeZ*loopz)
-								ytm[z] = lockedMaterials[targetx][targety][targetz]
-								yto[z] = lockedOccupancies[targetx][targety][targetz]
-							end
-							xtm[y] = ytm
-							xto[y] = yto
-						end
-						newMat[x] = xtm
-						newOcc[x] = xto
-					end]]
-
-
-					--[[local loopx = #lockedMaterials - 1		--Scaling closest neightbor resize OPRIMIZING	--not perfect
-					local loopy = #lockedMaterials[1] - 1
-					local loopz = #lockedMaterials[1][1] - 1
-					local tempRegionSize = Vector3.new(1,1,1) + temporaryEnd - temporaryStart
-					local tempSizeX = tempRegionSize.x
-					local tempSizeY = tempRegionSize.y
-					local tempSizeZ = tempRegionSize.z
-					local roundx = tempSizeX < loopx and math.floor or math.ceil
-					local roundy = tempSizeY < loopy and math.floor or math.ceil
-					local roundz = tempSizeZ < loopz and math.floor or math.ceil
-					local newMat = {}
-					local newOcc = {}
-					for x=1, tempSizeX do
-						local scalex = (x-1)/(tempSizeX-1)*loopx + 1
-						local targetx = scalex - scalex%1
-						local xtm = {}
-						local xto = {}
-						for y=1, tempSizeY do
-							local scaley = (y-1)/(tempSizeY-1)*loopy + 1
-							local targety = scaley - scaley%1
-							local ytm = {}
-							local yto = {}
-							for z=1, tempSizeZ do
-								local scalez = (z-1)/(tempSizeZ-1)*loopz + 1
-								local targetz = scalez - scalez%1
-								ytm[z] = lockedMaterials[targetx][targety][targetz]
-								yto[z] = lockedOccupancies[targetx][targety][targetz]
-							end
-							xtm[y] = ytm
-							xto[y] = yto
-						end
-						newMat[x] = xtm
-						newOcc[x] = xto
-					end]]
-
-					local region = Region3.new((temporaryStart - Vector3.new(1,1,1)) * resolution, temporaryEnd * resolution)
-					if behindThis then
-						terrain:WriteVoxels(behindThis.region, resolution, behindThis.materials, behindThis.occupancies)
-					else
-						if selectionStart and selectionEnd then
-							local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
-							local regionSize = region.Size / resolution
-							terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
-						end
-						--local regionSize = lockedRegion.Size / resolution
-						--terrain:WriteVoxels(lockedRegion, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+						xtm[y] = ytm
+						xto[y] = yto
 					end
-					behindThis = {}
-					behindThis.region = region
-					behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
+					newMat[x] = xtm
+					newOcc[x] = xto
+				end]]
+		
+				local region = Region3.new((temporaryStart - Vector3.new(1,1,1)) * resolution, temporaryEnd * resolution)
+				if behindThis then
+					terrain:WriteVoxels(behindThis.region, resolution, behindThis.materials, behindThis.occupancies)
+				else
+					if selectionStart and selectionEnd then
+						local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
+						local regionSize = region.Size / resolution
+						terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+					end
+				end
+				behindThis = {}
+				behindThis.region = region
+				behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
 
 
-					local floor = math.floor		--Scaling linear resize
-					local ceil = math.ceil
-					local loopx = #lockedMaterials - 1
-					local loopy = #lockedMaterials[1] - 1
-					local loopz = #lockedMaterials[1][1] - 1
-					local tempRegionSize = Vector3.new(1,1,1) + temporaryEnd - temporaryStart
-					local tempSizeX = tempRegionSize.x
-					local tempSizeY = tempRegionSize.y
-					local tempSizeZ = tempRegionSize.z
+				local loopx = #lockedMaterials - 1
+				local loopy = #lockedMaterials[1] - 1
+				local loopz = #lockedMaterials[1][1] - 1
+				local tempRegionSize = Vector3.new(1,1,1) + temporaryEnd - temporaryStart
+				local tempSizeX = tempRegionSize.x
+				local tempSizeY = tempRegionSize.y
+				local tempSizeZ = tempRegionSize.z
+				local newMat = {}
+				local newOcc = {}
+				for x=1, tempSizeX do
+					local scalex = (x-1)/(tempSizeX-1)*loopx
+					if scalex ~= scalex then
+						scalex = 0
+					end
+					local startx = floor(scalex)+1
+					local endx = startx+1
+					local interpScalex = scalex-startx+1
+					if startx > loopx then
+						endx = startx
+					end
+		
+					local xtm = {}
+					local xto = {}
+					for y=1, tempSizeY do
+						local scaley = (y-1)/(tempSizeY-1)*loopy
+						if scaley ~= scaley then
+							scaley = 0
+						end
+						local starty = floor(scaley)+1
+						local endy = starty+1
+						local interpScaley = scaley-starty+1
+						if starty > loopy then
+							endy = starty
+						end
+		
+						local ytm = {}
+						local yto = {}
+						for z=1, tempSizeZ do
+							local scalez = (z-1)/(tempSizeZ-1)*loopz	--consider adding 1 here and removing +1's elsewhere
+							if scalez ~= scalez then		--undefined check
+								scalez = 0
+							end
+							local startz = floor(scalez)+1
+							local endz = startz+1
+							local interpScalez = scalez-startz+1
+							if startz > loopz then
+								endz = startz
+							end
+		
+							local interpz1 = exaggeratedLinInterp(lockedOccupancies[startx][starty][startz],lockedOccupancies[startx][starty][endz],interpScalez, tempSizeZ/(loopz+1))
+							local interpz2 = exaggeratedLinInterp(lockedOccupancies[startx][endy][startz],lockedOccupancies[startx][endy][endz],interpScalez, tempSizeZ/(loopz+1))
+							local interpz3 = exaggeratedLinInterp(lockedOccupancies[endx][starty][startz],lockedOccupancies[endx][starty][endz],interpScalez, tempSizeZ/(loopz+1))
+							local interpz4 = exaggeratedLinInterp(lockedOccupancies[endx][endy][startz],lockedOccupancies[endx][endy][endz],interpScalez, tempSizeZ/(loopz+1))
+		
+							local interpy1 = exaggeratedLinInterp(interpz1,interpz2,interpScaley, tempSizeY/(loopy+1))
+							local interpy2 = exaggeratedLinInterp(interpz3,interpz4,interpScaley, tempSizeY/(loopy+1))
+		
+							local interpx1 = exaggeratedLinInterp(interpy1,interpy2,interpScalex, tempSizeX/(loopx+1))
+		
+							local newMaterial = lockedMaterials[round(scalex)+1][round(scaley)+1][round(scalez)+1]
+		
+							if fillAir and newMaterial == Enum.Material.Air then
+								ytm[z]=behindThis.materials[x][y][z]
+								yto[z]=behindThis.occupancies[x][y][z]
+							elseif fillWater and newMaterial == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
+								ytm[z]=behindThis.materials[x][y][z]
+								yto[z]=behindThis.occupancies[x][y][z]
+							else
+								ytm[z]=newMaterial
+								yto[z]=interpx1
+							end
+						end
+						xtm[y] = ytm
+						xto[y] = yto
+					end
+					newMat[x] = xtm
+					newOcc[x] = xto
+				end
+		
+				terrain:WriteVoxels(region, resolution, newMat, newOcc)
+			else
+				behindThis = nil
+			end
+		elseif tool == 'Move' then
+			temporaryStart = temporaryStart + dragVector
+			temporaryEnd = temporaryEnd + dragVector
+			if mode == 'Edit' then
+				local region = Region3.new((temporaryStart - Vector3.new(1,1,1)) * resolution, temporaryEnd * resolution)
+				if behindThis then
+					terrain:WriteVoxels(behindThis.region, resolution, behindThis.materials, behindThis.occupancies)
+				else
+					if selectionStart and selectionEnd then
+						local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
+						local regionSize = region.Size / resolution
+						terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+					end
+				end
+				behindThis = {}
+				behindThis.region = region
+				behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
+		
+				if not (fillAir or fillWater) then
+					terrain:WriteVoxels(region, resolution, lockedMaterials, lockedOccupancies)
+				else
 					local newMat = {}
 					local newOcc = {}
-					for x=1, tempSizeX do
-						local scalex = (x-1)/(tempSizeX-1)*loopx
-						if scalex ~= scalex then
-							scalex = 0
-						end
-						local startx = floor(scalex)+1
-						local endx = startx+1
-						local interpScalex = scalex-startx+1
-						if startx > loopx then
-							endx = startx
-						end
-
+		
+					for x,xv in ipairs(lockedMaterials) do
 						local xtm = {}
 						local xto = {}
-						for y=1, tempSizeY do
-							local scaley = (y-1)/(tempSizeY-1)*loopy
-							if scaley ~= scaley then
-								scaley = 0
-							end
-							local starty = floor(scaley)+1
-							local endy = starty+1
-							local interpScaley = scaley-starty+1
-							if starty > loopy then
-								endy = starty
-							end
-
+						for y,yv in ipairs(xv) do
 							local ytm = {}
 							local yto = {}
-							for z=1, tempSizeZ do
-								local scalez = (z-1)/(tempSizeZ-1)*loopz	--consider adding 1 here and removing +1's elsewhere
-								if scalez ~= scalez then		--undefined check
-									scalez = 0
-								end
-								local startz = floor(scalez)+1
-								local endz = startz+1
-								local interpScalez = scalez-startz+1
-								if startz > loopz then
-									endz = startz
-								end
-
-								local interpz1 = exaggeratedLinInterp(lockedOccupancies[startx][starty][startz],lockedOccupancies[startx][starty][endz],interpScalez, tempSizeZ/(loopz+1))
-								local interpz2 = exaggeratedLinInterp(lockedOccupancies[startx][endy][startz],lockedOccupancies[startx][endy][endz],interpScalez, tempSizeZ/(loopz+1))
-								local interpz3 = exaggeratedLinInterp(lockedOccupancies[endx][starty][startz],lockedOccupancies[endx][starty][endz],interpScalez, tempSizeZ/(loopz+1))
-								local interpz4 = exaggeratedLinInterp(lockedOccupancies[endx][endy][startz],lockedOccupancies[endx][endy][endz],interpScalez, tempSizeZ/(loopz+1))
-
-								local interpy1 = exaggeratedLinInterp(interpz1,interpz2,interpScaley, tempSizeY/(loopy+1))
-								local interpy2 = exaggeratedLinInterp(interpz3,interpz4,interpScaley, tempSizeY/(loopy+1))
-
-								local interpx1 = exaggeratedLinInterp(interpy1,interpy2,interpScalex, tempSizeX/(loopx+1))
-
-								local newMaterial = lockedMaterials[round(scalex)+1][round(scaley)+1][round(scalez)+1]
-
-								if fillAir and newMaterial == Enum.Material.Air then
+							for z,zv in ipairs(yv) do
+								if fillAir and zv == Enum.Material.Air then
 									ytm[z]=behindThis.materials[x][y][z]
 									yto[z]=behindThis.occupancies[x][y][z]
-								elseif fillWater and newMaterial == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
+								elseif fillWater and zv == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
 									ytm[z]=behindThis.materials[x][y][z]
 									yto[z]=behindThis.occupancies[x][y][z]
 								else
-									ytm[z]=newMaterial
-									yto[z]=interpx1
+									ytm[z]=lockedMaterials[x][y][z]
+									yto[z]=lockedOccupancies[x][y][z]
 								end
 							end
 							xtm[y] = ytm
@@ -5011,67 +5037,21 @@ function FirstTimeSetUp()
 						newMat[x] = xtm
 						newOcc[x] = xto
 					end
-
 					terrain:WriteVoxels(region, resolution, newMat, newOcc)
-				else
-					behindThis = nil
-				end
-			elseif tool == 'Move' then
-				temporaryStart = temporaryStart + dragVector
-				temporaryEnd = temporaryEnd + dragVector
-				if mode == 'Edit' then
-					local region = Region3.new((temporaryStart - Vector3.new(1,1,1)) * resolution, temporaryEnd * resolution)
-					if behindThis then
-						terrain:WriteVoxels(behindThis.region, resolution, behindThis.materials, behindThis.occupancies)
-					else
-						if selectionStart and selectionEnd then
-							local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
-							local regionSize = region.Size / resolution
-							terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
-						end
-						--local regionSize = lockedRegion.Size / resolution
-						--terrain:WriteVoxels(lockedRegion, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
-					end
-					behindThis = {}
-					behindThis.region = region
-					behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
-
-					if not (fillAir or fillWater) then
-						terrain:WriteVoxels(region, resolution, lockedMaterials, lockedOccupancies)
-					else
-						local newMat = {}
-						local newOcc = {}
-		
-						for x,xv in ipairs(lockedMaterials) do
-							local xtm = {}
-							local xto = {}
-							for y,yv in ipairs(xv) do
-								local ytm = {}
-								local yto = {}
-								for z,zv in ipairs(yv) do
-									if fillAir and zv == Enum.Material.Air then
-										ytm[z]=behindThis.materials[x][y][z]
-										yto[z]=behindThis.occupancies[x][y][z]
-									elseif fillWater and zv == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
-										ytm[z]=behindThis.materials[x][y][z]
-										yto[z]=behindThis.occupancies[x][y][z]
-									else
-										ytm[z]=lockedMaterials[x][y][z]
-										yto[z]=lockedOccupancies[x][y][z]
-									end
-								end
-								xtm[y] = ytm
-								xto[y] = yto
-							end
-							newMat[x] = xtm
-							newOcc[x] = xto
-						end
-						terrain:WriteVoxels(region, resolution, newMat, newOcc)
-					end
-
 				end
 			end
-			renderSelection(temporaryStart,temporaryEnd)
+		end
+		renderSelection(temporaryStart,temporaryEnd)
+	end
+
+	function dragHandles(face, delta)
+		local normal = faceToNormal[face]
+		local delta = delta
+		local newDragVector = normal * floor((delta + .5) / resolution)
+		dragStart = normal.x < 0 or normal.y < 0 or normal.z < 0	--This determines if we are dragging a side on the min or max bounds
+		if newDragVector ~= dragVector then
+			dragVector = newDragVector
+			updateDragOperation()
 		end
 	end
 
@@ -5086,88 +5066,93 @@ function FirstTimeSetUp()
 		return x,y
 	end
 
+	function updateRotateOperation()
+		local dragAngle = dragAngle or 0
+		local rotationCFrame = CFrame.Angles(
+			axis ~= 'X' and 0 or dragAngle * rotationInterval,
+			axis ~= 'Y' and 0 or dragAngle * rotationInterval,
+			axis ~= 'Z' and 0 or dragAngle * rotationInterval
+		)
+		local temporarySize = Vector3.new(1,1,1) + selectionEnd - selectionStart
+		local centerOffset = Vector3.new(ceil(temporarySize.x * .5), ceil(temporarySize.y * .5), ceil(temporarySize.z * .5))
+
+		temporarySize = rotationCFrame * temporarySize
+		local temporarySizeX = round(math.abs(temporarySize.x))	--I need to round these because of floating point imprecision
+		local temporarySizeY = round(math.abs(temporarySize.y))
+		local temporarySizeZ = round(math.abs(temporarySize.z))
+		centerOffset = centerOffset - Vector3.new(ceil(temporarySizeX * .5), ceil(temporarySizeY * .5), ceil(temporarySizeZ * .5))
+
+		local temporaryEnd = selectionStart + centerOffset + Vector3.new(temporarySizeX, temporarySizeY, temporarySizeZ) - Vector3.new(1, 1, 1)
+		local temporaryStart = selectionStart + centerOffset
+
+		if mode == 'Edit' then
+		local region = Region3.new((temporaryStart - Vector3.new(1,1,1)) * resolution, temporaryEnd * resolution)
+			if behindThis then
+				terrain:WriteVoxels(behindThis.region, resolution, behindThis.materials, behindThis.occupancies)
+			else
+				if selectionStart and selectionEnd then
+					local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
+					local regionSize = region.Size / resolution
+					terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+				end
+				--local regionSize = lockedRegion.Size / resolution
+				--terrain:WriteVoxels(lockedRegion, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+			end
+			behindThis = {}
+			behindThis.region = region
+			behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
+
+			local newMat = {}
+			local newOcc = {}
+
+			for x=1, temporarySizeX do
+				local xtm = {}
+				local xto = {}
+				for y=1, temporarySizeY do
+					local ytm = {}
+					local yto = {}
+					for z=1, temporarySizeZ do
+						local targetx = x
+						local targety = y
+						local targetz = z
+						if axis == 'Y' then	--prioritize y because I know this is the primary rotation axis
+							targetx, targetz = rotate(temporarySizeX, x, temporarySizeZ, z, dragAngle)
+						elseif axis == 'X' then
+							targetz, targety = rotate(temporarySizeZ, z, temporarySizeY, y, dragAngle)
+						elseif axis == 'Z' then
+							targety, targetx = rotate(temporarySizeY, y, temporarySizeX, x, dragAngle)
+						end
+						local newMaterial = lockedMaterials[targetx][targety][targetz]
+
+						if fillAir and newMaterial == Enum.Material.Air then
+							ytm[z]=behindThis.materials[x][y][z]
+							yto[z]=behindThis.occupancies[x][y][z]
+						elseif fillWater and newMaterial == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
+							ytm[z]=behindThis.materials[x][y][z]
+							yto[z]=behindThis.occupancies[x][y][z]
+						else
+							ytm[z]=newMaterial
+							yto[z]=lockedOccupancies[targetx][targety][targetz]
+						end
+					end
+					xtm[y] = ytm
+					xto[y] = yto
+				end
+				newMat[x] = xtm
+				newOcc[x] = xto
+			end
+
+			terrain:WriteVoxels(region, resolution, newMat, newOcc)
+		end
+		renderSelection(temporaryStart,temporaryEnd,rotationCFrame)
+	end
+
 	function dragArcHandles(rotationAxis,relativeAngle,deltaRadius)
 		axis = rotationAxis.Name
 		local newDragAngle = round(relativeAngle / rotationInterval) % 4
 		if newDragAngle ~= dragAngle then
 			dragAngle = newDragAngle
-			local rotationCFrame = CFrame.Angles(
-				axis ~= 'X' and 0 or dragAngle * rotationInterval,
-				axis ~= 'Y' and 0 or dragAngle * rotationInterval,
-				axis ~= 'Z' and 0 or dragAngle * rotationInterval
-			)
-			local temporarySize = Vector3.new(1,1,1) + selectionEnd - selectionStart
-			local centerOffset = Vector3.new(math.ceil(temporarySize.x * .5), math.ceil(temporarySize.y * .5), math.ceil(temporarySize.z * .5))
-
-			temporarySize = rotationCFrame * temporarySize
-			local temporarySizeX = round(math.abs(temporarySize.x))	--I need to round these because of floating point imprecision
-			local temporarySizeY = round(math.abs(temporarySize.y))
-			local temporarySizeZ = round(math.abs(temporarySize.z))
-			centerOffset = centerOffset - Vector3.new(math.ceil(temporarySizeX * .5), math.ceil(temporarySizeY * .5), math.ceil(temporarySizeZ * .5))
-
-			local temporaryEnd = selectionStart + centerOffset + Vector3.new(temporarySizeX, temporarySizeY, temporarySizeZ) - Vector3.new(1, 1, 1)
-			local temporaryStart = selectionStart + centerOffset
-
-			if mode == 'Edit' then
-			local region = Region3.new((temporaryStart - Vector3.new(1,1,1)) * resolution, temporaryEnd * resolution)
-				if behindThis then
-					terrain:WriteVoxels(behindThis.region, resolution, behindThis.materials, behindThis.occupancies)
-				else
-					if selectionStart and selectionEnd then
-						local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
-						local regionSize = region.Size / resolution
-						terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
-					end
-					--local regionSize = lockedRegion.Size / resolution
-					--terrain:WriteVoxels(lockedRegion, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
-				end
-				behindThis = {}
-				behindThis.region = region
-				behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
-
-				local newMat = {}
-				local newOcc = {}
-
-				for x=1, temporarySizeX do
-					local xtm = {}
-					local xto = {}
-					for y=1, temporarySizeY do
-						local ytm = {}
-						local yto = {}
-						for z=1, temporarySizeZ do
-							local targetx = x
-							local targety = y
-							local targetz = z
-							if axis == 'Y' then	--prioritize y because I know this is the primary rotation axis
-								targetx, targetz = rotate(temporarySizeX, x, temporarySizeZ, z, dragAngle)
-							elseif axis == 'X' then
-								targetz, targety = rotate(temporarySizeZ, z, temporarySizeY, y, dragAngle)
-							elseif axis == 'Z' then
-								targety, targetx = rotate(temporarySizeY, y, temporarySizeX, x, dragAngle)
-							end
-							local newMaterial = lockedMaterials[targetx][targety][targetz]
-
-							if fillAir and newMaterial == Enum.Material.Air then
-								ytm[z]=behindThis.materials[x][y][z]
-								yto[z]=behindThis.occupancies[x][y][z]
-							elseif fillWater and newMaterial == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
-								ytm[z]=behindThis.materials[x][y][z]
-								yto[z]=behindThis.occupancies[x][y][z]
-							else
-								ytm[z]=newMaterial
-								yto[z]=lockedOccupancies[targetx][targety][targetz]
-							end
-						end
-						xtm[y] = ytm
-						xto[y] = yto
-					end
-					newMat[x] = xtm
-					newOcc[x] = xto
-				end
-
-				terrain:WriteVoxels(region, resolution, newMat, newOcc)
-			end
-			renderSelection(temporaryStart,temporaryEnd,rotationCFrame)
+			updateRotateOperation()
 		end
 	end
 
@@ -5204,13 +5189,26 @@ function FirstTimeSetUp()
 			local emptyMaterialMap = make3DTable(regionSize,Enum.Material.Air)
 			local emptyOccupancyMap = make3DTable(regionSize,0)
 
-			behindThis = {}
+			--[[behindThis = {}
 			behindThis.region = region
 			behindThis.materials, behindThis.occupancies = emptyMaterialMap, emptyOccupancyMap
 
-			terrain:WriteVoxels(region, resolution, emptyMaterialMap, emptyOccupancyMap)
+			terrain:WriteVoxels(region, resolution, emptyMaterialMap, emptyOccupancyMap)]]
+			if behindThis then
+				terrain:WriteVoxels(behindThis.region, resolution, behindThis.materials, behindThis.occupancies)
+			else
+				if selectionStart and selectionEnd then
+					terrain:WriteVoxels(region, resolution, emptyMaterialMap, emptyOccupancyMap)
+				end
+			end
+			behindThis = {}
+			behindThis.region = region
+			behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
 
-			lockInMap()
+			--lockInMap()
+			lockedRegion = region
+			lockedMaterials, lockedOccupancies = emptyMaterialMap, emptyOccupancyMap			--after delete, does selection lock in air or lock in previous terrain? merge empty discrepencies?
+
 			changeHistory:SetWaypoint('Terrain Delete')
 			selectionEffect(nil,nil,'Really red',1,1.2,.5)
 		end
@@ -5337,6 +5335,9 @@ function FirstTimeSetUp()
 		--regionEditButton:SetActive(false)
 		behindThis = nil
 		on = false
+		if turnOff then
+			turnOff()
+		end
 	end
 
 	mouse.Button1Down:connect(function()
@@ -5414,12 +5415,12 @@ function FirstTimeSetUp()
 				axis ~= 'Z' and 0 or dragAngle * rotationInterval
 			)
 			local temporarySize = Vector3.new(1,1,1) + selectionEnd - selectionStart
-			local centerOffset = Vector3.new(math.ceil(temporarySize.x * .5), math.ceil(temporarySize.y * .5), math.ceil(temporarySize.z * .5))
+			local centerOffset = Vector3.new(ceil(temporarySize.x * .5), ceil(temporarySize.y * .5), ceil(temporarySize.z * .5))
 			temporarySize = rotationCFrame * temporarySize
 			local temporarySizeX = round(math.abs(temporarySize.x))	--I need to round these because of floating point imprecision
 			local temporarySizeY = round(math.abs(temporarySize.y))
 			local temporarySizeZ = round(math.abs(temporarySize.z))
-			centerOffset = centerOffset - Vector3.new(math.ceil(temporarySizeX * .5), math.ceil(temporarySizeY * .5), math.ceil(temporarySizeZ * .5))
+			centerOffset = centerOffset - Vector3.new(ceil(temporarySizeX * .5), ceil(temporarySizeY * .5), ceil(temporarySizeZ * .5))
 			
 			selectionEnd = selectionStart + centerOffset + Vector3.new(temporarySizeX, temporarySizeY, temporarySizeZ) - Vector3.new(1, 1, 1)
 			selectionStart = selectionStart + centerOffset
@@ -5454,8 +5455,9 @@ function FirstTimeSetUp()
 
 end
 
-function On(mouseHandMeDown)
+function On(mouseHandMeDown,turnOffHandMeDown)
 	mouse = mouseHandMeDown
+	turnOff = turnOffHandMeDown
 	if not setup then	--I do this so that things only get set up when this plugin is used.
 		FirstTimeSetUp()
 	end
@@ -5477,11 +5479,11 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX4833E606CC434CB8A2B19C8136E31A77">
+		<Item class="ScreenGui" referent="RBX13FCB7586EE94CAF8D56203C2879A1C7">
 			<Properties>
 				<string name="Name">TerrainRegionGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBXA449FAF1EB514774ACBF35CB228DB149">
+			<Item class="Frame" referent="RBX1B781CA56AE944D48990117B0EDE2C69">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5509,7 +5511,7 @@ return {
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX7357D9FF05EB45809E2982B5122543E2">
+				<Item class="TextButton" referent="RBX7BC7E8EF522C4292B57676D2A0D994DE">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5552,7 +5554,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX3E677A55F2CE47A4A9DD331C9548B626">
+				<Item class="TextButton" referent="RBX75FF714E7B9E483FA523F44253FD7801">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5595,7 +5597,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX51688FAE9E4C42B7992C3B93BBA36391">
+				<Item class="TextButton" referent="RBX6BD4B4DC012C4A64B1EB1A0B40421C84">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5638,7 +5640,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX14E17A12D1CC41D7832BDE8277855E7F">
+				<Item class="TextLabel" referent="RBX36D5112058B34E069AE400C3B4808AB0">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5677,7 +5679,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX23D64354EBED45C688F6C1D5BEE496EA">
+				<Item class="TextButton" referent="RBX147A7A37FC1F4E089216A1103479CE2C">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5720,7 +5722,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX9E2DC6EE04CD4EDBBFEECB4CE6A7689A">
+				<Item class="TextButton" referent="RBXAFCDC6E2B5C145ADA16A4D7E906CE6A5">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5763,7 +5765,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXA49152DC2CB74E519F23950355D1BCCB">
+				<Item class="TextButton" referent="RBXE16B4CEC25554C398B6C1F407B62D7D2">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5805,7 +5807,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXA5910AF52E7948A3BB51433DA5D823BB">
+					<Item class="TextLabel" referent="RBXE6776E34C0934319A3E2A7B83BDF5F80">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5845,7 +5847,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBXBAEB74B051FE459FB7D46D77DD8EA445">
+				<Item class="TextLabel" referent="RBX9148CFC028494E7E914915F5211525EA">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5884,7 +5886,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX513C44DC03C1446287F0B66574C03B87">
+				<Item class="TextButton" referent="RBX1E22F0E786BF4152A2721750EBFE537A">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5926,7 +5928,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXA15E325676974B09BDAC32DAAA80DB78">
+					<Item class="TextLabel" referent="RBX513E3C79DCFD4382B6553335C6BA18FA">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5966,7 +5968,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX62C6373B03BC43EE9207DAD46DED2852">
+				<Item class="Frame" referent="RBX43EDEB5488F24654819655155489A232">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5995,7 +5997,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX092A1FF7E529471C9002956FAE0DF081">
+				<Item class="TextButton" referent="RBXA77ADAB71D734ACAAD98C81FF92AAD3A">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -6038,7 +6040,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX3787C93DE25B442DB2F388F6E54F0FE8">
+				<Item class="TextButton" referent="RBXF281AB18A57B469C81A975A414376D3B">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -6081,7 +6083,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX8EC52E3C73D0453BBB02E45E98E3C34C">
+				<Item class="TextLabel" referent="RBX95720FCDA7A84EB3AB0775982A2B47D9">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6120,7 +6122,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX807266F1719640CB9D73B43C093CB5C4">
+				<Item class="TextButton" referent="RBX9FC674FF347549028369AAF1DAB5B541">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
