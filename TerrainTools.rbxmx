@@ -574,14 +574,14 @@ function FirstTimeSetUp()
 						if currentTool == 'Add' then
 							if selectionSize <= 2 then
 								if brushOccupancy >= .5 then
-									if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy <= 0 then
+									if materials[ix][iy][iz] == Enum.Material.Air or materials[ix][iy][iz] == Enum.Material.Water or cellOccupancy <= 0 then
 										materials[ix][iy][iz] = desiredMaterial
 									end
 									occupancies[ix][iy][iz] = 1
 								end 
 							else
 								if brushOccupancy > cellOccupancy then
-									if materials[ix][iy][iz] == Enum.Material.Air or cellOccupancy <= 0 then
+									if materials[ix][iy][iz] == Enum.Material.Air or materials[ix][iy][iz] == Enum.Material.Water or cellOccupancy <= 0 then
 										materials[ix][iy][iz] = desiredMaterial
 									end
 									occupancies[ix][iy][iz] = brushOccupancy
@@ -591,11 +591,13 @@ function FirstTimeSetUp()
 							if selectionSize <= 2 then
 								if brushOccupancy >= .5 then
 									occupancies[ix][iy][iz] = 0
+									materials[ix][iy][iz] = Enum.Material.Air
 								end
 							else
 								local desiredOccupancy = 1 - brushOccupancy
 								if desiredOccupancy < cellOccupancy then
 									occupancies[ix][iy][iz] = desiredOccupancy
+									materials[ix][iy][iz] = Enum.Material.Air
 								end
 							end
 						elseif currentTool == 'Grow' then
