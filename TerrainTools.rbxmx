@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBX9F07780AD2EA46D5BCF2CC93ADA140E8">
+	<Item class="Model" referent="RBX966C63F18E814D3EACF38F1A4D0E1BBB">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXCE40FEAF0F3C40EDAE7DA35D039F3997">
+		<Item class="Script" referent="RBX3B4A8D8EC5AB44029204B88C2425EFA1">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -845,7 +845,7 @@ end
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXF6CD41127B3947ADA439EC4C5648659F">
+		<Item class="ModuleScript" referent="RBX42C86A353F134301820602A64759363C">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">GenerationModule</string>
@@ -2081,7 +2081,7 @@ function GenerateTerrain()
 									terrain:FillRegion(
 										Region3.new(Vector3.new(x*4, -4, z*4), Vector3.new((x+1)*4, 0, (z+1)*4)),
 										4,
-										Enum.Material.Slate)
+										Enum.Material.Rock)
 									mountainMask[datax][dataz] = true
 								end
 							end
@@ -2089,28 +2089,35 @@ function GenerateTerrain()
 					end
 				end
 			end
-			local mouseC1 = mouse.Button1Down:connect(function()
-				mouseDown = true
-				doPaint()
-			end)
-			local mouseC2 = mouse.Button1Up:connect(function()
-				mouseDown = false
-			end)
-			local mouseC3 = mouse.Move:connect(function()
-				if mouseDown then
+			mouseC1=nil
+			mouseC2=nil
+			mouseC3=nil
+			mouseC4=nil
+			mouseC5=nil
+			if mouse then
+				mouseC1 = mouse.Button1Down:connect(function()
+					mouseDown = true
 					doPaint()
-				end
-			end)
-			local mouseC4 = mouse.KeyDown:connect(function(key)
-				if string.byte(key) == 48 then -- shift key = 48, for both right and left shift
-					shiftHeld = true
-				end
-			end)
-			local mouseC5 = mouse.KeyUp:connect(function(key)
-				if string.byte(key) == 48 then -- shift key = 48, for both right and left shift
-					shiftHeld = false
-				end
-			end)
+				end)
+				mouseC2 = mouse.Button1Up:connect(function()
+					mouseDown = false
+				end)
+				mouseC3 = mouse.Move:connect(function()
+					if mouseDown then
+						doPaint()
+					end
+				end)
+				mouseC4 = mouse.KeyDown:connect(function(key)
+					if string.byte(key) == 48 then -- shift key = 48, for both right and left shift
+						shiftHeld = true
+					end
+				end)
+				mouseC5 = mouse.KeyUp:connect(function(key)
+					if string.byte(key) == 48 then -- shift key = 48, for both right and left shift
+						shiftHeld = false
+					end
+				end)
+			end
 
 			-- wait for the user to be done
 			local hresult = orEvent.Event:wait()
@@ -2118,11 +2125,13 @@ function GenerateTerrain()
 			-- disconnect all of the events that we made
 			deactivatingC:disconnect()
 			cancelC:disconnect()
-			mouseC1:disconnect()
-			mouseC2:disconnect()
-			mouseC3:disconnect()
-			mouseC4:disconnect()
-			mouseC5:disconnect()
+			if mouseC1 then
+				mouseC1:disconnect()
+				mouseC2:disconnect()
+				mouseC3:disconnect()
+				mouseC4:disconnect()
+				mouseC5:disconnect()
+			end
 
 			-- kill the message box
 			messageBox:Destroy()
@@ -2365,7 +2374,7 @@ function GenerateTerrain()
 						--these areas a special color code so that where they are drawn they will not just
 						--be single color columns like the rest, which would lead to vertical striping~~
 						-- **REMOVED**, disabled until smooth terrain gets more materials to work with
-						ColorMap[x][z] = Enum.Material.Slate
+						ColorMap[x][z] = Enum.Material.Rock
 					else
 						local mountainHeight = mountainMask[x][z]*mountainMap[x][z]*GenerateOptions.mountainFrequency
 						local sandy = SandMapA[x][z]+SandMapB[x][z]+SandMapC[x][z]
@@ -2377,10 +2386,10 @@ function GenerateTerrain()
 							if tot<5 then
 								--we are are really high up, place snow here
 								if GenerateOptions.snowtoppedMountains then
-									ColorMap[x][z] = Enum.Material.Slate --snowey: TODO: Needs new material under smooth terrain
+									ColorMap[x][z] = Enum.Material.Rock --snowey: TODO: Needs new material under smooth terrain
 								else
 									if GenerateOptions.colorMountains then
-										ColorMap[x][z] = Enum.Material.Slate
+										ColorMap[x][z] = Enum.Material.Rock
 									else
 										ColorMap[x][z] = Enum.Material.Grass
 									end
@@ -2390,9 +2399,9 @@ function GenerateTerrain()
 								--reuse the sandy map for a bit of variation in the mountain material
 								if GenerateOptions.colorMountains then
 									if sandy > 1.5 then
-										ColorMap[x][z] = Enum.Material.Slate --TODO: find something else for this material
+										ColorMap[x][z] = Enum.Material.Rock --TODO: find something else for this material
 									else
-										ColorMap[x][z] = Enum.Material.Slate
+										ColorMap[x][z] = Enum.Material.Rock
 									end
 								else
 									ColorMap[x][z] = Enum.Material.Grass
@@ -2402,10 +2411,10 @@ function GenerateTerrain()
 							--it's both not steep, and high in the mountains. These areas are snow-covered
 							--peaks, color them snowey
 							if GenerateOptions.snowtoppedMountains then
-								ColorMap[x][z] = Enum.Material.Slate -- todo: Should be snowey once material arrives
+								ColorMap[x][z] = Enum.Material.Rock -- todo: Should be snowey once material arrives
 							else
 								if GenerateOptions.colorMountains then
-									ColorMap[x][z] = Enum.Material.Slate
+									ColorMap[x][z] = Enum.Material.Rock
 								else
 									ColorMap[x][z] = Enum.Material.Grass
 								end
@@ -2426,7 +2435,7 @@ function GenerateTerrain()
 					if ColorMap[x][z] == Enum.Material.Grass then
 						local flecks = 0.4*FlecksMapA[x][z] + 0.3*FlecksMapB[x][z] + 0.3*FlecksMapC[x][z]
 						if flecks < math.random()*0.55 then
-							ColorMap[x][z] = Enum.Material.Slate
+							ColorMap[x][z] = Enum.Material.Rock
 						end
 					end
 				end
@@ -2492,7 +2501,7 @@ function GenerateTerrain()
 					if (columnHeight - yc) < GenerateOptions.soilDepth then
 						materialVoxels[x][yc][z] = color
 					else
-						materialVoxels[x][yc][z] = Enum.Material.Slate
+						materialVoxels[x][yc][z] = Enum.Material.Rock
 					end
 				end
 			end 
@@ -3465,7 +3474,7 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXD70D6015CEEB4A4AACC14C0CD0ABF365">
+		<Item class="ModuleScript" referent="RBXFF93016695EB48758B9FF7A5D38ACB16">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">SmootherModule</string>
@@ -3595,11 +3604,11 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX630A72DEC8D149919E95E7EBFB65BABD">
+		<Item class="ScreenGui" referent="RBX5D2BADA87B524C59BC8B94400D137B66">
 			<Properties>
 				<string name="Name">TerrainBrushGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBXE32CB9ED3C5D4D0783BAE27A32064676">
+			<Item class="Frame" referent="RBXCCD499B757B44D8499292BF2B3D4DC20">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3627,7 +3636,7 @@ return {
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX6BFF6E5FE34842EE857510D1D0934EDA">
+				<Item class="TextButton" referent="RBX7F4F250B5CB443318B8E67C1C3CB8DAB">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -3670,7 +3679,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX22FB9406E2F84EE1B1DF4C1AEBEF0BB0">
+				<Item class="TextLabel" referent="RBXE8FDC55880724586B8C1E713EBE5024A">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3709,7 +3718,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXD1DD79A3F950401893901966485DF0C8">
+				<Item class="TextLabel" referent="RBX40E2D3B315804622A27B77BCECF387BB">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3748,7 +3757,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX2A9274474C4C46B8B0826659BE0D0FA9">
+				<Item class="TextLabel" referent="RBXCB29487C3F6D4A10B2F54873D9F68E51">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3787,7 +3796,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX6304AD7EA35D41909550090824840AD8">
+				<Item class="TextLabel" referent="RBXF2B891C187594FCB9B01A44C4A8304DC">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3826,7 +3835,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX7ECC3C002BB346DC923FBE267BDD5D8C">
+				<Item class="TextLabel" referent="RBXFEFC4BB0454C4879A1D1AF13A4702C6D">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3865,7 +3874,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXC9BE635E0C7F42778E1525A8E9CB8C31">
+				<Item class="TextButton" referent="RBX264ADA92F73C408892E7154B6BF4BAB7">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -3907,7 +3916,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXA07E5588A61544EE856643886D993B07">
+					<Item class="TextLabel" referent="RBX2320BA18AC404ABF98C65EA7F762715C">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3947,7 +3956,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="ImageButton" referent="RBX7EA748527BBD4F3AA22A3F1E5C4E1BFF">
+				<Item class="ImageButton" referent="RBXC435845687B44541A4E28FF5530A70B5">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -3990,7 +3999,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="ImageButton" referent="RBX46F1454644BD4E01B718BE3D27305114">
+				<Item class="ImageButton" referent="RBXB4CC5A0BB2064A64B4CD495B725CC06E">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -4033,7 +4042,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXACFCB842CF924881BB1109C93EB0CD64">
+				<Item class="TextLabel" referent="RBX208E982F3913461B832654774BA47E47">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4071,7 +4080,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX6679648C528C4FFD886608E67B017560">
+					<Item class="TextLabel" referent="RBXEEC2DCD4AAEC4464A85DF048595B7795">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4109,7 +4118,7 @@ return {
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">2</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBX486E6A3877CB4572AC2B8613B9303F29">
+						<Item class="TextLabel" referent="RBX76F9C1C562224758BFA3C258681BCDDA">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4286479998</Color3>
@@ -4150,7 +4159,7 @@ return {
 						</Item>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBXFD7B576F74D4457D8919A419A82A97EF">
+				<Item class="TextLabel" referent="RBX04A0146F9E4544AA9DF87C8305F37966">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4189,7 +4198,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX9B4E33F2722A4F3683C8B22F332CDAB0">
+				<Item class="TextButton" referent="RBX13E1A42D6D134538A5323D429EAC0E60">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -4231,7 +4240,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXA98DC5D61E414E1E94F52ACF8460EA3D">
+					<Item class="TextLabel" referent="RBXF383279D8D794396AAE5DC8B17D6116C">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4271,7 +4280,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBXF4372669BE184B24BAA89148A3C8704F">
+				<Item class="Frame" referent="RBX94EBD51087F5461A8A7001AF708253AA">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4300,7 +4309,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX7DB47DDE275143EDB30AE535E8004F7F">
+				<Item class="TextButton" referent="RBXD708D49AB50346319E6A0042B1694695">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -4342,7 +4351,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXE4A0E984F6994CA9BDBF2C5839182058">
+					<Item class="TextLabel" referent="RBX84E8D98379754F2E829BAD84B7FC6212">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4382,7 +4391,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBXCCF9CDB96BC44A0E9301F5EED6CAEE76">
+				<Item class="TextLabel" referent="RBX46F4BE9651764BA2B3D7BD526804D2DD">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4420,7 +4429,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">3</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX14EEC90B707249AB84DECA153F9CE0C3">
+					<Item class="TextLabel" referent="RBXAA05DD12417848ECA3862AD85E3142A2">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4460,7 +4469,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX179D84333B674FDC991C8862AE36CA43">
+				<Item class="TextLabel" referent="RBXDD550F41A06A438AAE53B31B94086171">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4498,7 +4507,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">3</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXEC8210094604476EA3DB86DEA59524CE">
+					<Item class="TextLabel" referent="RBXACA706A264304DF98EF95DFE20F30A28">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4540,7 +4549,7 @@ return {
 				</Item>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBX19B2F0CA57834EA9A7ACA6507B1009D5">
+		<Item class="ModuleScript" referent="RBX9148CB67490048A7AB26C3513AD4396C">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">RegionEditorModule</string>
@@ -5479,11 +5488,11 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX13FCB7586EE94CAF8D56203C2879A1C7">
+		<Item class="ScreenGui" referent="RBX65C7B1CE6C914582AEE146073D041ADB">
 			<Properties>
 				<string name="Name">TerrainRegionGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX1B781CA56AE944D48990117B0EDE2C69">
+			<Item class="Frame" referent="RBX6F334B6F39054433B6CEBD24E07CDEC1">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5511,7 +5520,7 @@ return {
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX7BC7E8EF522C4292B57676D2A0D994DE">
+				<Item class="TextButton" referent="RBX7A197E0F427A4F54955405C12405B88D">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5554,7 +5563,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX75FF714E7B9E483FA523F44253FD7801">
+				<Item class="TextButton" referent="RBXCC86B9ECCC134A6AB2D38162AAF54F51">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5597,7 +5606,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX6BD4B4DC012C4A64B1EB1A0B40421C84">
+				<Item class="TextButton" referent="RBXF96F0EF71EFF4983A07DC2A39810B789">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5640,7 +5649,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX36D5112058B34E069AE400C3B4808AB0">
+				<Item class="TextLabel" referent="RBXD16335E1FE9E48F9ACE2E8BA7BE78F8B">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5679,7 +5688,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX147A7A37FC1F4E089216A1103479CE2C">
+				<Item class="TextButton" referent="RBX7D45A130DB674E1BBDDEFB7F53F3CC33">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5722,7 +5731,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXAFCDC6E2B5C145ADA16A4D7E906CE6A5">
+				<Item class="TextButton" referent="RBX3C258EB15D784CC1BBEDBF4558ADDA7C">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5765,7 +5774,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXE16B4CEC25554C398B6C1F407B62D7D2">
+				<Item class="TextButton" referent="RBX782446748AE24BADABE2E8A588466920">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5807,7 +5816,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXE6776E34C0934319A3E2A7B83BDF5F80">
+					<Item class="TextLabel" referent="RBX138CBA81B1524ED884F78EACC2EC403A">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5847,7 +5856,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX9148CFC028494E7E914915F5211525EA">
+				<Item class="TextLabel" referent="RBX8082A8F32AD0410B9B6DD3021472AA83">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5886,7 +5895,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX1E22F0E786BF4152A2721750EBFE537A">
+				<Item class="TextButton" referent="RBXCD3B0DAF913D47878D7677A2B69A4636">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5928,7 +5937,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX513E3C79DCFD4382B6553335C6BA18FA">
+					<Item class="TextLabel" referent="RBXAFB5C6DA45A24F57913FB6AD1B56E2CB">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5968,7 +5977,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX43EDEB5488F24654819655155489A232">
+				<Item class="Frame" referent="RBX45CEBCB4E1C34F9AB8A8D80187FDFD6D">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5997,7 +6006,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXA77ADAB71D734ACAAD98C81FF92AAD3A">
+				<Item class="TextButton" referent="RBX686A2DDD42544838A3C4ECB765165C8C">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -6040,7 +6049,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXF281AB18A57B469C81A975A414376D3B">
+				<Item class="TextButton" referent="RBXF99539D02A7A4146A2608D992B334FA0">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -6083,7 +6092,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX95720FCDA7A84EB3AB0775982A2B47D9">
+				<Item class="TextLabel" referent="RBXF6862826296D49BEAF5704E3C59381F6">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6122,7 +6131,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX9FC674FF347549028369AAF1DAB5B541">
+				<Item class="TextButton" referent="RBX1B6BE08BE4FE4D06AC438CAE04E03EF6">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
