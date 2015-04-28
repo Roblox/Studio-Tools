@@ -197,7 +197,6 @@ function FirstTimeSetUp()
 	local selectionPart = nil
 	local selectionObject = nil
 	local gridLineParts = {}
-	local tau = math.pi * 2
 	local currentLoopTag = nil
 	local lastMainPoint = Vector3.new(0, 0, 0)
 	local click = false
@@ -208,6 +207,17 @@ function FirstTimeSetUp()
 	local lastCursorDistance = 300
 	local toolTip1Change = nil
 	local toolTip2Change = nil
+	local materialAir = Enum.Material.Air
+	local materialWater = Enum.Material.Water
+	local ceil = math.ceil
+	local floor = math.floor
+	local abs = math.abs
+	local min = math.min
+	local max = math.max
+	local sqrt = math.sqrt
+	local sin = math.sin
+	local cos = math.cos
+	local pi = math.pi
 	-------------
 
 
@@ -290,7 +300,7 @@ function FirstTimeSetUp()
 		newMaterialButton.BackgroundTransparency = 1
 		newMaterialButton.Image = materialImageDictionary[materialName]
 		newMaterialButton.Size = UDim2.new(0, 35, 0, 35)
-		newMaterialButton.Position = UDim2.new(0, 5 + ((i-1) % 4) * 40, 0, 195 + math.ceil(i/4) * 40)
+		newMaterialButton.Position = UDim2.new(0, 5 + ((i-1) % 4) * 40, 0, 195 + ceil(i/4) * 40)
 		newMaterialButton.MouseButton1Down:connect(function()
 			setMaterialSelection(materialName)
 		end)
@@ -331,7 +341,7 @@ function FirstTimeSetUp()
 		checkBox3.Text =  isDynamic and 'X' or ''
 		local desiredSize = UDim2.new(0, 180, 0, 245)
 		if not isDynamic then
-			desiredSize = desiredSize + UDim2.new(0, 0, 0, 5 + math.ceil(#materialSelections / 4) * 40)	--Dynamically resizes frame if we add more materials later.
+			desiredSize = desiredSize + UDim2.new(0, 0, 0, 5 + ceil(#materialSelections / 4) * 40)	--Dynamically resizes frame if we add more materials later.
 		end
 		--guiFrame:TweenSize(desiredSize, 'Out', 'Quad', .5)	--illegal in studio
 		guiFrame.Size = desiredSize
@@ -416,7 +426,7 @@ function FirstTimeSetUp()
 				linePart.SelectionBox.Color = color
 			end
 			local percent = (u - 1) / (gridSize - 1)
-			linePart.Size = Vector3.new(gridCellSize * gridSize * math.sin(math.acos(percent * 1.8 - .9)), 0, 0)
+			linePart.Size = Vector3.new(gridCellSize * gridSize * sin(math.acos(percent * 1.8 - .9)), 0, 0)
 			linePart.CFrame = baseCframe * CFrame.new(0, (percent - .5) * (gridSize - 1) * gridCellSize, 0) * CFrame.new(roundedNormalOffset)
 		end
 		for u = 1, gridSize do
@@ -441,7 +451,7 @@ function FirstTimeSetUp()
 				linePart.SelectionBox.Color = color
 			end
 			local percent = (u - 1) / (gridSize - 1)
-			linePart.Size = Vector3.new(0, gridCellSize * gridSize * math.sin(math.acos(percent * 1.8 - .9)), 0)
+			linePart.Size = Vector3.new(0, gridCellSize * gridSize * sin(math.acos(percent * 1.8 - .9)), 0)
 			linePart.CFrame = baseCframe * CFrame.new((percent - .5) * (gridSize - 1) * gridCellSize, 0, 0) * CFrame.new(roundedNormalOffset)
 		end
 	end
@@ -482,14 +492,14 @@ function FirstTimeSetUp()
 	end
 
 	local function round(n)
-		return math.floor(n + .5)
+		return floor(n + .5)
 	end
 
 	function findFace()
 		local cameraLookVector = game.Workspace.CurrentCamera.CoordinateFrame.lookVector
-		--[[local absx = math.abs(cameraLookVector.x)		--this code is for 90 plane locking
-		local absy = math.abs(cameraLookVector.y)
-		local absz = math.abs(cameraLookVector.z)
+		--[[local absx = abs(cameraLookVector.x)		--this code is for 90 plane locking
+		local absy = abs(cameraLookVector.y)
+		local absz = abs(cameraLookVector.z)
 		if absy >= absx and absy >= absz then	--preference towards y axis planes
 			return Vector3.new(0, cameraLookVector.y / absy, 0)
 		elseif absx >= absz then
@@ -518,8 +528,8 @@ function FirstTimeSetUp()
 		local desiredMaterial = isDynamic and nearMaterial or materialDictionary[materialSelection]
 
 		local radius = selectionSize * .5 * resolution
-		local minBounds = Vector3.new(math.floor((centerPoint.x - radius) / resolution), math.floor((centerPoint.y - radius) / resolution), math.floor((centerPoint.z - radius) / resolution)) * resolution
-		local maxBounds = Vector3.new(math.ceil((centerPoint.x + radius) / resolution), math.ceil((centerPoint.y + radius) / resolution), math.ceil((centerPoint.z + radius) / resolution)) * resolution
+		local minBounds = Vector3.new(floor((centerPoint.x - radius) / resolution), floor((centerPoint.y - radius) / resolution), floor((centerPoint.z - radius) / resolution)) * resolution
+		local maxBounds = Vector3.new(ceil((centerPoint.x + radius) / resolution), ceil((centerPoint.y + radius) / resolution), ceil((centerPoint.z + radius) / resolution)) * resolution
 		local region = Region3.new(minBounds, maxBounds)
 
 		local materials, occupancies = terrain:ReadVoxels(region, resolution)
@@ -527,12 +537,12 @@ function FirstTimeSetUp()
 		if modules[currentTool] then
 			if modules[currentTool]['operation'] then
 
-				local middle = materials[math.ceil(#materials * .5)]	--This little section of code sets nearMaterial to middle of matrix
+				local middle = materials[ceil(#materials * .5)]	--This little section of code sets nearMaterial to middle of matrix
 				if middle then	--dig X
-					local middle = middle[math.ceil(#middle * .5)]
+					local middle = middle[ceil(#middle * .5)]
 					if middle then	--dig Y
-						local middle = middle[math.ceil(#middle * .5)]
-						if middle and middle ~= Enum.Material.Air then	--dig Z
+						local middle = middle[ceil(#middle * .5)]
+						if middle and middle ~= materialAir then	--dig Z
 							nearMaterial = middle
 							desiredMaterial = isDynamic and nearMaterial or materialDictionary[materialSelection]
 						end
@@ -543,29 +553,33 @@ function FirstTimeSetUp()
 			end
 		else
 
-	        for ix, vx in ipairs(occupancies) do
+			for ix, vx in ipairs(occupancies) do
+				local cellVectorX = minBounds.x + (ix - .5) * resolution - centerPoint.x
+
 				for iy, vy in pairs(vx) do
+					local cellVectorY = minBounds.y + (iy - .5) * resolution - centerPoint.y
+
 					for iz, cellOccupancy in pairs(vy) do
+						local cellVectorZ = minBounds.z + (iz - .5) * resolution - centerPoint.z
+
 						local cellMaterial = materials[ix][iy][iz]
-						local cellWorldPos = minBounds + (Vector3.new(ix, iy, iz) - Vector3.new(.5, .5, .5)) * resolution
-						local distance = (cellWorldPos - centerPoint).magnitude
+						local distance = sqrt(cellVectorX * cellVectorX + cellVectorY * cellVectorY + cellVectorZ * cellVectorZ)
 	
 						local magnitudePercent = 1
 						local brushOccupancy = 1
 						if brushShape == 'Sphere' then
-							magnitudePercent = math.cos(math.min(1, distance / (radius + resolution * .5)) * math.pi * .5)
-							brushOccupancy = math.max(0, math.min(1, (radius + .5 * resolution - distance) / resolution))
+							magnitudePercent = cos(min(1, distance / (radius + resolution * .5)) * pi * .5)
+							brushOccupancy = max(0, min(1, (radius + .5 * resolution - distance) / resolution))
 						elseif brushShape == 'Box' then
 							if not (snapToGrid or forceSnapToGrid) then
-								local difference = (cellWorldPos - centerPoint) / resolution
-								local xOutside = 1 - math.max(0, math.abs(difference.x) + .5 - selectionSize * .5)
-								local yOutside = 1 - math.max(0, math.abs(difference.y) + .5 - selectionSize * .5)
-								local zOutside = 1 - math.max(0, math.abs(difference.z) + .5 - selectionSize * .5)
+								local xOutside = 1 - max(0, abs(cellVectorX / resolution) + .5 - selectionSize * .5)
+								local yOutside = 1 - max(0, abs(cellVectorY / resolution) + .5 - selectionSize * .5)
+								local zOutside = 1 - max(0, abs(cellVectorZ / resolution) + .5 - selectionSize * .5)
 								brushOccupancy = xOutside * yOutside * zOutside
 							end
 						end
 
-						if cellMaterial ~= Enum.Material.Air and cellMaterial ~= nearMaterial then
+						if cellMaterial ~= materialAir and cellMaterial ~= nearMaterial then
 							nearMaterial = cellMaterial
 							if isDynamic then
 								desiredMaterial = nearMaterial
@@ -575,7 +589,7 @@ function FirstTimeSetUp()
 						if currentTool == 'Add' then
 							if selectionSize <= 2 then
 								if brushOccupancy >= .5 then
-									if cellMaterial == Enum.Material.Air or cellMaterial == Enum.Material.Water or cellOccupancy <= 0 then
+									if cellMaterial == materialAir or cellMaterial == materialWater or cellOccupancy <= 0 then
 										materials[ix][iy][iz] = desiredMaterial
 									end
 									occupancies[ix][iy][iz] = 1
@@ -584,7 +598,7 @@ function FirstTimeSetUp()
 								if brushOccupancy > cellOccupancy then
 									occupancies[ix][iy][iz] = brushOccupancy
 								end
-								if brushOccupancy >= .5 and (cellMaterial == Enum.Material.Air or cellMaterial == Enum.Material.Water) then
+								if brushOccupancy >= .5 and (cellMaterial == materialAir or cellMaterial == materialWater) then
 									materials[ix][iy][iz] = desiredMaterial
 								end
 							end
@@ -592,7 +606,7 @@ function FirstTimeSetUp()
 							if selectionSize <= 2 then
 								if brushOccupancy >= .5 then
 									occupancies[ix][iy][iz] = 0
-									materials[ix][iy][iz] = Enum.Material.Air
+									materials[ix][iy][iz] = materialAir
 								end
 							else
 								local desiredOccupancy = 1 - brushOccupancy
@@ -600,7 +614,7 @@ function FirstTimeSetUp()
 									occupancies[ix][iy][iz] = desiredOccupancy
 								end
 								if desiredOccupancy <= 0 then
-									materials[ix][iy][iz] = Enum.Material.Air
+									materials[ix][iy][iz] = materialAir
 								end
 							end
 						elseif currentTool == 'Grow' then
@@ -610,7 +624,7 @@ function FirstTimeSetUp()
 								if cellOccupancy > 0 or fullNeighbor then	--problem if selection size is small.
 									desiredOccupancy = desiredOccupancy + neighborOccupancies * (strength + .1) * .25 * brushOccupancy * magnitudePercent
 								end
-								if cellMaterial == Enum.Material.Air or cellOccupancy <= 0 and desiredOccupancy > 0 then
+								if cellMaterial == materialAir or cellOccupancy <= 0 and desiredOccupancy > 0 then
 									materials[ix][iy][iz] = desiredMaterial
 								end
 								occupancies[ix][iy][iz] = desiredOccupancy
@@ -642,7 +656,7 @@ function FirstTimeSetUp()
 								if cellOccupancy < 1 or emptyNeighbor then
 									desiredOccupancy = desiredOccupancy - (neighborOccupancies / 6) * (strength + .1) * .25 * brushOccupancy * magnitudePercent
 								end
-								if cellMaterial == Enum.Material.Air or cellOccupancy <= 0 and desiredOccupancy > 0 then
+								if cellMaterial == materialAir or cellOccupancy <= 0 and desiredOccupancy > 0 then
 									materials[ix][iy][iz] = desiredMaterial
 								end
 								occupancies[ix][iy][iz] = desiredOccupancy
@@ -714,7 +728,7 @@ function FirstTimeSetUp()
 				if snapToGrid or forceSnapToGrid then
 					local snapOffset = Vector3.new(1, 1, 1) * (radius % resolution)		--in studs
 					local tempMainPoint = (mainPoint - snapOffset) / resolution + Vector3.new(.5, .5, .5)	--in voxels
-					mainPoint = Vector3.new(math.floor(tempMainPoint.x), math.floor(tempMainPoint.y), math.floor(tempMainPoint.z)) * resolution + snapOffset
+					mainPoint = Vector3.new(floor(tempMainPoint.x), floor(tempMainPoint.y), floor(tempMainPoint.z)) * resolution + snapOffset
 				end
 	
 				if mouseDown then
@@ -729,8 +743,8 @@ function FirstTimeSetUp()
 						local crawlDistance = radius * .5			--Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
 						if dragDistance > crawlDistance then
 							local differenceVector = difference.unit
-							local dragDistance = math.min(dragDistance, crawlDistance * 2 + 20)	--limiting this so that it does not attempt too many operations within a single drag.
-							local samples=math.ceil(dragDistance / crawlDistance - .1)
+							local dragDistance = min(dragDistance, crawlDistance * 2 + 20)	--limiting this so that it does not attempt too many operations within a single drag.
+							local samples=ceil(dragDistance / crawlDistance - .1)
 							for i = 1, samples do
 								operation(lastMainPoint + differenceVector * dragDistance * (i / samples))
 							end
@@ -770,7 +784,7 @@ function FirstTimeSetUp()
 					drawGrid(mainPointIntersect, lastNormal, mouseDown and .8)
 				end
 	
-				lastCursorDistance = math.max(20 + selectionSize * resolution * 1.5,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
+				lastCursorDistance = max(20 + selectionSize * resolution * 1.5,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
 	
 				quickWait()
 			end
@@ -797,11 +811,11 @@ function FirstTimeSetUp()
 	function scrollwheel(change)
 		if on then
 			if downKeys[Enum.KeyCode.LeftShift] or downKeys[Enum.KeyCode.RightShift] then
-				selectionSize = math.max(minSelectionSize, math.min(maxSelectionSize, selectionSize + change))
+				selectionSize = max(minSelectionSize, min(maxSelectionSize, selectionSize + change))
 				selectionSizeValue.Value = selectionSize
 			end
 			if downKeys[Enum.KeyCode.LeftControl] or downKeys[Enum.KeyCode.RightControl] then
-				strength = math.max(0, math.min(1, strength + change * (1/(maxSelectionSize-minSelectionSize))))
+				strength = max(0, min(1, strength + change * (1/(maxSelectionSize-minSelectionSize))))
 				strengthValue.Value = round(strength * 100 + 1)
 			end
 		end
@@ -3534,13 +3548,14 @@ function getNeighborOccupancies(list, x, y, z, includeSelf, range)
 	local range = range or 1
 	local neighborOccupancies = 0
 	local totalNeighbors = 0
+	local sqrt = math.sqrt
 	for ix = -range, range do
 		for iy = -range, range do
 			for iz = -range, range do
 				if includeSelf or not (ix == 0 and iy == 0 and iz == 0) then
 					local neighbor = getCell(list, x + ix, y + iy, z + iz)
 					if neighbor then
-						local distanceScale = 1 - (Vector3.new(ix,iy,iz).magnitude / (range * 2))
+						local distanceScale = 1 - (sqrt(ix * ix + iy * iy + iz * iz) / (range * 2))
 						if neighbor >= 1 then
 							fullNeighbor = true
 						end
@@ -3564,13 +3579,21 @@ function operation(centerPoint, materials, occupancies, resolution, selectionSiz
 	local readMaterials, readOccupancies = terrain:ReadVoxels(region, resolution)
 
 	local radius = selectionSize * .5 * resolution
-    for ix, vx in ipairs(readOccupancies) do
+
+	local materialAir = Enum.Material.Air
+
+	for ix, vx in ipairs(readOccupancies) do
+		local cellVectorX = minBounds.x + (ix - .5) * resolution - centerPoint.x
+
 		for iy, vy in pairs(vx) do
+			local cellVectorY = minBounds.y + (iy - .5) * resolution - centerPoint.y
+
 			for iz, cellOccupancy in pairs(vy) do
+				local cellVectorZ = minBounds.z + (iz - .5) * resolution - centerPoint.z
 
-				local cellWorldPos = minBounds + (Vector3.new(ix, iy, iz) - Vector3.new(.5, .5, .5)) * resolution
-				local distance = (cellWorldPos - centerPoint).magnitude
-
+				local cellMaterial = materials[ix][iy][iz]
+				local distance = math.sqrt(cellVectorX * cellVectorX + cellVectorY * cellVectorY + cellVectorZ * cellVectorZ)
+	
 				local magnitudePercent = 1
 				local brushOccupancy = 1
 				if brushType == 'Sphere' then
@@ -3590,7 +3613,7 @@ function operation(centerPoint, materials, occupancies, resolution, selectionSiz
 						difference = 0
 					end
 
-					if readMaterials[ix][iy][iz] == Enum.Material.Air or cellOccupancy <= 0 and difference > 0 then
+					if readMaterials[ix][iy][iz] == materialAir or cellOccupancy <= 0 and difference > 0 then
 						materials[ix][iy][iz] = desiredMaterial
 					end
 					if difference ~= 0 then
