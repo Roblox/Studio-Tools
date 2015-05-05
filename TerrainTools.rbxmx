@@ -4687,6 +4687,8 @@ function FirstTimeSetUp()
 	local lockedRegion = nil
 	local behindThis = nil
 	local axis = 'X'
+	local materialAir = Enum.Material.Air
+	local materialWater = Enum.Material.Water
 	local floor = math.floor		--Scaling linear resize
 	local ceil = math.ceil
 	-------------
@@ -4944,13 +4946,14 @@ function FirstTimeSetUp()
 					if selectionStart and selectionEnd then
 						local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
 						local regionSize = region.Size / resolution
-						terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+						terrain:WriteVoxels(region, resolution, make3DTable(regionSize,materialAir), make3DTable(regionSize,0))
 					end
 				end
 				behindThis = {}
 				behindThis.region = region
 				behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
 
+				local behindMaterials, behindOccupancies = behindThis.materials, behindThis.occupancies
 
 				local loopx = #lockedMaterials - 1
 				local loopy = #lockedMaterials[1] - 1
@@ -5013,12 +5016,12 @@ function FirstTimeSetUp()
 		
 							local newMaterial = lockedMaterials[round(scalex)+1][round(scaley)+1][round(scalez)+1]
 		
-							if fillAir and newMaterial == Enum.Material.Air then
-								ytm[z]=behindThis.materials[x][y][z]
-								yto[z]=behindThis.occupancies[x][y][z]
-							elseif fillWater and newMaterial == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
-								ytm[z]=behindThis.materials[x][y][z]
-								yto[z]=behindThis.occupancies[x][y][z]
+							if fillAir and newMaterial == materialAir then
+								ytm[z]=behindMaterials[x][y][z]
+								yto[z]=behindOccupancies[x][y][z]
+							elseif fillWater and newMaterial == materialWater and behindMaterials[x][y][z] ~= materialAir then
+								ytm[z]=behindMaterials[x][y][z]
+								yto[z]=behindOccupancies[x][y][z]
 							else
 								ytm[z]=newMaterial
 								yto[z]=interpx1
@@ -5046,12 +5049,14 @@ function FirstTimeSetUp()
 					if selectionStart and selectionEnd then
 						local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
 						local regionSize = region.Size / resolution
-						terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+						terrain:WriteVoxels(region, resolution, make3DTable(regionSize,materialAir), make3DTable(regionSize,0))
 					end
 				end
 				behindThis = {}
 				behindThis.region = region
 				behindThis.materials, behindThis.occupancies = terrain:ReadVoxels(region, resolution)
+
+				local behindMaterials, behindOccupancies = behindThis.materials, behindThis.occupancies
 		
 				if not (fillAir or fillWater) then
 					terrain:WriteVoxels(region, resolution, lockedMaterials, lockedOccupancies)
@@ -5066,12 +5071,12 @@ function FirstTimeSetUp()
 							local ytm = {}
 							local yto = {}
 							for z,zv in ipairs(yv) do
-								if fillAir and zv == Enum.Material.Air then
-									ytm[z]=behindThis.materials[x][y][z]
-									yto[z]=behindThis.occupancies[x][y][z]
-								elseif fillWater and zv == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
-									ytm[z]=behindThis.materials[x][y][z]
-									yto[z]=behindThis.occupancies[x][y][z]
+								if fillAir and zv == materialAir then
+									ytm[z]=behindMaterials[x][y][z]
+									yto[z]=behindOccupancies[x][y][z]
+								elseif fillWater and zv == materialWater and behindMaterials[x][y][z] ~= materialAir then
+									ytm[z]=behindMaterials[x][y][z]
+									yto[z]=behindOccupancies[x][y][z]
 								else
 									ytm[z]=lockedMaterials[x][y][z]
 									yto[z]=lockedOccupancies[x][y][z]
@@ -5139,10 +5144,10 @@ function FirstTimeSetUp()
 				if selectionStart and selectionEnd then
 					local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
 					local regionSize = region.Size / resolution
-					terrain:WriteVoxels(region, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+					terrain:WriteVoxels(region, resolution, make3DTable(regionSize,materialAir), make3DTable(regionSize,0))
 				end
 				--local regionSize = lockedRegion.Size / resolution
-				--terrain:WriteVoxels(lockedRegion, resolution, make3DTable(regionSize,Enum.Material.Air), make3DTable(regionSize,0))
+				--terrain:WriteVoxels(lockedRegion, resolution, make3DTable(regionSize,materialAir), make3DTable(regionSize,0))
 			end
 			behindThis = {}
 			behindThis.region = region
@@ -5170,10 +5175,10 @@ function FirstTimeSetUp()
 						end
 						local newMaterial = lockedMaterials[targetx][targety][targetz]
 
-						if fillAir and newMaterial == Enum.Material.Air then
+						if fillAir and newMaterial == materialAir then
 							ytm[z]=behindThis.materials[x][y][z]
 							yto[z]=behindThis.occupancies[x][y][z]
-						elseif fillWater and newMaterial == Enum.Material.Water and behindThis.materials[x][y][z] ~= Enum.Material.Air then
+						elseif fillWater and newMaterial == materialWater and behindThis.materials[x][y][z] ~= materialAir then
 							ytm[z]=behindThis.materials[x][y][z]
 							yto[z]=behindThis.occupancies[x][y][z]
 						else
@@ -5232,12 +5237,13 @@ function FirstTimeSetUp()
 		if selectionStart and selectionEnd then
 			local region = Region3.new((selectionStart - Vector3.new(1,1,1)) * resolution, selectionEnd * resolution)
 			local regionSize = region.Size / resolution
-			local emptyMaterialMap = make3DTable(regionSize,Enum.Material.Air)
+			local emptyMaterialMap = make3DTable(regionSize,materialAir)
 			local emptyOccupancyMap = make3DTable(regionSize,0)
 
 			--[[behindThis = {}
 			behindThis.region = region
 			behindThis.materials, behindThis.occupancies = emptyMaterialMap, emptyOccupancyMap
+
 			terrain:WriteVoxels(region, resolution, emptyMaterialMap, emptyOccupancyMap)]]
 			if behindThis then
 				terrain:WriteVoxels(behindThis.region, resolution, behindThis.materials, behindThis.occupancies)
