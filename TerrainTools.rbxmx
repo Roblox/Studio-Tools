@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBX2096B18F49D8404E9831611D8E2BDA73">
+	<Item class="Model" referent="RBX160C6C01A7BF430588BFF19B4B588CB7">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXE923C92AABC8400E98B2E9AB4D5B8041">
+		<Item class="Script" referent="RBXA1887AB6EF974F4094D5C57AABEF1E4A">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -873,7 +873,7 @@ end
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX809D9A17C2824775A8787CB4EEC940F4">
+		<Item class="ModuleScript" referent="RBXC07A1B4BE373410F8D1C30DD64BE61BE">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">GenerationModule</string>
@@ -919,9 +919,9 @@ do
 	-- This is a global mask value to apply to mountains, with the formula:
 	-- Terrain = mountainlayerAndMask * mountainFrequency + 
 	--           otherlayers * 1-mountainFrequency
-	TerrainOptions.mountainFrequency = 1
+	TerrainOptions.mountainFrequency = .9
 	-- the max height of mountains
-	TerrainOptions.mountainHeight = 60
+	TerrainOptions.mountainHeight = 56
 	-- The average size of mountains to make, in terms of a fraction of the map size
 	TerrainOptions.mountainSize = 0.15
 
@@ -956,6 +956,7 @@ do
 	TerrainOptions.colorCliffs = true          -- color clif faces with a marbled texture
 	TerrainOptions.soilDepth = 4               -- where soil is, how deep should it be? (with rock below)
 end
+local snowMaterial = Enum.Material.Slate
 
 
 -- This will store a copy of TerrainOptions when the generate button is pressed.
@@ -1032,7 +1033,7 @@ end)]]
 
 
 --==========================================================================================================--
---                                       Noise generation code                                            ==--
+--==                                     Noise generation code                                            ==--
 --==========================================================================================================--
 --
 local perm = {
@@ -1117,6 +1118,12 @@ end
 --                                       GUI Utility functions                                            ==--
 --==========================================================================================================--
 
+local newgui=script.Parent:WaitForChild('TerrainGenerationGui')
+local newguiFrame = newgui:WaitForChild('Frame')
+local scrollingFrame = newguiFrame:WaitForChild('ScrollingFrame')
+local canvasFrame = scrollingFrame:WaitForChild('Canvas')
+local coreGui = game:GetService('CoreGui')
+
 -- UI gui load.  Required for all the GUI code
 local RbxGui = LoadLibrary("RbxGui")
 
@@ -1186,6 +1193,7 @@ function CreateStandardSlider(name,
 	return sliderGui, sliderPosition 
 end
 
+
 -- Create a standard dropdown.  Use this for all dropdowns in the popup so it is easy to standardize.
 -- name - What to set the text label name as.
 -- pos    	 	 - Where to position the label.  Should be of type UDim2.
@@ -1235,7 +1243,7 @@ function CreateStandardButton(name,
 							  funcOnPress,
 							  parent,
 							  size)					
-	button = Instance.new("TextButton", parent)
+	local button = Instance.new("TextButton", parent)
 	button.Name = name
 	button.Position = pos
 
@@ -1258,6 +1266,36 @@ function CreateStandardButton(name,
 end	
 
 
+
+function createSection(name, pos, size, parent)
+	local sectionGui = newgui:WaitForChild('TemplateSection'):clone()
+	sectionGui.Name = 'Section'..name
+	sectionGui.Text = name
+	sectionGui.Position = UDim2.new(0,0,0,pos)
+	sectionGui.Frame.Size = UDim2.new(1,0,0,size)
+	sectionGui.Parent = parent
+	sectionGui.Visible = true
+	return sectionGui, sectionGui.Frame
+end
+
+function createCheckBox(name, pos, parent, setting, changedFunction)
+	local setting = setting
+	local checkBoxGui = newgui:WaitForChild('TemplateCheckBox'):clone()
+	checkBoxGui.Name = 'CheckBox'..name
+	checkBoxGui.Label.Text = name
+	checkBoxGui.Text = setting and 'X' or ''
+	checkBoxGui.Position = UDim2.new(0,4,0,pos)
+	checkBoxGui.Parent = parent
+	checkBoxGui.Visible = true
+	checkBoxGui.MouseButton1Down:connect(function()
+		setting = not setting
+		checkBoxGui.Text = setting and 'X' or ''
+		changedFunction(setting)
+	end)
+	return checkBoxGui
+end
+
+
 -- Create a standard accordion, which contains many child areas that can be
 -- swiched between
 -- name
@@ -1269,7 +1307,7 @@ function CreateStandardAccordion(name,
 	                             size, 
 	                             childList, 
 	                             parent)
-	frame = Instance.new('Frame', parent)
+	local frame = Instance.new('Frame', parent)
 	frame.Position = pos
 	frame.Size = size
 	frame.Name = name
@@ -2414,7 +2452,7 @@ function GenerateTerrain()
 							if tot<5 then
 								--we are are really high up, place snow here
 								if GenerateOptions.snowtoppedMountains then
-									ColorMap[x][z] = Enum.Material.Rock --snowey: TODO: Needs new material under smooth terrain
+									ColorMap[x][z] = snowMaterial--Rock --snowey: TODO: Needs new material under smooth terrain
 								else
 									if GenerateOptions.colorMountains then
 										ColorMap[x][z] = Enum.Material.Rock
@@ -2427,7 +2465,7 @@ function GenerateTerrain()
 								--reuse the sandy map for a bit of variation in the mountain material
 								if GenerateOptions.colorMountains then
 									if sandy > 1.5 then
-										ColorMap[x][z] = Enum.Material.Rock --TODO: find something else for this material
+										ColorMap[x][z] = Enum.Material.Sand--Enum.Material.Rock
 									else
 										ColorMap[x][z] = Enum.Material.Rock
 									end
@@ -2439,7 +2477,7 @@ function GenerateTerrain()
 							--it's both not steep, and high in the mountains. These areas are snow-covered
 							--peaks, color them snowey
 							if GenerateOptions.snowtoppedMountains then
-								ColorMap[x][z] = Enum.Material.Rock -- todo: Should be snowey once material arrives
+								ColorMap[x][z] = snowMaterial -- todo: Should be snowey once material arrives
 							else
 								if GenerateOptions.colorMountains then
 									ColorMap[x][z] = Enum.Material.Rock
@@ -2480,6 +2518,20 @@ function GenerateTerrain()
 		--done, return the color map
 		return ColorMap
 	end
+
+
+	--Day 1
+		--This is Luke, looking thought Stravant's code. I've been able to ctrl+f to find some points of interest, but
+		--I have to lay down cable as I go so that I do not get lost. This system looks pretty large. Not sure if I
+		--have enough cable to explore it all.
+	--Day 2
+		--The system goes much deeper than I initially thought. Much of the interface actually leads to the RbxGui
+		--library and is impassable. I am looking into alternatives.
+	--Day 3
+		--My hands are very dirty and I have nothing to clean them off with.
+	--Day 4
+		--There is much more that I need to do, and my time is running short. I am not sure if I had allocated enough
+		--time to make it out alive. If you are reading this, tell me family that I love them.
 
 
 	------------------------------------------------------------------------------------------------------
@@ -2979,96 +3031,103 @@ MainScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 MainScreenGui.Name = 'TerrainCreatorGui'
 
 -- Gui frame for the plugin.
-local terrainPropertiesDragBar, terrainFrame, terrainHelpFrame, terrainCloseEvent = RbxGui.CreatePluginFrame("Terrain Generator",UDim2.new(0,186,0,487),UDim2.new(0,0,0,0),false,MainScreenGui)
-terrainPropertiesDragBar.Visible = false
-terrainCloseEvent.Event:connect(function()
+--local terrainPropertiesDragBar, terrainFrame, terrainHelpFrame, terrainCloseEvent = RbxGui.CreatePluginFrame("Terrain Generator",UDim2.new(0,186,0,487),UDim2.new(0,0,0,0),false,MainScreenGui)
+--terrainPropertiesDragBar.Visible = false
+--terrainCloseEvent.Event:connect(function()
+--	if turnOff then
+--		turnOff()
+--	end
+--	Off()
+--end)
+--
+--terrainHelpFrame.Size = UDim2.new(0,300,0,539)
+--
+---- Create the help text:
+--
+--local terrainHelpText = Instance.new("TextLabel",terrainHelpFrame)
+--terrainHelpText.Name = "HelpText"
+--terrainHelpText.Font = Enum.Font.ArialBold
+--terrainHelpText.FontSize = Enum.FontSize.Size12
+--terrainHelpText.TextColor3 = Color3.new(227/255,227/255,227/255)
+--terrainHelpText.TextXAlignment = Enum.TextXAlignment.Left
+--terrainHelpText.TextYAlignment = Enum.TextYAlignment.Top
+--terrainHelpText.Position = UDim2.new(0,4,0,4)
+--terrainHelpText.Size = UDim2.new(1,-8,0,132)
+--terrainHelpText.BackgroundTransparency = 1
+--terrainHelpText.TextWrap = true
+--terrainHelpText.Text = [[                         <> Generate Terrain <>
+--================= Basic Options =================
+-- - Width: Terrain size in the X direction.
+-- - Length: Terrain size in the Z direction.
+-- - Base Height: The lowest point that will be present in
+--     the terrain.
+--================== Hill Options =================
+-- - Hill Density: A smaller value gives fewer, smoother 
+--     hills, while a larger value gives more sharp 
+--     frequent hills.
+-- - Enable Cliffs: If enabled, cliffs will be sliced into
+--]]
+--
+--local helpSecondText = terrainHelpText:clone()
+--helpSecondText.Name = "HelpSecondText"
+--helpSecondText.Position = UDim2.new(0,0,1,0)
+--helpSecondText.Size = UDim2.new(1,0,0,157)
+--helpSecondText.Text = [[     random locations on the map.
+-- - Cliff Density: If cliffs are enabled, the larger the
+--     value the more cliffs will be added to the map.
+--================ Mountain Options ==============
+-- - Region Dropdown: Mountains can be placed in one 
+--     of several different regions around the map, or 
+--     placed in a custom region of your choice by using 
+--     the "Interactive" mode.
+-- - Max Mountain Height: The maximum elevation that
+--     mountains placed in the region will reach.
+-- - Mountainous %: How mountainous is the chosen 
+--     region? 100% = place only mountains there,
+--     0% = place only hills there.
+--]]
+--helpSecondText.Parent = terrainHelpText
+--
+--local helpThirdText = helpSecondText:clone()
+--helpThirdText.Name = "HelpThirdText"
+--helpThirdText.Position = UDim2.new(0,0,1,0)
+--helpThirdText.Size = UDim2.new(1,0,0,157)
+--helpThirdText.Text = [[ - Mountain Size: How wide are the mountains to be, 
+--     in terms of the width of the whole map?
+--================== Water Options ===============
+-- - Water Dropdown: A sea level can be chosen to fill
+--     the whole level to, or lakes can be placed around
+--     the level, or both.
+-- - Lake Density: How many lakes to place in the level?
+-- - Lake max size: How large should the lakes be?
+-- - Sea level: What water-level to fill the level up to?
+--================ Material Options ===============
+-- - Material Dropdown: Select to either color the level
+--    one solid color, or automatically color it based on 
+--    the landscape and some settings.
+--]]
+--helpThirdText.Parent = helpSecondText
+--
+--local helpFourthText = helpThirdText:clone()
+--helpFourthText.Name = "HelpFourthText"
+--helpFourthText.Position = UDim2.new(0,0,1,0)
+--helpFourthText.Size = UDim2.new(1,0,0,120)
+--helpFourthText.Text = [[ - Color Mountains: Color steep slopes and high 
+--    places with a grey color?
+-- - Snow on Mountaintops: Color the tops of high 
+--    mountains with a white color?
+-- - Color Cliffs: Color sharp cliffs with a grey color?
+-- - Add Sandy Regions: Color some low, flat areas with
+--    a yellow color?
+--]]
+--helpFourthText.Parent = helpThirdText
+
+newguiFrame:WaitForChild('CloseButton').MouseButton1Down:connect(function()
 	if turnOff then
 		turnOff()
 	end
 	Off()
 end)
-
-terrainHelpFrame.Size = UDim2.new(0,300,0,539)
-
--- Create the help text:
-
-local terrainHelpText = Instance.new("TextLabel",terrainHelpFrame)
-terrainHelpText.Name = "HelpText"
-terrainHelpText.Font = Enum.Font.ArialBold
-terrainHelpText.FontSize = Enum.FontSize.Size12
-terrainHelpText.TextColor3 = Color3.new(227/255,227/255,227/255)
-terrainHelpText.TextXAlignment = Enum.TextXAlignment.Left
-terrainHelpText.TextYAlignment = Enum.TextYAlignment.Top
-terrainHelpText.Position = UDim2.new(0,4,0,4)
-terrainHelpText.Size = UDim2.new(1,-8,0,132)
-terrainHelpText.BackgroundTransparency = 1
-terrainHelpText.TextWrap = true
-terrainHelpText.Text = [[                         <> Generate Terrain <>
-================= Basic Options =================
- - Width: Terrain size in the X direction.
- - Length: Terrain size in the Z direction.
- - Base Height: The lowest point that will be present in
-     the terrain.
-================== Hill Options =================
- - Hill Density: A smaller value gives fewer, smoother 
-     hills, while a larger value gives more sharp 
-     frequent hills.
- - Enable Cliffs: If enabled, cliffs will be sliced into
-]]
-
-local helpSecondText = terrainHelpText:clone()
-helpSecondText.Name = "HelpSecondText"
-helpSecondText.Position = UDim2.new(0,0,1,0)
-helpSecondText.Size = UDim2.new(1,0,0,157)
-helpSecondText.Text = [[     random locations on the map.
- - Cliff Density: If cliffs are enabled, the larger the
-     value the more cliffs will be added to the map.
-================ Mountain Options ==============
- - Region Dropdown: Mountains can be placed in one 
-     of several different regions around the map, or 
-     placed in a custom region of your choice by using 
-     the "Interactive" mode.
- - Max Mountain Height: The maximum elevation that
-     mountains placed in the region will reach.
- - Mountainous %: How mountainous is the chosen 
-     region? 100% = place only mountains there,
-     0% = place only hills there.
-]]
-helpSecondText.Parent = terrainHelpText
-
-local helpThirdText = helpSecondText:clone()
-helpThirdText.Name = "HelpThirdText"
-helpThirdText.Position = UDim2.new(0,0,1,0)
-helpThirdText.Size = UDim2.new(1,0,0,157)
-helpThirdText.Text = [[ - Mountain Size: How wide are the mountains to be, 
-     in terms of the width of the whole map?
-================== Water Options ===============
- - Water Dropdown: A sea level can be chosen to fill
-     the whole level to, or lakes can be placed around
-     the level, or both.
- - Lake Density: How many lakes to place in the level?
- - Lake max size: How large should the lakes be?
- - Sea level: What water-level to fill the level up to?
-================ Material Options ===============
- - Material Dropdown: Select to either color the level
-    one solid color, or automatically color it based on 
-    the landscape and some settings.
-]]
-helpThirdText.Parent = helpSecondText
-
-local helpFourthText = helpThirdText:clone()
-helpFourthText.Name = "HelpFourthText"
-helpFourthText.Position = UDim2.new(0,0,1,0)
-helpFourthText.Size = UDim2.new(1,0,0,120)
-helpFourthText.Text = [[ - Color Mountains: Color steep slopes and high 
-    places with a grey color?
- - Snow on Mountaintops: Color the tops of high 
-    mountains with a white color?
- - Color Cliffs: Color sharp cliffs with a grey color?
- - Add Sandy Regions: Color some low, flat areas with
-    a yellow color?
-]]
-helpFourthText.Parent = helpThirdText
 
 --==========================================================================================================--
 --                            Population of the GUI with all the setting controlls                        ==--
@@ -3081,48 +3140,48 @@ local function setY(v) curY = v end
 local function addY(v) curY = curY + v end
 
 -- Slider for controlling the width of the terran area.  Terran is created in a region this wide.
-widthLabel = CreateStandardLabel("WidthLabel", UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), "", terrainFrame)
+widthLabel = CreateStandardLabel("WidthLabel", UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), "", canvasFrame)
 addY(16)
 widthSliderGui, widthSliderPosition = CreateStandardSlider('WidthSliderGui', UDim2.new(0,1,0,curY), UDim2.new(0,10,0.5,-2), 512, 
 																	function(widthSliderPosition) 
 																		TerrainOptions.width = widthSliderPosition.Value
 																		widthLabel.Text = "Width: "..TerrainOptions.width
-																	end, nil, terrainFrame)
+																	end, nil, canvasFrame)
 addY(25)
 widthSliderPosition.Value = TerrainOptions.width
 
 -- Slider for controlling the length of the terran area.  Terran is created in a region this long.
-lengthLabel = CreateStandardLabel("LengthLabel", UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), "", terrainFrame)
+lengthLabel = CreateStandardLabel("LengthLabel", UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), "", canvasFrame)
 addY(16)
 lengthSliderGui, lengthSliderPosition = CreateStandardSlider('LengthSliderGui', UDim2.new(0,1,0,curY), UDim2.new(0,10,0.5,-2), 512, 
 																	function(lengthSliderPosition) 
 																		TerrainOptions.length = lengthSliderPosition.Value
 																		lengthLabel.Text = "Length: "..TerrainOptions.length
-																	end, nil, terrainFrame)
+																	end, nil, canvasFrame)
 addY(25)
 lengthSliderPosition.Value = TerrainOptions.length
 
 
 -- Slider for controlling the baseHeight, how deep the base terrain should be.
-baseHeightLabel = CreateStandardLabel("BaseHeightLabel", UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), "", terrainFrame)
+--[[baseHeightLabel = CreateStandardLabel("BaseHeightLabel", UDim2.new(0, 8, 0, curY), UDim2.new(0, 67, 0, 14), "", canvasFrame)
 addY(16)
 baseHeightSliderGui, baseHeightSliderPosition = CreateStandardSlider('BaseHeightSliderGui', UDim2.new(0,1,0,curY), UDim2.new(0,10,0.5,-2), game.Workspace.Terrain.MaxExtents.Max.Y, 
 																	function(baseHeightSliderPosition) 
 																		TerrainOptions.baseHeight = baseHeightSliderPosition.Value - 1
 																		baseHeightLabel.Text = "Base Height: ".. (TerrainOptions.baseHeight)
-																	end, nil, terrainFrame)
+																	end, nil, canvasFrame)
 addY(25)
-baseHeightSliderPosition.Value = TerrainOptions.baseHeight
+baseHeightSliderPosition.Value = TerrainOptions.baseHeight]]
 local accordionBoxAtY = curY
 
 
 -----------------------
 -- hill settings
-hillSettingsFrame = Instance.new("Frame")
+hillSettingsButton, hillSettingsFrame = createSection('Hills', 105, 122, canvasFrame)--Instance.new("Frame")
 
 -- hill size slider
-hillDensityLabel = CreateStandardLabel("DensityLabel", UDim2.new(0, 8, 0, 0), UDim2.new(0, 67, 0, 14), "", hillSettingsFrame)
-hillDensitySliderGui, hillDensitySliderPosition = CreateStandardSlider('DensitySliderGui', UDim2.new(0,1,0,16), UDim2.new(0,10,0.5,-2), 21, 
+hillDensityLabel = CreateStandardLabel("DensityLabel", UDim2.new(0, 8, 0, 5), UDim2.new(0, 67, 0, 14), "", hillSettingsFrame)
+hillDensitySliderGui, hillDensitySliderPosition = CreateStandardSlider('DensitySliderGui', UDim2.new(0,1,0,21), UDim2.new(0,10,0.5,-2), 21, 
 																	function(hillDensitySliderPosition) 
 																		TerrainOptions.hillSizeModifier = 2^((hillDensitySliderPosition.Value - 11)/10)
 																		hillDensityLabel.Text = "Hill density modifier: "..string.format("%1.2fx", TerrainOptions.hillSizeModifier)
@@ -3130,7 +3189,7 @@ hillDensitySliderGui, hillDensitySliderPosition = CreateStandardSlider('DensityS
 hillDensitySliderPosition.Value = math.log(TerrainOptions.hillSizeModifier)/math.log(2)*10 + 11
 
 -- cliffs modifier
-function onEnableCliffs()
+--[[function onEnableCliffs()
 	TerrainOptions.enableCliffs = not TerrainOptions.enableCliffs
 	if TerrainOptions.enableCliffs then
 		enableCliffsCheckbox.Text = "X"
@@ -3142,26 +3201,29 @@ function onEnableCliffs()
 		cliffDensityLabel.Visible = false
 	end
 end
-enableCliffsLabel = CreateStandardLabel("EnableCliffsLabel", UDim2.new(0, 44, 0, 41), UDim2.new(0, 50, 0, 24), "Enable Cliffs", hillSettingsFrame)
-enableCliffsCheckbox = CreateStandardButton("EnableCliffsCheckbox", UDim2.new(0, 10, 0, 41), '', 
-	                                           onEnableCliffs, hillSettingsFrame, UDim2.new(0, 24, 0, 24))
+enableCliffsLabel = CreateStandardLabel("EnableCliffsLabel", UDim2.new(0, 44, 0, 46), UDim2.new(0, 50, 0, 24), "Enable Cliffs", hillSettingsFrame)
+enableCliffsCheckbox = CreateStandardButton("EnableCliffsCheckbox", UDim2.new(0, 10, 0, 46), '', 
+	                                           onEnableCliffs, hillSettingsFrame, UDim2.new(0, 24, 0, 24))]]
+createCheckBox('Enable Cliffs', 46, hillSettingsFrame, TerrainOptions.enableCliffs, function(newSetting)
+	TerrainOptions.enableCliffs = newSetting
+end)
 
-cliffDensityLabel = CreateStandardLabel("CliffDensityLabel", UDim2.new(0, 8, 0, 65), UDim2.new(0, 67, 0, 14), "", hillSettingsFrame)
-cliffDensitySliderGui, cliffDensitySliderPosition = CreateStandardSlider('CliffDensitySliderGui', UDim2.new(0,1,0,81), UDim2.new(0,10,0.5,-2), 21, 
+cliffDensityLabel = CreateStandardLabel("CliffDensityLabel", UDim2.new(0, 8, 0, 78), UDim2.new(0, 67, 0, 14), "", hillSettingsFrame)
+cliffDensitySliderGui, cliffDensitySliderPosition = CreateStandardSlider('CliffDensitySliderGui', UDim2.new(0,1,0,94), UDim2.new(0,10,0.5,-2), 21, 
 																	function(cliffDensitySliderPosition) 
 																		TerrainOptions.cliffDensityModifier = 2^((cliffDensitySliderPosition.Value - 11)/10)
 																		cliffDensityLabel.Text = "Cliff density modifier: "..string.format("%1.2fx", TerrainOptions.cliffDensityModifier)
 																	end, nil, hillSettingsFrame)
 cliffDensitySliderPosition.Value = math.log(TerrainOptions.cliffDensityModifier)/math.log(2)*10 + 11
 
-onEnableCliffs()
-onEnableCliffs()
+--onEnableCliffs()	--Why is this here twice?
+--onEnableCliffs()
 
 
 
 -----------------------
 -- mountain settings
-mountainSettingsFrame = Instance.new('Frame')
+mountainSettingsButton, mountainSettingsFrame = createSection('Mountains', 257, 207, canvasFrame)--Frame = Instance.new('Frame')
 
 function onMountainPatternDropdown(value) 
 	TerrainOptions.mountainMode = value
@@ -3183,35 +3245,35 @@ function onMountainPatternDropdown(value)
 	end
 end
 mountainPatternDropdown, mountainPatternSet = CreateStandardDropdown("MountainPatternDropdown",
-						        UDim2.new(0,0,0,0),
+						        UDim2.new(0,0,0,5),
 								{"None", "Whole Map", "Ridge", "Ring", "Random", "Interactive"},
 								"Ridge",
 								onMountainPatternDropdown, 
 								mountainSettingsFrame)
 
-mountainPatternDescriptionLabel = CreateStandardLabel("DescriptionLabel", UDim2.new(0, 10, 0, 29), UDim2.new(0, 186, 0, 44), "", mountainSettingsFrame)
+mountainPatternDescriptionLabel = CreateStandardLabel("DescriptionLabel", UDim2.new(0, 10, 0, 34), UDim2.new(1, -10, 0, 44), "", mountainSettingsFrame)
 mountainPatternDescriptionLabel.Font = "Arial"
 mountainPatternDescriptionLabel.TextWrap = true
 mountainPatternDescriptionLabel.TextYAlignment = "Top"
 
-mountainAmplitudeLabel = CreateStandardLabel("AmplitudeLabel", UDim2.new(0, 8, 0, 76), UDim2.new(0, 67, 0, 14), "", mountainSettingsFrame)
-mountainAmplitudeSliderGui, mountainAmplitudeSliderPosition = CreateStandardSlider('AmplitudeSliderGui', UDim2.new(0,1,0,92), UDim2.new(0,10,0.5,-2), 62, 
+mountainAmplitudeLabel = CreateStandardLabel("AmplitudeLabel", UDim2.new(0, 8, 0, 81), UDim2.new(0, 67, 0, 14), "", mountainSettingsFrame)
+mountainAmplitudeSliderGui, mountainAmplitudeSliderPosition = CreateStandardSlider('AmplitudeSliderGui', UDim2.new(0,1,0,97), UDim2.new(0,10,0.5,-2), 62, 
 																	function(mountainAmplitudeSliderPosition) 
 																		TerrainOptions.mountainHeight = mountainAmplitudeSliderPosition.Value + 1
 																		mountainAmplitudeLabel.Text = "Max mountain height: "..TerrainOptions.mountainHeight
 																	end, nil, mountainSettingsFrame)
 mountainAmplitudeSliderPosition.Value = TerrainOptions.mountainHeight
 
-mountainFrequencyLabel = CreateStandardLabel("FrequencyLabel", UDim2.new(0, 8, 0, 117), UDim2.new(0, 67, 0, 14), "", mountainSettingsFrame)
-mountainFrequencySlider, mountainFrequencySliderPosition = CreateStandardSlider('FrequencySlider', UDim2.new(0,1,0,133), UDim2.new(0,10,0.5,-2), 11,
+mountainFrequencyLabel = CreateStandardLabel("FrequencyLabel", UDim2.new(0, 8, 0, 122), UDim2.new(0, 67, 0, 14), "", mountainSettingsFrame)
+mountainFrequencySlider, mountainFrequencySliderPosition = CreateStandardSlider('FrequencySlider', UDim2.new(0,1,0,138), UDim2.new(0,10,0.5,-2), 11,
 	                                                                function(mountainFrequencySliderPosition)
 	                                                                	TerrainOptions.mountainFrequency = (mountainFrequencySliderPosition.Value-1)/10
 	                                                                	mountainFrequencyLabel.Text = "Region is "..(TerrainOptions.mountainFrequency*100).."% mountainous"
 	                                                                end, nil, mountainSettingsFrame)
 mountainFrequencySliderPosition.Value = TerrainOptions.mountainFrequency*10 + 1
 
-mountainFeatureSizeLabel = CreateStandardLabel("FeatureSizeLabel", UDim2.new(0, 8, 0, 158), UDim2.new(0, 67, 0, 14), "", mountainSettingsFrame)
-mountainFeatureSizeSlider, mountainFeatureSizeSliderPosition = CreateStandardSlider('FeatureSizeSlider', UDim2.new(0,1,0,174), UDim2.new(0,10,0.5,-2), 41,
+mountainFeatureSizeLabel = CreateStandardLabel("FeatureSizeLabel", UDim2.new(0, 8, 0, 163), UDim2.new(0, 67, 0, 14), "", mountainSettingsFrame)
+mountainFeatureSizeSlider, mountainFeatureSizeSliderPosition = CreateStandardSlider('FeatureSizeSlider', UDim2.new(0,1,0,179), UDim2.new(0,10,0.5,-2), 41,
 	                                                                function(mountainFeatureSizeSliderPosition)
 	                                                                	TerrainOptions.mountainSize = (mountainFeatureSizeSliderPosition.Value-1)/40
 	                                                                	mountainFeatureSizeLabel.Text = 
@@ -3226,10 +3288,10 @@ onMountainPatternDropdown("Ridge")
 
 -----------------------
 -- water settings
-waterSettingsFrame = Instance.new('Frame')
+waterSettingsButton, waterSettingsFrame = createSection('Water', 494, 136, canvasFrame)--Frame = Instance.new('Frame')
 
 -- water mode dropdown
-function onSetWaterMode(value)
+--[[function onSetWaterMode(value)
 	TerrainOptions.waterMode = value
 	--
 	if value == "None" then
@@ -3272,14 +3334,15 @@ waterModeDropdown, waterModeSet = CreateStandardDropdown("WaterModeDropdown",
                                                          "None",
                                                          onSetWaterMode,
                                                          waterSettingsFrame)
-
+]]
 -- Slider for controlling the waterHeight, how much water to fill.
-lakeDensityLabel = CreateStandardLabel("LakeFrequencyLabel", UDim2.new(0, 8, 0, 2), UDim2.new(0, 67, 0, 14), "", waterSettingsFrame)
-lakeDensitySliderGui, lakeDensitySliderPosition = CreateStandardSlider('LakeFrequencySliderGui', UDim2.new(0,1,0,18), UDim2.new(0,10,0.5,-2), 4, 
+lakeDensityLabel = CreateStandardLabel("LakeFrequencyLabel", UDim2.new(0, 8, 0, 7), UDim2.new(0, 67, 0, 14), "", waterSettingsFrame)
+local lakeDensitySteps = 101
+lakeDensitySliderGui, lakeDensitySliderPosition = CreateStandardSlider('LakeFrequencySliderGui', UDim2.new(0,1,0,23), UDim2.new(0,10,0.5,-2), lakeDensitySteps, 
 																	function(lakeDensitySliderPosition) 
 																		local val = lakeDensitySliderPosition.Value
 																		local str, num;
-																		if val == 1 then
+																		--[[if val == 1 then		--This cade was when the lakeDensitySteps variable was set to 4
 																			str, num = "No lakes.", 0
 																		elseif val == 2 then
 																			str, num = "1 lake / 20000 squares", 1/20000
@@ -3287,40 +3350,56 @@ lakeDensitySliderGui, lakeDensitySliderPosition = CreateStandardSlider('LakeFreq
 																			str, num = "2 lakes/ 20000 squares", 1/10000
 																		elseif val == 4 then
 																			str, num = "4 lakes/ 20000 squares", 1/5000
-																		end
+																		end]]
+																		local percent=(val-1)/(lakeDensitySteps-1)
+																		str = tostring(percent*100)..'%'
+																		num = percent<=0 and 0 or 1/(5000*(2^((1-percent)*4)))	--40000*(percent^2)
 																		TerrainOptions.lakesPerSquare = num
 																		lakeDensityLabel.Text = "Lakes: "..str
 																	end, nil, waterSettingsFrame)
-lakeDensitySliderPosition.Value = 3
+lakeDensitySliderPosition.Value = 76
 
 -- Slider for the lake max size
-lakeMaxSizeLabel = CreateStandardLabel("LakeMaxSizeLabel", UDim2.new(0, 8, 0, 2), UDim2.new(0, 67, 0, 14), "", waterSettingsFrame)
-lakeMaxSizeSliderGui, lakeMaxSizeSliderPosition = CreateStandardSlider('LakeMaxSizeSliderGui', UDim2.new(0,1,0,18), UDim2.new(0,10,0.5,-2), 5, 
+lakeMaxSizeLabel = CreateStandardLabel("LakeMaxSizeLabel", UDim2.new(0, 8, 0, 7), UDim2.new(0, 67, 0, 14), "", waterSettingsFrame)
+lakeMaxSizeSliderGui, lakeMaxSizeSliderPosition = CreateStandardSlider('LakeMaxSizeSliderGui', UDim2.new(0,1,0,23), UDim2.new(0,10,0.5,-2), 5, 
 																	function(lakeMaxSizeSliderPosition)
 																		TerrainOptions.lakeMaxSize = lakeMaxSizeSliderPosition.Value*1000
-																		lakeMaxSizeLabel.Text = "Lake max size: "..TerrainOptions.lakeMaxSize.." squares"
+																		lakeMaxSizeLabel.Text = "Lake max size: "..TerrainOptions.lakeMaxSize--.." squares" --trim
 																	end, nil, waterSettingsFrame)
 lakeMaxSizeSliderPosition.Value = TerrainOptions.lakeMaxSize/1000
 
 -- Slider for the sea level
-sealevelLabel = CreateStandardLabel("SeaLevelLabel", UDim2.new(0, 8, 0, 2), UDim2.new(0, 67, 0, 14), "", waterSettingsFrame)
+sealevelLabel = CreateStandardLabel("SeaLevelLabel", UDim2.new(0, 8, 0, 7), UDim2.new(0, 67, 0, 14), "", waterSettingsFrame)
 sealevelSliderGui, sealevelSliderPosition = CreateStandardSlider("SealevelSliderGui", UDim2.new(0,1,0,18), UDim2.new(0,10,0.5,-2), 31,
                                                                  function(sealevelSliderPosition)
                                                                  	TerrainOptions.sealevel = sealevelSliderPosition.Value - 1
-                                                                 	sealevelLabel.Text = "Sea level: "..TerrainOptions.sealevel
+                                                                 	sealevelLabel.Text = "Ocean level: "..TerrainOptions.sealevel
                                                                  end, nil, waterSettingsFrame)
 sealevelSliderPosition.Value = TerrainOptions.sealevel + 1
 
-waterModeSet("Lakes")
+--waterModeSet("Lakes")
 -- programetrically setting the water mode does not call set callback oddly 
 -- enough, so it has to be manually called here to lay things out right.
-onSetWaterMode("Lakes") 
+--onSetWaterMode("Lakes")
+TerrainOptions.waterMode = 'Both'
+lakeDensityLabel.Visible = true
+lakeDensitySliderGui.Visible = true
+lakeMaxSizeLabel.Visible = true
+lakeMaxSizeSliderGui.Visible = true
+lakeDensityLabel.Position = UDim2.new(0, 8, 0, 9)
+lakeDensitySliderGui.Position = UDim2.new(0, 0, 0, 25)
+lakeMaxSizeLabel.Position = UDim2.new(0, 8, 0, 50)
+lakeMaxSizeSliderGui.Position = UDim2.new(0, 0, 0, 66)
+sealevelLabel.Visible = true
+sealevelSliderGui.Visible = true
+sealevelLabel.Position = UDim2.new(0, 8, 0, 91)
+sealevelSliderGui.Position = UDim2.new(0, 0, 0, 107)
 
 
 
 --------------------------
 -- vegetation settings
-vegetationSettingsFrame = Instance.new('Frame')
+--[[vegetationSettingsFrame = Instance.new('Frame')
 
 vegetationCheckBox = CreateStandardButton("GenerateButton",
 									      UDim2.new(0, 10, 0, 0),
@@ -3354,15 +3433,15 @@ vegetationLabel = CreateStandardLabel("VegetationLabel", UDim2.new(0, 44, 0, 5),
 vegetationSliderGui, vegetationSliderPosition = CreateStandardSlider("VegetationSliderGui", UDim2.new(0,1,0,24), UDim2.new(0,10,0.5,-2), 4,
                                                                  onVegetationSlider, nil, vegetationSettingsFrame)
 vegetationSliderPosition.Value = TerrainOptions.vegetationDensity * 200
-setVegetationMode(TerrainOptions.vegetationMode)
+setVegetationMode(TerrainOptions.vegetationMode)]]
 
 
 
 --------------------------
 -- material settings 
-materialSettingsFrame = Instance.new('Frame')
+materialSettingsButton, materialSettingsFrame = createSection('Materals', 660, 130, canvasFrame)--Frame = Instance.new('Frame')
 
-function onSetColorMode(value)
+--[[function onSetColorMode(value)
 	TerrainOptions.colorMode = value
 	for _, o in pairs(materialControlSet) do
 		o.Visible = (value == "Auto Color")
@@ -3373,9 +3452,9 @@ colorModeDropdown, colorModeSet = CreateStandardDropdown("ColorModeDropdown",
                                                          {"Solid Color", "Auto Color"},
                                                          "Auto Color",
                                                          onSetColorMode,
-                                                         materialSettingsFrame)
+                                                         materialSettingsFrame)]]
 
-function onColorMountainsMode()
+--[[function onColorMountainsMode()
 	TerrainOptions.colorMountains = not TerrainOptions.colorMountains
 	if TerrainOptions.colorMountains then
 		colorMountainsCheckbox.Text = "X"
@@ -3385,11 +3464,16 @@ function onColorMountainsMode()
 end
 colorMountainsLabel = CreateStandardLabel("ColorMountainsLabel", UDim2.new(0, 44, 0, 34), UDim2.new(0, 50, 0, 24), "Color mountains", materialSettingsFrame)
 colorMountainsCheckbox = CreateStandardButton("ColorMountainsCheckbox", UDim2.new(0, 10, 0, 34), '', 
-	                                           onColorMountainsMode, materialSettingsFrame, UDim2.new(0, 24, 0, 24))
-onColorMountainsMode()
-onColorMountainsMode()
+	                                           onColorMountainsMode, materialSettingsFrame, UDim2.new(0, 24, 0, 24))]]
 
-function onSnowtoppedMountainsMode()
+createCheckBox('Rock mountains', 8, materialSettingsFrame, TerrainOptions.colorMountains, function(newSetting)
+	TerrainOptions.colorMountains = newSetting
+end)
+
+--onColorMountainsMode()	--Two again. How odd.
+--onColorMountainsMode()
+
+--[[function onSnowtoppedMountainsMode()
 	TerrainOptions.snowtoppedMountains = not TerrainOptions.snowtoppedMountains
 	if TerrainOptions.snowtoppedMountains then
 		snowtoppedMountainsCheckbox.Text = "X"
@@ -3401,9 +3485,13 @@ snowtoppedMountainsLabel = CreateStandardLabel("SnowtoppedMountainsLabel", UDim2
 snowtoppedMountainsCheckbox = CreateStandardButton("SnowtoppedMountaisCheckbox", UDim2.new(0, 10, 0, 56), '', 
 	                                           onSnowtoppedMountainsMode, materialSettingsFrame, UDim2.new(0, 24, 0, 24))
 onSnowtoppedMountainsMode()
-onSnowtoppedMountainsMode()
+onSnowtoppedMountainsMode()]]
 
-function onColorCliffsMode()
+createCheckBox('Snowcap Mountains', 38, materialSettingsFrame, TerrainOptions.snowtoppedMountains, function(newSetting)
+	TerrainOptions.snowtoppedMountains = newSetting
+end)
+
+--[[function onColorCliffsMode()
 	TerrainOptions.colorCliffs = not TerrainOptions.colorCliffs
 	if TerrainOptions.colorCliffs then
 		colorCliffsCheckbox.Text = "X"
@@ -3415,9 +3503,13 @@ colorCliffsLabel = CreateStandardLabel("ColorCliffsLabel", UDim2.new(0, 44, 0, 7
 colorCliffsCheckbox = CreateStandardButton("ColorCliffsCheckbox", UDim2.new(0, 10, 0, 78), '', 
 	                                           onColorCliffsMode, materialSettingsFrame, UDim2.new(0, 24, 0, 24))
 onColorCliffsMode()
-onColorCliffsMode()
+onColorCliffsMode()]]
 
-function onAddSandyRegionsMode()
+createCheckBox('Rock cliffs', 68, materialSettingsFrame, TerrainOptions.colorCliffs, function(newSetting)
+	TerrainOptions.colorCliffs = newSetting
+end)
+
+--[[function onAddSandyRegionsMode()
 	TerrainOptions.addSandyRegions = not TerrainOptions.addSandyRegions
 	if TerrainOptions.addSandyRegions then
 		addSandyRegionsCheckbox.Text = "X"
@@ -3432,11 +3524,14 @@ onAddSandyRegionsMode()
 onAddSandyRegionsMode()
 
 materialControlSet = {colorMountainsLabel, colorMountainsCheckbox, snowtoppedMountainsLabel, snowtoppedMountainsCheckbox,
-                      colorCliffsLabel,    colorCliffsCheckbox,    addSandyRegionsLabel,     addSandyRegionsCheckbox}
+                      colorCliffsLabel,    colorCliffsCheckbox,    addSandyRegionsLabel,     addSandyRegionsCheckbox}]]
+createCheckBox('Add sandy regions', 98, materialSettingsFrame, TerrainOptions.addSandyRegions, function(newSetting)
+	TerrainOptions.addSandyRegions = newSetting
+end)
 
 -----------------------
 -- main accordion for all of those settings
-mainSettingsAccordion = CreateStandardAccordion("MoreSettingsAccordion", 
+--[[mainSettingsAccordion = CreateStandardAccordion("MoreSettingsAccordion", 
                                                 UDim2.new(0, 0, 0, accordionBoxAtY), 
                                                 UDim2.new(1, 0, 0, 310),
                                                 {
@@ -3447,24 +3542,26 @@ mainSettingsAccordion = CreateStandardAccordion("MoreSettingsAccordion",
                                                 	-- Uncomment to enable vegetation generation as an option.
                                                 	-- {Name = 'Vegetation', Gui = vegetationSettingsFrame, Height = 200};
                                                 }, 
-                                                terrainFrame)
+                                                canvasFrame)]]
 
 
 -- Button to generate terrain using the current settings.
-generateButton = CreateStandardButton("GenerateButton",
+--[[generateButton = CreateStandardButton("GenerateButton",
 									   UDim2.new(0.5, 0, 0, 445),
 									   'Generate',
 									   ConfirmGenerateTerrain,
-									   terrainFrame,
-									   UDim2.new(0, 100, 0, 40))	
+									   canvasFrame,
+									   UDim2.new(0, 100, 0, 40))]]
+newguiFrame:WaitForChild('GenerateButton').MouseButton1Down:connect(ConfirmGenerateTerrain)
 									   
 -- Button to clear terrain using.  All terrain will be removed.
-clearButton = CreateStandardButton("ClearButton",
+--[[clearButton = CreateStandardButton("ClearButton",
 								   UDim2.new(0.5, -100, 0, 445),
 								   'Clear',
 								   ConfirmClearTerrain,
-								   terrainFrame,
-								   UDim2.new(0, 100, 0, 40))											   
+								   canvasFrame,
+								   UDim2.new(0, 100, 0, 40))]]
+newguiFrame:WaitForChild('ClearButton').MouseButton1Down:connect(ConfirmClearTerrain)											   
 							
 --==========================================================================================================--
 --                           Final definition of main On/Off functions                                    ==--
@@ -3474,7 +3571,8 @@ clearButton = CreateStandardButton("ClearButton",
 function On(mouseHandMeDown,turnOffHandMeDown)
 	--plugin:Activate(true)
 	--toolbarbutton:SetActive(true)
-	terrainPropertiesDragBar.Visible = true
+	--terrainPropertiesDragBar.Visible = true
+	newgui.Parent = coreGui
 	on = true
 	mouse = mouseHandMeDown
 	turnOff = turnOffHandMeDown
@@ -3487,7 +3585,8 @@ function Off()
 	on = false
 
 	-- Hide the popup gui.
-	terrainPropertiesDragBar.Visible = false	
+	--terrainPropertiesDragBar.Visible = false	
+	newgui.Parent = nil
 end
 
 -- and we're finally done loading
@@ -3502,7 +3601,7 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX2C86EEBE7F954AC7815E4F77FE1CAA6A">
+		<Item class="ModuleScript" referent="RBX2A21B5BD9A504B8B839154800CE326B6">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">SmootherModule</string>
@@ -3641,11 +3740,11 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBXD931791E51B14FC6ADB99BA03EC2CED1">
+		<Item class="ScreenGui" referent="RBXBF595899360F4EE3A5FEA942CFACDF46">
 			<Properties>
 				<string name="Name">TerrainBrushGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX3C81DA5E93F748FC99465F7CB52D7232">
+			<Item class="Frame" referent="RBX3B78562DD3C1437DAF2A49759A8FDD7B">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3673,7 +3772,7 @@ return {
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX1867D27785C74E66BC05359E9DBEBD0F">
+				<Item class="TextButton" referent="RBXA1D4F76335344CAAB3C00DC0C9124014">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -3716,7 +3815,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXBB79029A08D441E091B743081C225051">
+				<Item class="TextLabel" referent="RBX2F72974821A840C5B8B9C600F064F234">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3755,7 +3854,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX562B4DD1A6534ADFAE2124DF9CF78D5C">
+				<Item class="TextLabel" referent="RBXCB772DD2FF9E4D2B986FE726AE24AC1F">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3794,7 +3893,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX904A8BC63F764A25B82F8C696B52E05B">
+				<Item class="TextLabel" referent="RBXE25B050EFAB34EF9847984C061EE209E">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3833,7 +3932,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXD1F84BEFC58947E3BD7EA443EE39D3A7">
+				<Item class="TextLabel" referent="RBXC680EF3CE3584A17A5D5C4B4D15EC6DE">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3872,7 +3971,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX83FB93858238463AA437F8A87B33877A">
+				<Item class="TextLabel" referent="RBX474120A725D640729D7E3DF350716432">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3911,7 +4010,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX24160E58A4804653AB4892464BA27D98">
+				<Item class="TextButton" referent="RBX402EF8408A1B435391394F76799F0E79">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -3953,7 +4052,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX2CD07E5DE613402881E4754F1B75AD80">
+					<Item class="TextLabel" referent="RBX17AF7B506B504703A656C06E88617BE6">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3993,7 +4092,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="ImageButton" referent="RBXD007732E137E4E519D2C268CD286093E">
+				<Item class="ImageButton" referent="RBX1509DDBB7B8E4B6CAF9409517ED8352A">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -4036,7 +4135,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="ImageButton" referent="RBXE448B8C5B1CE4E8D9B3B997698454814">
+				<Item class="ImageButton" referent="RBX9175EECB72CB4698954CF63CF5CA3860">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -4079,7 +4178,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXDAD00FB4F8F6486AAA4689928FDF96B3">
+				<Item class="TextLabel" referent="RBX69995208E47F4FBC9E97CE28DA9EAB51">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4117,7 +4216,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXDDDEC9FE3343489082789035D36C9C5E">
+					<Item class="TextLabel" referent="RBXE0CC1DAA3B56444E86BC0EC9A7FDD248">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4155,7 +4254,7 @@ return {
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">2</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBXF3359E1197FF4BC4B220AE70C135A1F0">
+						<Item class="TextLabel" referent="RBXD3DF9B19D0684413A9788D35734BBF23">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4286479998</Color3>
@@ -4196,7 +4295,7 @@ return {
 						</Item>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX7D50235C2FBB48B0B81E0BA55B587E3B">
+				<Item class="TextLabel" referent="RBX5A61BDAB04384E708E608810C630F82C">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4235,7 +4334,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX23BE00C4CD2941BFAE25C91865193B4B">
+				<Item class="TextButton" referent="RBXA198AC0431AE42328B7B45C35F3FE79C">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -4277,7 +4376,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX42E8C15F9C6D44519FAA68FD60B01060">
+					<Item class="TextLabel" referent="RBXD81A18E3C8694982BAAB246B4EDBB36C">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4317,7 +4416,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX8BBED771689D4D959D2E353C6368C21B">
+				<Item class="Frame" referent="RBX02D447C0DDFB4961BB045AC1D57802F2">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4346,7 +4445,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX8DDA40BFC9334FDB82423BCFC347DC86">
+				<Item class="TextButton" referent="RBX42DAEE5AD67B47B9BA4374873F384D74">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -4388,7 +4487,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX9A5FFAD634514203940E8D6610CC241E">
+					<Item class="TextLabel" referent="RBX4F136F71D2F444CAB1D2D755C8B5FA3A">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4428,7 +4527,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBXE516DC2C64BE4CBD8349AC554C93EE03">
+				<Item class="TextLabel" referent="RBX0F1C9572DEEA4B5BBB8AAA51343F5307">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4466,7 +4565,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">3</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX359F159E68B045DF9FCB457F2CA5CF03">
+					<Item class="TextLabel" referent="RBXD17492926FA14CF59BF9CC235E7A9436">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4506,7 +4605,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX08C42C4F591D4F4883436BD7F016F6C0">
+				<Item class="TextLabel" referent="RBX99627FE5ADE342CFBE12782179A4B125">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4544,7 +4643,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">3</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX00E86B4382374181AE90310EEE71F133">
+					<Item class="TextLabel" referent="RBX4F5DF08BC8234CA298A08A4C502C46B7">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4586,7 +4685,7 @@ return {
 				</Item>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBX0EF0D90807E54944A4AE4AB0B7DEF79D">
+		<Item class="ModuleScript" referent="RBX28115105678A43A7A1829DCFC0F05C25">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">RegionEditorModule</string>
@@ -5532,11 +5631,11 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX2294C23337764F629965981A62DBBBBF">
+		<Item class="ScreenGui" referent="RBX2EEADD1115A24527A7B4B00ED3A55529">
 			<Properties>
 				<string name="Name">TerrainRegionGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX7A37342EA869465E8E3815F17432E873">
+			<Item class="Frame" referent="RBX77F56F9B1BE34170836C8FE1BB2AEDDD">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5564,7 +5663,7 @@ return {
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX64EF71BD381941D3BB610FE7C713F0D3">
+				<Item class="TextButton" referent="RBX0424EA09E55242D7A7FBC81D1CB2697B">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5607,7 +5706,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXF5DF1AEB3188471B954978616AD4A049">
+				<Item class="TextButton" referent="RBX7C624F8120614C6F836ACA6DAF093DB9">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5650,7 +5749,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX8DF62290D3AD45EFBDD23D623A136865">
+				<Item class="TextButton" referent="RBXA148644FD74B44AC88F3DB07D198FCE2">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5693,7 +5792,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX4D6F4546EFAC4322BEA3C6A5ED52E86C">
+				<Item class="TextLabel" referent="RBXC5AAB97901794CE9BEA39F7058FE4184">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5732,7 +5831,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXCE6F91FFC6824CAC925F4E206F0C885F">
+				<Item class="TextButton" referent="RBX5A06A2E50C054075AEA87BF7928F71FF">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5775,7 +5874,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX69B7E052F88C4274B058EE15F59D4DBE">
+				<Item class="TextButton" referent="RBX63AF8F6AF0C84A8291C038027065FA17">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5818,7 +5917,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX9CB4273839954276B81EBE68888A29EF">
+				<Item class="TextButton" referent="RBX4BA00FDA4D2449D88709F6F9CAC191AC">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5860,7 +5959,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX240AB04E09BD4E99947AA31564D606A4">
+					<Item class="TextLabel" referent="RBX07A83F8E3E744B2DBAF9B1A8DF8B7C19">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5900,7 +5999,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBXE437682C3DF24A75B3C83D9D47C17B27">
+				<Item class="TextLabel" referent="RBX3CE16F414A514883BCEBB1527346C5A3">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5939,7 +6038,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX416A1AFD1F3B4C72A454BDE2172ED123">
+				<Item class="TextButton" referent="RBX45CC2DDCB55447AA8B15FF4F93F9FA25">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5981,7 +6080,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX8663FAFA78014690864D641A38ABC65B">
+					<Item class="TextLabel" referent="RBX9DF5A5F20A8D4800AA0498025C802557">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6021,7 +6120,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX79A0AEE7FC9A45A28633510BCD2771C8">
+				<Item class="Frame" referent="RBXD1BD212F897C48DD909E35471543B025">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6050,7 +6149,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX3933C4E89E8A4602AB45971E0281E18F">
+				<Item class="TextButton" referent="RBXA1022EF900C143CBB032F85013E0AB40">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -6093,7 +6192,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXBC2708D8CE6A4FD48B0179D82ACEE11E">
+				<Item class="TextButton" referent="RBX70993CFF47454FA4A787B79B71CFEDA7">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -6136,7 +6235,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXD3F75F3E59F8469696CCDD95E9F28381">
+				<Item class="TextLabel" referent="RBXD67EFD57646F4BF983113BE14DB0FA7E">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6175,7 +6274,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXE41A4EC6DF704F13A8A6C6BA82E9107F">
+				<Item class="TextButton" referent="RBXB049AEF8B10740F9A868F4FB13A69D8A">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -6216,6 +6315,531 @@ return {
 						<token name="TextYAlignment">1</token>
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+			</Item>
+		</Item>
+		<Item class="ScreenGui" referent="RBX6948E0DC920D4B49B917684929B2B77E">
+			<Properties>
+				<string name="Name">TerrainGenerationGui</string>
+			</Properties>
+			<Item class="Frame" referent="RBX03003F6A2C3E46BFB6E9D43291834538">
+				<Properties>
+					<bool name="Active">true</bool>
+					<Color3 name="BackgroundColor3">4294967295</Color3>
+					<float name="BackgroundTransparency">0</float>
+					<Color3 name="BorderColor3">4279970357</Color3>
+					<int name="BorderSizePixel">1</int>
+					<bool name="ClipsDescendants">false</bool>
+					<bool name="Draggable">false</bool>
+					<string name="Name">Frame</string>
+					<UDim2 name="Position">
+						<XS>0</XS>
+						<XO>0</XO>
+						<YS>0</YS>
+						<YO>0</YO>
+					</UDim2>
+					<float name="Rotation">0</float>
+					<UDim2 name="Size">
+						<XS>0</XS>
+						<XO>200</XO>
+						<YS>0</YS>
+						<YO>400</YO>
+					</UDim2>
+					<token name="SizeConstraint">0</token>
+					<token name="Style">6</token>
+					<bool name="Visible">true</bool>
+					<int name="ZIndex">1</int>
+				</Properties>
+				<Item class="TextButton" referent="RBXDAECF5675C7B4703B0E8200445BDB836">
+					<Properties>
+						<bool name="Active">true</bool>
+						<bool name="AutoButtonColor">true</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">0</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">1</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">6</token>
+						<bool name="Modal">false</bool>
+						<string name="Name">ClearButton</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>10</XO>
+							<YS>1</YS>
+							<YO>-35</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<bool name="Selected">false</bool>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>-20</XO>
+							<YS>0</YS>
+							<YO>30</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">4</token>
+						<string name="Text">Clear</string>
+						<Color3 name="TextColor3">4293848814</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">2</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="TextLabel" referent="RBXA0F31B58E14A41A0B532DCDBCA6C87F4">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">0.600000024</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">6</token>
+						<string name="Name">Divider</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>1</YS>
+							<YO>-80</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>2</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<string name="Text"></string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">2</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="Frame" referent="RBXE81159826500493FA40F7A3B88D41B52">
+					<Properties>
+						<bool name="Active">true</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">0</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">1</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<string name="Name">DoubleBacking</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>-7</XO>
+							<YS>0</YS>
+							<YO>-7</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>16</XO>
+							<YS>1</YS>
+							<YO>16</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">6</token>
+						<bool name="Visible">false</bool>
+						<int name="ZIndex">1</int>
+					</Properties>
+				</Item>
+				<Item class="TextLabel" referent="RBX4E311149B7D0455F8CF94250891A3868">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">0.75</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">6</token>
+						<string name="Name">TitleLabel</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>0</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>25</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<string name="Text">Generation</string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">2</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="TextButton" referent="RBX9E0CEAE6D51544E68833EA87BFDAF557">
+					<Properties>
+						<bool name="Active">true</bool>
+						<bool name="AutoButtonColor">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">1</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">0</token>
+						<token name="FontSize">4</token>
+						<bool name="Modal">false</bool>
+						<string name="Name">CloseButton</string>
+						<UDim2 name="Position">
+							<XS>1</XS>
+							<XO>-26</XO>
+							<YS>0</YS>
+							<YO>0</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<bool name="Selected">false</bool>
+						<UDim2 name="Size">
+							<XS>0</XS>
+							<XO>25</XO>
+							<YS>0</YS>
+							<YO>25</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">0</token>
+						<string name="Text">X</string>
+						<Color3 name="TextColor3">4294967295</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">true</bool>
+						<token name="TextXAlignment">2</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="ScrollingFrame" referent="RBX6A339852CC0A4E0E8640E474F922DD2D">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">1</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<Content name="BottomImage"><url>rbxasset://textures/ui/studs.png</url></Content>
+						<Vector2 name="CanvasPosition">
+							<X>0</X>
+							<Y>0</Y>
+						</Vector2>
+						<UDim2 name="CanvasSize">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>810</YO>
+						</UDim2>
+						<bool name="ClipsDescendants">true</bool>
+						<bool name="Draggable">false</bool>
+						<Content name="MidImage"><url>rbxasset://textures/ui/smooth.png</url></Content>
+						<string name="Name">ScrollingFrame</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>30</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<int name="ScrollBarThickness">12</int>
+						<bool name="ScrollingEnabled">true</bool>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>0</XO>
+							<YS>1</YS>
+							<YO>-115</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<Content name="TopImage"><url>rbxasset://textures/ui/studs.png</url></Content>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+					<Item class="Frame" referent="RBXB35D2E86D952494A9C9A8288842E4970">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4294967295</Color3>
+							<float name="BackgroundTransparency">1</float>
+							<Color3 name="BorderColor3">4279970357</Color3>
+							<int name="BorderSizePixel">0</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<string name="Name">Canvas</string>
+							<UDim2 name="Position">
+								<XS>0</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<UDim2 name="Size">
+								<XS>1</XS>
+								<XO>-13</XO>
+								<YS>1</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<token name="Style">0</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+					</Item>
+				</Item>
+				<Item class="TextButton" referent="RBXAE371FB815E945D79DC8DF1D1C9C8D92">
+					<Properties>
+						<bool name="Active">true</bool>
+						<bool name="AutoButtonColor">true</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">0</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">1</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">4</token>
+						<token name="FontSize">6</token>
+						<bool name="Modal">false</bool>
+						<string name="Name">GenerateButton</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>10</XO>
+							<YS>1</YS>
+							<YO>-70</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<bool name="Selected">false</bool>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>-20</XO>
+							<YS>0</YS>
+							<YO>30</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">4</token>
+						<string name="Text">Generate</string>
+						<Color3 name="TextColor3">4293848814</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">2</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+				<Item class="Frame" referent="RBXCF19B5AB357F451DA68ADB7E2D9F2494">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4278190080</Color3>
+						<float name="BackgroundTransparency">0.699999988</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<string name="Name">ScrollBackground</string>
+						<UDim2 name="Position">
+							<XS>1</XS>
+							<XO>-12</XO>
+							<YS>0</YS>
+							<YO>30</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>0</XS>
+							<XO>12</XO>
+							<YS>1</YS>
+							<YO>-115</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">0</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">1</int>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="TextButton" referent="RBXB12F0A4A01A041FDA88CC70639CCD37D">
+				<Properties>
+					<bool name="Active">true</bool>
+					<bool name="AutoButtonColor">true</bool>
+					<Color3 name="BackgroundColor3">4294967295</Color3>
+					<float name="BackgroundTransparency">0</float>
+					<Color3 name="BorderColor3">4279970357</Color3>
+					<int name="BorderSizePixel">1</int>
+					<bool name="ClipsDescendants">false</bool>
+					<bool name="Draggable">false</bool>
+					<token name="Font">4</token>
+					<token name="FontSize">6</token>
+					<bool name="Modal">false</bool>
+					<string name="Name">TemplateCheckBox</string>
+					<UDim2 name="Position">
+						<XS>0</XS>
+						<XO>5</XO>
+						<YS>1</YS>
+						<YO>-36</YO>
+					</UDim2>
+					<float name="Rotation">0</float>
+					<bool name="Selected">false</bool>
+					<UDim2 name="Size">
+						<XS>0</XS>
+						<XO>26</XO>
+						<YS>0</YS>
+						<YO>26</YO>
+					</UDim2>
+					<token name="SizeConstraint">0</token>
+					<token name="Style">4</token>
+					<string name="Text">X</string>
+					<Color3 name="TextColor3">4293848814</Color3>
+					<bool name="TextScaled">false</bool>
+					<Color3 name="TextStrokeColor3">4278190080</Color3>
+					<float name="TextStrokeTransparency">1</float>
+					<float name="TextTransparency">0</float>
+					<bool name="TextWrapped">false</bool>
+					<token name="TextXAlignment">2</token>
+					<token name="TextYAlignment">1</token>
+					<bool name="Visible">false</bool>
+					<int name="ZIndex">2</int>
+				</Properties>
+				<Item class="TextLabel" referent="RBXD6FE2A017A024031904C2FA4E05F9CD3">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">1</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<token name="Font">2</token>
+						<token name="FontSize">5</token>
+						<string name="Name">Label</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>20</XO>
+							<YS>0.5</YS>
+							<YO>-10</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>0</XS>
+							<XO>90</XO>
+							<YS>0</YS>
+							<YO>20</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<string name="Text">snowcap mountains</string>
+						<Color3 name="TextColor3">4294111986</Color3>
+						<bool name="TextScaled">false</bool>
+						<Color3 name="TextStrokeColor3">4278190080</Color3>
+						<float name="TextStrokeTransparency">1</float>
+						<float name="TextTransparency">0</float>
+						<bool name="TextWrapped">false</bool>
+						<token name="TextXAlignment">0</token>
+						<token name="TextYAlignment">1</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">2</int>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="TextButton" referent="RBXDB4CBAE05FC3434B8D37B15CC637BEDB">
+				<Properties>
+					<bool name="Active">true</bool>
+					<bool name="AutoButtonColor">false</bool>
+					<Color3 name="BackgroundColor3">4294967295</Color3>
+					<float name="BackgroundTransparency">0.75</float>
+					<Color3 name="BorderColor3">4279970357</Color3>
+					<int name="BorderSizePixel">0</int>
+					<bool name="ClipsDescendants">false</bool>
+					<bool name="Draggable">false</bool>
+					<token name="Font">4</token>
+					<token name="FontSize">6</token>
+					<bool name="Modal">false</bool>
+					<string name="Name">TemplateSection</string>
+					<UDim2 name="Position">
+						<XS>0</XS>
+						<XO>0</XO>
+						<YS>0</YS>
+						<YO>0</YO>
+					</UDim2>
+					<float name="Rotation">0</float>
+					<bool name="Selected">false</bool>
+					<UDim2 name="Size">
+						<XS>1</XS>
+						<XO>0</XO>
+						<YS>0</YS>
+						<YO>20</YO>
+					</UDim2>
+					<token name="SizeConstraint">0</token>
+					<token name="Style">0</token>
+					<string name="Text">Section</string>
+					<Color3 name="TextColor3">4294967295</Color3>
+					<bool name="TextScaled">false</bool>
+					<Color3 name="TextStrokeColor3">4278190080</Color3>
+					<float name="TextStrokeTransparency">1</float>
+					<float name="TextTransparency">0</float>
+					<bool name="TextWrapped">false</bool>
+					<token name="TextXAlignment">2</token>
+					<token name="TextYAlignment">1</token>
+					<bool name="Visible">false</bool>
+					<int name="ZIndex">1</int>
+				</Properties>
+				<Item class="Frame" referent="RBX54D04DC8E08F4376BDFC2AC4BB513FF9">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">0.899999976</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<string name="Name">Frame</string>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>1</YS>
+							<YO>0</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>70</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">0</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
 			</Item>
