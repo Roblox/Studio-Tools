@@ -172,6 +172,13 @@ function FirstTimeSetUp()
 		{enum = Enum.Material.WoodPlanks, image = 'http://www.roblox.com/asset/?id=225315705', forceSnapToGrid=true},
 		{enum = Enum.Material.Brick, image = 'http://www.roblox.com/asset/?id=225315419', forceSnapToGrid=true},
 		{enum = Enum.Material.Concrete, image = 'http://www.roblox.com/asset/?id=225314983'},
+		{enum = Enum.Material.Glacier, image = 'http://www.roblox.com/asset/?id=254541572'},
+		{enum = Enum.Material.Snow, image = 'http://www.roblox.com/asset/?id=254541898'},
+		{enum = Enum.Material.Sandstone, image = 'http://www.roblox.com/asset/?id=254541350'},
+		{enum = Enum.Material.Mud, image = 'http://www.roblox.com/asset/?id=254541862'},
+		{enum = Enum.Material.Basalt, image = 'http://www.roblox.com/asset/?id=254542066'},
+		{enum = Enum.Material.Ground, image = 'http://www.roblox.com/asset/?id=254542189'},
+		{enum = Enum.Material.CrackedLava, image = 'http://www.roblox.com/asset/?id=254541726'},
 	}
 	local brushShapes = {
 		['Sphere'] = {
@@ -918,8 +925,8 @@ do
 	TerrainOptions.xpos = 0
 	TerrainOptions.zpos = 0
 	-- Size of area to generate
-	TerrainOptions.width = 400  -- width  ~ x size
-	TerrainOptions.length = 300 -- length ~ z size
+	TerrainOptions.width = 256  -- width  ~ x size
+	TerrainOptions.length = 256 -- length ~ z size
 	-- How how the base of the world should be.
 	TerrainOptions.baseHeight = 1
 
@@ -977,8 +984,6 @@ do
 	TerrainOptions.colorCliffs = true          -- color clif faces with a marbled texture
 	TerrainOptions.soilDepth = 4               -- where soil is, how deep should it be? (with rock below)
 end
-local snowMaterial = Enum.Material.Slate
-
 
 -- This will store a copy of TerrainOptions when the generate button is pressed.
 -- This will then be used for the generation instead of TerrainOptions.  This way 
@@ -2473,7 +2478,7 @@ function GenerateTerrain()
 							if tot<5 then
 								--we are are really high up, place snow here
 								if GenerateOptions.snowtoppedMountains then
-									ColorMap[x][z] = snowMaterial--Rock --snowey: TODO: Needs new material under smooth terrain
+									ColorMap[x][z] = Enum.Material.Snow
 								else
 									if GenerateOptions.colorMountains then
 										ColorMap[x][z] = Enum.Material.Rock
@@ -2498,7 +2503,7 @@ function GenerateTerrain()
 							--it's both not steep, and high in the mountains. These areas are snow-covered
 							--peaks, color them snowey
 							if GenerateOptions.snowtoppedMountains then
-								ColorMap[x][z] = snowMaterial -- todo: Should be snowey once material arrives
+								ColorMap[x][z] = Enum.Material.Snow
 							else
 								if GenerateOptions.colorMountains then
 									ColorMap[x][z] = Enum.Material.Rock
