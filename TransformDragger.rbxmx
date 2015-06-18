@@ -25,7 +25,7 @@
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Precision</string>
-				<ProtectedString name="Source"><![CDATA[local plugin = plugin
+				<ProtectedString name="Source"><![CDATA[local plugin,settings = plugin,settings
 
 if not settings():GetFFlag("TransformToolEnabled") then return end
 
@@ -2494,14 +2494,12 @@ function planeDrag()
 	local ray = mouse.UnitRay
 	ray = Ray.new(ray.Origin, ray.Direction * 800)
 	
-	local part, tmpLocation= game.Workspace:FindPartOnRay(ray)
+	local part, tmpLocation = game.Workspace:FindPartOnRay(ray)
 		
 	if not part or part:IsA("Terrain") then return end
 	holoBox.Visible = true
 	
-	if part then
-		location = rayBoxIntersection(ray, part.CFrame, part.Size)
-	end
+	local location = part and rayBoxIntersection(ray, part.CFrame, part.Size)
 	
 	if part and location then
 			
@@ -2729,7 +2727,7 @@ function selectDragPlane(selectBase)
 	ray = Ray.new(ray.Origin, ray.Direction* 800)
 				
 	--TODO: add tmpNormal
-	local tmpPart
+	local tmpPart, tmpNormal, tmpLocation
 	
 	if selectBase then
 		tmpPart = Instance.new("Part", cg)
@@ -2750,7 +2748,6 @@ function selectDragPlane(selectBase)
 	
 	if secondaryPart then
 		secondaryPart:Destroy()
-		secondaryPart = nil
 	end
 	
 	secondaryPart = tmpPart
@@ -2775,7 +2772,8 @@ function selectDragPlane(selectBase)
 		localLocation = secondaryPart.CFrame:pointToObjectSpace(secondaryLocation)
 		
 		local v0, v1, v2 = nil
-		w0, w1, w2, w3 = nil
+		-- below aren't locals, and they're not meant to be
+		w0, w1, w2, w3 = nil -- global variables
 		
 		halfSize = secondaryPart.Size /2
 		
@@ -3261,6 +3259,7 @@ end
 function selectionChanged()
 	adornmentUpdateNeeded = true
 	Selection.updateSelection()
+	resetDragger()
 	
 	if RubberBand.isRubberBandDragInProgress() then return end --dont update anything if still rubber band dragging
 	
@@ -5261,7 +5260,9 @@ end
 
 function getPartBounds(object, currentSpace)
 	
-	if not currentSpace then currentSpace = extentSpace end
+	-- traced usge of getPartBounds. This'll never be nil.
+	-- on another note: extentSpace doesn't exist in this scope...
+	--if not currentSpace then currentSpace = extentSpace end
 
 	local halfSize = object.Size / 2
 	
@@ -5795,6 +5796,14 @@ local function hoverEnterHandle(handle)
 	currentlyOverHandle = true
 end
 
+local function resetHandle(handle)
+	adornKeeper[handle][2].Color3 = adornKeeper[handle][5][1]
+	adornKeeper[handle][2].Transparency = adornKeeper[handle][5][2]
+	if shadowKeeper[handle] then
+		shadowKeeper[handle].Color3 = Color3.new(0, 0, 0)
+		shadowKeeper[handle].Transparency = shadowTransparency
+	end
+end
 local function hoverLeaveHandle(handle)
 	hoveredHandles[handle] = nil
 	if handle == currentHandle then currentlyOverHandle = false end
@@ -5804,12 +5813,7 @@ local function hoverLeaveHandle(handle)
 		--adornKeeper[handle][2].ImageTransparency = adornKeeper[handle][5][2]
 		planeHoverTransition = false
 	else
-		adornKeeper[handle][2].Color3 = adornKeeper[handle][5][1]
-		adornKeeper[handle][2].Transparency = adornKeeper[handle][5][2]
-		if shadowKeeper[handle] then
-			shadowKeeper[handle].Color3 = Color3.new(0, 0, 0)
-			shadowKeeper[handle].Transparency = shadowTransparency
-		end
+		resetHandle(handle)
 	end
 	
 	local finalHandle = H_NONE
@@ -6984,15 +6988,30 @@ local function getYScale()
 end
 
 local function isOverPlaneSelect()
-	return hoveredHandles[H_PLANE]
+	if not hoveredHandles[H_PLANE] then return false end -- We're already sure
+	-- Need to check mouse position too, as MouseLeave doesn't like us all the time
+	-- (Removing the mouse (quickly) from the button doesn't fire MouseLeave)
+	local label = adornKeeper[H_PLANE][1]
+	local s = label.AbsolutePosition - label.AbsoluteSize/2
+	local e = label.AbsolutePosition + label.AbsoluteSize/2
+	local mouse = Input.getMouse()
+	local x,y = mouse.X, mouse.Y
+	--print("X:",s.X,"<",x,"<",e.X)
+	--print("Y:",s.Y,"<",y,"<",e.Y)
+	if x < s.X or x > e.X then return false end
+	return y > s.Y and y < e.Y
 end
 
 local function resetDragger()
-	
+	for i=1,13 do
+		resetHandle(i)
+	end
 	releaseHandle()
 	setAllAdornVisibility(false)
 	hoveredHandles = {}
 	currentHandle = H_NONE
+	currentlyOverHandle = false
+	planeSelectionActive = false
 end
 
 
