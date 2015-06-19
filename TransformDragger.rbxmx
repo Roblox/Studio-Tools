@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBXDF0EFEE6DFDF4F6CA97806C908BCF0E5">
+	<Item class="Model" referent="RBXE5E19109B617405AA380F7295A482AB2">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">PrecisionDragger</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBX0B234B8B719E4CA3AD0185E0994D0FEF">
+		<Item class="Script" referent="RBXD2132E8335464624B054741D85D07100">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -89,6 +89,7 @@ local initializedDragPlane = false
 local adornmentUpdateNeeded = true
 
 local cg = game:GetService("CoreGui")
+local uis = game:GetService("UserInputService")
 
 local shouldBreakJoints = true
 
@@ -150,8 +151,6 @@ local castPartAdorn = nil
 local castPlane = nil
 local castWorkplaneOffset = nil
 
-
-
 local waypointUndoConnection = nil
 local waypointRedoConnection = nil
 local inputBeganConnection = nil
@@ -161,14 +160,9 @@ local selectionChangedConnection = nil
 local renderSteppedConnection = nil
 local dragEnterConnection = nil
 
-local removeCollisionPartsConnection = nil
-
 local selectedPartCFrameBeforeDrag = nil
 
 local dragFromToolbox = false
---local initialDragFromToolbox = false
-
-local keys = {}
 
 local clickOnUpdate = false
 
@@ -185,9 +179,6 @@ local LEFT_SIDE = 2
 local RIGHT_SIDE = 3
 local FRONT_SIDE = 4
 local BACK_SIDE = 5
-
-local invisiblePartAllowedInWorkspace = false
-local dragPartAllowedInWorkspace = false
 
 ---------------------------------------
 
@@ -902,6 +893,7 @@ function updatePart()
 	--local tickOut1 = tick()
 	
 	local filteredSelectionMetapart = Selection.getFilteredSelectionMetapart()
+	local filteredSelection = Selection.getFilteredSelection()
 	
 	local currentHandle = Adorn.getCurrentHandle()
 	if currentHandle == H_NONE then return end
@@ -969,13 +961,11 @@ function updatePart()
 	
 	local isPreviouslyColliding = false
 	if plugin.CollisionEnabled then
-		invisiblePartAllowedInWorkspace = true
 		invisiblePart.Parent = workspace
-		if #List.filterOutItems(selection, invisiblePart:GetTouchingParts()) > 0 then
+		if List.itemsHasItemNotInList(invisiblePart:GetTouchingParts(), selection) then
 			isPreviouslyColliding = true
 		end
-		invisiblePart.Parent = cg
-		invisiblePartAllowedInWorkspace = false
+		invisiblePart.Parent = nil
 	end
 	
 	--local tickOut9 = tick()
@@ -1236,7 +1226,7 @@ function updatePart()
 		invisiblePart.CFrame = invisiblePart.CFrame - invisiblePart.CFrame.p + worldOffset;
 		
 		local initialTest = false
-
+		
 		if plugin.CollisionEnabled then
 			
 			local positionDiff = invisiblePart.CFrame.p - previousPosition.p
@@ -1244,77 +1234,31 @@ function updatePart()
 			
 			if filteredSelectionMetapart.CanSimulate then
 				filteredSelectionMetapart.TranslateFromTo(previousPosition, invisiblePart.CFrame)
-				if #List.filterOutItems(filteredSelectionMetapart.Children, filteredSelectionMetapart:GetTouchingParts()) > 0 then
+				if List.itemsHasItemNotInList(filteredSelectionMetapart:GetTouchingParts(), filteredSelectionMetapart.Children) then
 					local unitDiff = positionDiff.Unit
 					filteredSelectionMetapart.TranslateFromTo(invisiblePart.CFrame, previousPosition)
 					--move until collide
 					Collision.moveUntilCollideMetapart(filteredSelectionMetapart, filteredSelectionMetapart.Children, unitDiff, totalDist)
 				end
 			else
-				invisiblePartAllowedInWorkspace = true
 				invisiblePart.Parent = workspace
-				if #List.filterOutItems(filteredSelectionMetapart.Children, invisiblePart:GetTouchingParts()) > 0 then
+
+				if List.itemsHasItemNotInList(invisiblePart:GetTouchingParts(), filteredSelectionMetapart.Children) then
 	
 					local unitDiff = positionDiff.Unit
 					invisiblePart.CFrame = previousPosition
 					moveUntilCollideWrapper(invisiblePart, 0.0002, filteredSelectionMetapart.Children, unitDiff, totalDist)
 				end
-				invisiblePart.Parent = cg
-				invisiblePartAllowedInWorkspace = false
 				
+				invisiblePart.Parent = nil
 				filteredSelectionMetapart.TranslateFromTo(previousPosition, invisiblePart.CFrame)
 			end
 			
 		else
 			filteredSelectionMetapart.TranslateFromTo(previousPosition, invisiblePart.CFrame)
-		end
+		end		
 		
-		
----------------------------------------------------------
------Previous funcitonality
---		local previousPosition = invisiblePart.CFrame
---		
---		invisiblePart.CFrame = previousAABBCFrame:toWorldSpace(CFrame.new(currentDist))	
---
---		local offset1 = -invisiblePart.CFrame:pointToObjectSpace(secondaryLocation).y - invisiblePart.Size.Y / 2 
---		local offset2 = -invisiblePart.CFrame:pointToObjectSpace(secondaryLocation).y + invisiblePart.Size.Y / 2 
---		
---		local snappedOffset1 = roundToNearestGrid(offset1)
---		local snappedOffset2 = roundToNearestGrid(offset2)
---				
---		local deltaOffset1 = snappedOffset1 - offset1
---		local deltaOffset2 = snappedOffset2 - offset2
---		
---		local deltaOffset = math.abs(deltaOffset1) <= math.abs(deltaOffset2) and deltaOffset1 or deltaOffset2
---
---		local worldOffset = invisiblePart.CFrame:pointToWorldSpace(Vector3.new(0, deltaOffset, 0))
---		invisiblePart.CFrame = invisiblePart.CFrame - invisiblePart.CFrame.p + worldOffset;
---		
---		local initialTest = false
---
---		if plugin.CollisionEnabled then
---			
---			local positionDiff = invisiblePart.CFrame.p - previousPosition.p
---			local totalDist = Utility.distanceVector3(previousPosition.p, invisiblePart.CFrame.p)
---			
---			invisiblePartAllowedInWorkspace = true
---			invisiblePart.Parent = workspace
---			if #List.filterOutItems(filteredSelectionMetapart.Children, invisiblePart:GetTouchingParts()) > 0 then
---
---				local unitDiff = positionDiff.Unit
---				invisiblePart.CFrame = previousPosition
---				moveUntilCollideWrapper(invisiblePart, 0.0002, filteredSelectionMetapart.Children, unitDiff, totalDist)
---			end
---			invisiblePart.Parent = cg
---			invisiblePartAllowedInWorkspace = false
---			
---			filteredSelectionMetapart.TranslateFromTo(previousPosition, invisiblePart.CFrame)
---
---		else
---			filteredSelectionMetapart.TranslateFromTo(previousPosition, invisiblePart.CFrame)
---		end
-----------------------------------------------------------
-				
+			
 	elseif currentHandle == R_XY then
 		
 		local halfSize = originalSize * 0.5
@@ -1352,7 +1296,9 @@ function updatePart()
 			end
 		end
 		
-		if filteredSelectionMetapart and (not plugin.CollisionEnabled or #List.filterOutItems(selection, filteredSelectionMetapart:GetTouchingParts()) == 0) then
+		if filteredSelectionMetapart and
+			(not plugin.CollisionEnabled or
+				not List.itemsHasItemNotInList(filteredSelectionMetapart:GetTouchingParts(), selection)) then
 			local planeNormal = (originalCFrame:pointToWorldSpace(Vector3.new(0, 0, 1)) - originalCFrame.p).Unit
 		
 			local initialAngle = (originalCFrame:pointToObjectSpace(initialPos) * Vector3.new(1, 1, 0)).unit
@@ -1419,7 +1365,9 @@ function updatePart()
 			end
 		end
 		
-		if filteredSelectionMetapart and (not plugin.CollisionEnabled or #List.filterOutItems(selection, filteredSelectionMetapart:GetTouchingParts()) == 0) then
+		if filteredSelectionMetapart and
+			(not plugin.CollisionEnabled or
+				not List.itemsHasItemNotInList(filteredSelectionMetapart:GetTouchingParts(), selection)) then
 			local planeNormal = (originalCFrame:pointToWorldSpace(Vector3.new(currentHandle == R_YZ and 1 or 0, currentHandle == R_XZ and 1 or 0, currentHandle == R_XY and 1 or 0)) - originalCFrame.p).Unit
 		
 			local initialAngle = (originalCFrame:pointToObjectSpace(initialPos) * Vector3.new(1, 0, 1)).unit
@@ -1470,7 +1418,9 @@ function updatePart()
 		
 		--rotation adorn
 		
-		if filteredSelectionMetapart and (not plugin.CollisionEnabled or #List.filterOutItems(selection, filteredSelectionMetapart:GetTouchingParts()) == 0) then
+		if filteredSelectionMetapart and
+			(not plugin.CollisionEnabled or
+				not List.itemsHasItemNotInList(filteredSelectionMetapart:GetTouchingParts(), selection)) then
 			local planeNormal = (originalCFrame:pointToWorldSpace(Vector3.new(1, 0, 0)) - originalCFrame.p).Unit
 		
 			local initialAngle = (originalCFrame:pointToObjectSpace(initialPos) * Vector3.new(0, 1, 1)).unit
@@ -1500,7 +1450,6 @@ function updatePart()
 			--universalAdornment:SetWorkplaneVisible(false)
 			
 			if not planeObject then
-				--print("plane creation")
 				planeObject = Instance.new("Part", cg)
 				planeObject.FormFactor = Enum.FormFactor.Custom
 				planeObject.Size = Vector3.new(50, 50, 0.01)
@@ -1515,9 +1464,7 @@ function updatePart()
 				holoBox.Size = holoBox.Adornee.Size
 				holoBox.Transparency = 0.6
 				holoBox.Color3 = Color3.new(38.0 / 255.0, 136.0 / 255.0, 240.0 / 255.0)
-				--holoBox.Color3 = Color3.new(.2, .7, .3)
 			end
-			
 		end
 	else
 		allowAdornUpdate = false
@@ -1527,7 +1474,6 @@ function updatePart()
 	
 	if plugin.CollisionEnabled and #game:GetService("Selection"):Get() == 1 then
 		if currentHandle == S_Y_POS or 
-		--currentHandle == S_Y_NEG or
 		currentHandle == S_Z_POS or
 		currentHandle == S_X_NEG or 
 		currentHandle == S_Z_NEG or
@@ -1538,7 +1484,7 @@ function updatePart()
 		currentHandle == R_XY or 
 		currentHandle == R_XZ or
 		currentHandle == R_YZ then
-			if selectedPart and #List.filterOutItems(game:GetService("Selection"):Get(), selectedPart:GetTouchingParts()) > 0 then
+			if selectedPart and List.itemsHasItemNotInList(selectedPart:GetTouchingParts(), filteredSelection) then
 				if preactionCFrame then
 					selectedPart.CFrame = preactionCFrame
 				end
@@ -1600,17 +1546,12 @@ function updateDragPart()
 	--print("updateDragPart")
 	if not dragPart then
 		--print ("showing dragPart")
-		dragPart = Instance.new("Part", cg)
+		dragPart = Instance.new("Part", nil)
 		dragPart.Name = "DragParte1b1aec5"
 		dragPart.FormFactor = Enum.FormFactor.Custom
 		dragPart.BottomSurface = Enum.SurfaceType.Smooth
 		dragPart.TopSurface = Enum.SurfaceType.Smooth
 		dragPart.Transparency = 1
-		dragPart.AncestryChanged:connect(function()
-			if not dragPartAllowedInWorkspace then
-				spawn(function() invisiblePart.Parent = game:GetService("CoreGui") end)
-			end
-		end)
 		if shouldBreakJoints then
 			BreakJoints(dragPart)
 		end
@@ -1638,7 +1579,7 @@ function updateDragPart()
 		
 		dragPart.Name = "DragParte1b1aec5"
 		dragPart.Archivable = false
-		dragPart.Parent = cg
+		dragPart.Parent = nil
 		dragPart.FormFactor = Enum.FormFactor.Custom
 		dragPart.BottomSurface = Enum.SurfaceType.Smooth
 		dragPart.TopSurface = Enum.SurfaceType.Smooth
@@ -1656,10 +1597,6 @@ function updateDragPart()
 		--dragPartHoloBox.Color3 = Color3.new(.2, .5, .1)
 		--dragPartHoloBox.Visible = true
 
-		
-		
-		
-		
 		--dragPartHoloBox.DrawFull = true
 		--print("showing holobox")
 		--Remove for Demo - dragPartHoloBox.Visible = true
@@ -2088,14 +2025,13 @@ function movePart(delta, collision)
 		 --TODO, switch to this
 		table.insert(selection, dragPart)
 		
-		dragPartAllowedInWorkspace = true
 		dragPart.Parent = workspace
 		
 		dragPart.CFrame = initialPos
 		
 		dragPart.CFrame = preSafeMove
 		
-		if #List.filterOutItems(selection, dragPart:GetTouchingParts()) > 0 then
+		if List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
 			
 			local dragVector = (dragPart.CFrame.p - initialPos.p).Unit
 			if dragVector.x ~= dragVector.x then
@@ -2119,8 +2055,7 @@ function movePart(delta, collision)
 			local i = 0
 			
 			
-			
-			while #List.filterOutItems(selection, dragPart:GetTouchingParts()) == 0 and i < 100 do
+			while not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) and i < 100 do
 				--print("initial collision")
 				dragPart.CFrame = dragPart.CFrame + (dragVector * .0001)
 				i = i + 1
@@ -2292,7 +2227,7 @@ function movePart(delta, collision)
 				--print("s1 upper:", upperBounds)
 				--print("s1 lower:", lowerBounds)
 				if loE and goE then
-					if #List.filterOutItems(selection, dragPart:GetTouchingParts()) == 0 then
+					if not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
 						--print("s1 good")
 						table.insert(finalPositionTable, dragPart.CFrame.p)
 					else
@@ -2310,7 +2245,7 @@ function movePart(delta, collision)
 				localPosition = v[1].CFrame:pointToObjectSpace(dragPart.CFrame.p)
 				--print("s2 local position:", localPosition)
 				if vector3LessThanOrEqualTo(localPosition, upperBounds) and vector3GreaterThanOrEqualTo(localPosition, lowerBounds) then
-					if #List.filterOutItems(selection, dragPart:GetTouchingParts()) == 0 then
+					if not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
 						--print("s2 good")
 						table.insert(finalPositionTable, dragPart.CFrame.p)
 					else
@@ -2336,7 +2271,7 @@ function movePart(delta, collision)
 							safeMoveWrapper(dragPart, 0.0002, selection, vNorm)
 							localPosition = v[1].CFrame:pointToObjectSpace(dragPart.CFrame.p)
 								--print("in good space")
-								if #List.filterOutItems(selection, dragPart:GetTouchingParts()) == 0 then
+								if not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
 									--print("s3 good: ", dragPart.CFrame.p)
 									table.insert(finalPositionTable, dragPart.CFrame.p)
 								else
@@ -2388,14 +2323,13 @@ function movePart(delta, collision)
 		end
 
 		--local selection = getCurrentSelectionWithChildren()
-		if #List.filterOutItems(selection, dragPart:GetTouchingParts()) > 0 then
+		if List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
 			local coll = List.filterOutItems(selection, dragPart:GetTouchingParts())
 
 			dragPart.CFrame = initialPos
 		end
 			
-		dragPart.Parent = cg
-		dragPartAllowedInWorkspace = false
+		dragPart.Parent = nil
 				
 		local castOffset = 0.1
 		local threshHold = 20 + castOffset
@@ -2413,19 +2347,16 @@ function movePart(delta, collision)
 		--end
 		--print("dragPart2", dragPart.CFrame.p.y)
 		
-		if dragFromToolbox then --and initialDragFromToolbox then
+		if dragFromToolbox then
 			--print("SAFE MOVING")
 			local ini1 = dragPart.CFrame.p
-			local previousParent = dragPart.Parent
-			dragPartAllowedInWorkspace = true
 			dragPart.Parent = game.Workspace
 			--dragPart:SafeMove(planeNormal, game.Selection:Get())
 			--print("safe move")
 			safeMoveWrapper(dragPart, 0.0002, game.Selection:Get(), Vector3.new(0, 1, 0))
-			dragPart.Parent = previousParent
-			dragPartAllowedInWorkspace = false
+			dragPart.Parent = nil
 			local ini2 = dragPart.CFrame.p
-			--initialDragFromToolbox = false
+			
 			dragFromToolbox = false
 		end
 		
@@ -2931,7 +2862,7 @@ function releasePart()
 	
 	if dragPart then
 		dragPartHoloBox.Visible = false
-		dragPart.Parent = cg
+		dragPart.Parent = nil
 		
 		dragPartHoloBox.Adornee = dragPart
 		dragPartHoloBox.Size = dragPartHoloBox.Adornee.Size-- + Vector3.new(.01, .01, .01)
@@ -3023,34 +2954,18 @@ function releaseHandle()
 	--print("releaseHandle - setting AABBCFrame", previousAABBCFrame)
 end
 
-local function onWorkspaceChildAdded(descendant)
-	
-	if descendant.Name == "InvisibleParte1b1aec5" and not invisiblePartAllowedInWorkspace then
-		spawn(function() descendant.Parent = game:GetService("CoreGui") end)
-	end
-	
-	if descendant.Name == "DragParte1b1aec5" and not dragPartAllowedInWorkspace then
-		spawn(function() descendant.Parent = game:GetService("CoreGui") end)
-	end
-end
-
 function recreateAdornment()
 	if not adornmentUpdateNeeded then return end
 	adornmentUpdateNeeded = false
 	--print("recreateAdornment")	
 	if not invisiblePart then
-		invisiblePart = Instance.new("Part", cg)
+		invisiblePart = Instance.new("Part", nil)
 		invisiblePart.Name = "InvisibleParte1b1aec5"
 		invisiblePart.FormFactor = Enum.FormFactor.Custom
 		invisiblePart.TopSurface = Enum.SurfaceType.Smooth
 		invisiblePart.BottomSurface = Enum.SurfaceType.Smooth
 		invisiblePart.Archivable = false
 		invisiblePart.Transparency = 1
-		invisiblePart.AncestryChanged:connect(function()
-			if not invisiblePartAllowedInWorkspace then
-				spawn(function() invisiblePart.Parent = game:GetService("CoreGui") end)
-			end
-		end)
 	end
 	
 	if not castPart then
@@ -3176,13 +3091,13 @@ function selectPart(instances)
 		part = nil
 	end
 			
-	if part and not keys[Enum.KeyCode.LeftAlt] then
+	if part and not uis:IsKeyDown(Enum.KeyCode.LeftAlt) then
 		part = getTopPVInstance(part)
 	end
 	
 	if part then
 		if not isInSelection(part) then
-			if keys[Enum.KeyCode.LeftControl] then
+			if uis:IsKeyDown(Enum.KeyCode.LeftControl) then
 				local selection = game.Selection:Get()
 				table.insert(selection, part)
 				setSelection(selection)
@@ -3190,7 +3105,7 @@ function selectPart(instances)
 				setSelection({part})
 			end
 			
-		elseif keys[Enum.KeyCode.LeftControl] then
+		elseif uis:IsKeyDown(Enum.KeyCode.LeftControl) then
 			
 			local selection = {}
 			for _,p in ipairs(game.Selection:Get()) do
@@ -3225,7 +3140,7 @@ function selectPart(instances)
 			local selectedPartRotation = part.CFrame - part.CFrame.p + startLocation
 			local secondaryPartRotation = secondaryPart.CFrame - secondaryPart.CFrame.p
 			local newRotation = CFrame.new(selectedPartRotation.p) * secondaryPartRotation
-			if keys[Enum.KeyCode.LeftShift] then
+			if uis:IsKeyDown(Enum.KeyCode.LeftShift) then
 				adornmentUpdateNeeded = true
 				local partGroup = Selection.getFilteredSelectionMetapart()
 				partGroup.CFrame = newRotation:toWorldSpace(selectedPartRotation:toObjectSpace(partGroup.CFrame))
@@ -3273,7 +3188,7 @@ function selectionChanged()
 	end
 	
 	if dragPart then
-		dragPart.Parent = cg
+		dragPart.Parent = nil
 	end
 	
 	if filteredSelectionMetapart then
@@ -3302,11 +3217,7 @@ function selectionChanged()
 end
 
 function onDragEnter(instances)
-	
-	--print("DragEnter", location)
-	--print("DragEnterPlugin:", plugin:GetMouse().X, plugin:GetMouse().Y)
 	dragFromToolbox = true
-	--initialDragFromToolbox = true
 				
 	if not Input.getButtonState(Input.Enum.Key.MOUSE_BUTTON1) then
 		Input.setButtonState(Input.Enum.Key.MOUSE_BUTTON1, true)
@@ -3314,24 +3225,50 @@ function onDragEnter(instances)
 	end
 end
 
---function onDragLeave(location)
---	dragFromToolbox = false
---	releasePart()
---end
+
+local function togglePlaneSelection()
+	if Adorn.isPlaneSelectingModeOn() then
+		Adorn.setPlaneSelectingMode(false)
+		planeDragging = false
+		holoBox.Visible = false
+		Adorn.clearExtraAdorns()
+	else
+		Adorn.setPlaneSelectingMode(true)
+		planeDragging = true
+		
+		if not planeObject then
+			planeObject = Instance.new("Part", cg)
+			planeObject.FormFactor = Enum.FormFactor.Custom
+			planeObject.Size = Vector3.new(50, 50, 0.01)
+			planeObject.Position = Vector3.new(0,0,0)
+			planeObject.Transparency = 1
+		end
+		
+		if not holoBox then
+			holoBox = Instance.new("BoxHandleAdornment", cg)
+			holoBox.Visible = false
+			holoBox.Adornee = planeObject
+			holoBox.Size = holoBox.Adornee.Size
+			holoBox.Transparency = 0.6
+			holoBox.Color3 = Color3.new(38.0 / 255.0, 136.0 / 255.0, 240.0 / 255.0)
+		end
+	end
+end
 
 function keyPress(evt)
+
 	if evt.UserInputType == Enum.UserInputType.Keyboard then
-		
 		if (evt.UserInputState == Enum.UserInputState.Begin) then
-			keys[evt.KeyCode] = true
-			if evt.KeyCode == Enum.KeyCode.L and (keys[Enum.KeyCode.LeftShift] or keys[Enum.KeyCode.RightShift]) then
-				localSpace = not localSpace --Todo: switch between local and plane space
-				--print("Local Space:", localSpace)
+			
+			if on and evt.KeyCode == Enum.KeyCode.Space then
+				togglePlaneSelection()
 			end
-		elseif (evt.UserInputState == Enum.UserInputState.End) then
-			keys[evt.KeyCode] = nil
+			if evt.KeyCode == Enum.KeyCode.Five and (uis:IsKeyDown(Enum.KeyCode.LeftControl) or uis:IsKeyDown(Enum.KeyCode.RightControl)) then
+				if not on then On() else Off() end
+			end
 		end
-	elseif evt.UserInputType == Enum.UserInputType.MouseButton1 then
+		
+	elseif on and evt.UserInputType == Enum.UserInputType.MouseButton1 then
 		if (evt.UserInputState == Enum.UserInputState.Begin) then
 			Input.setButtonState(Input.Enum.Key.MOUSE_BUTTON1, true)
 			onPressMouse()
@@ -3343,15 +3280,6 @@ function keyPress(evt)
 end
 
 function inputChanged(evt)
-	
---	print("input type:", evt.UserInputType, Input.getButtonState(Input.Enum.Key.MOUSE_BUTTON1))
---	local keys = game:GetService("UserInputService"):GetKeysPressed()
-	
---	for i, v in ipairs(keys) do
---		print(i, v)
---	end
-
-	--print("Input Changed", evt.Position)
 	
 	--print ("returning early")
 	--if true then return end
@@ -3385,16 +3313,14 @@ end
 local updateAdornmentPositions = Adorn.updateAdornmentPositions
 
 function Off()	
-	--print("off")
+	if not on then return end
 	on = false
 	
-	--plugin:Activate(false)
 	toolbarbutton:SetActive(false)
-	--print("not deactivating")
 	
 	waypointUndoConnection:disconnect()
 	waypointRedoConnection:disconnect()
-	inputBeganConnection:disconnect()
+	--inputBeganConnection:disconnect()
 	inputEndedConnection:disconnect()
 	inputChangedConnection:disconnect()
 	
@@ -3418,18 +3344,14 @@ function On()
 
 	Adorn.initializeAdorns()
 			
-	--if not waypointUndoConnection then
-		waypointUndoConnection = game:GetService("ChangeHistoryService").OnUndo:connect(function() waypointChanged() end)
-	--end
-	--if not waypointRedoConnection then
-		waypointRedoConnection = game:GetService("ChangeHistoryService").OnRedo:connect(function() waypointChanged() end)
-	--end
+	waypointUndoConnection = game:GetService("ChangeHistoryService").OnUndo:connect(waypointChanged)
+	waypointRedoConnection = game:GetService("ChangeHistoryService").OnRedo:connect(waypointChanged)
+
 	
-	inputBeganConnection = game:GetService("UserInputService").InputBegan:connect(function(evt) keyPress(evt) end)
-	inputEndedConnection = game:GetService("UserInputService").InputEnded:connect(function(evt) keyPress(evt) end)
-	inputChangedConnection = game:GetService("UserInputService").InputChanged:connect(function(evt) inputChanged(evt) end)
+	inputEndedConnection = uis.InputEnded:connect(keyPress)
+	inputChangedConnection = uis.InputChanged:connect(inputChanged)
 	
-	selectionChangedConnection = game:GetService("Selection").SelectionChanged:connect(function() selectionChanged() end)
+	selectionChangedConnection = game:GetService("Selection").SelectionChanged:connect(selectionChanged)
 	
 	renderSteppedConnection = game:GetService("RunService").RenderStepped:connect(function()
 		if Selection.getFilteredSelectionMetapart() then
@@ -3440,10 +3362,7 @@ function On()
 		updateAdornmentPositions()
 	end)
 	
-	dragEnterConnection = plugin:GetMouse().DragEnter:connect(function(instances) onDragEnter(instances) end)
-	if not removeCollisionPartsConnection then
-		removeCollisionPartsConnection = game.Workspace.ChildAdded:connect(function(descendant) onWorkspaceChildAdded(descendant) end)
-	end
+	dragEnterConnection = plugin:GetMouse().DragEnter:connect(onDragEnter)
 	
 	adornmentUpdateNeeded = true
 	recreateAdornment()
@@ -3457,10 +3376,12 @@ function On()
 end
 
 loaded = true
+
+inputBeganConnection = uis.InputBegan:connect(keyPress)
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXB4CFE9BEF46B4179A48CE4BA03EB63CF">
+		<Item class="ModuleScript" referent="RBX6E14885EDA934FE7ABAA796EB62539C5">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Collision</string>
@@ -3495,7 +3416,7 @@ local function searchIn(part, ignoreList, direction, moveBy, inExtent, outExtent
 --	print("start:", part.CFrame.p)
 --	print("searchIn")
 --	clockTime()
-	while (#List.filterOutItems(ignoreList, part:GetTouchingParts()) == 0) do
+	while not List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) do
 --		print("start int")
 --		clockTime()
 		outExtent = part.CFrame.p
@@ -3525,7 +3446,7 @@ function searchOut(part, ignoreList, direction, moveBy, inExtent, outExtent)
 --	print("start:", part.CFrame.p)
 --	clockTime()
 	
-	while (#List.filterOutItems(ignoreList, part:GetTouchingParts()) > 0) do
+	while List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) do
 --		print("start out")
 --		clockTime()
 		inExtent = part.CFrame.p
@@ -3660,7 +3581,7 @@ local function searchDirectionFine(part, ignoreList, movedSoFar, direction, move
 	if movedSoFar ~= movedSoFar then return end
 	
 	--print("searchDirectionFine touching")
-	if #List.filterOutItems(ignoreList, part:GetTouchingParts()) > 0 then
+	if List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
 		movedSoFar = movePrimitivesDelta(part, direction.Unit * -moveBy, movedSoFar, isMetapart)
 		searchDirectionFine(part, ignoreList, movedSoFar, direction, moveBy * 0.5, threshold, depth + 1, isMetapart)
 	else
@@ -3674,7 +3595,7 @@ local function searchDirectionGross(part, ignoreList, movedSoFar, direction, thr
 	--print("directionGross:", part.CFrame.p.Z)
 	if (movedSoFar ~= movedSoFar) then return end
 	
-	if #List.filterOutItems(ignoreList, part:GetTouchingParts()) > 0 then
+	if List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
 		searchDirectionGross(part, ignoreList, movedSoFar, direction, threshold, isMetapart)
 	else
 		searchDirectionFine(part, ignoreList, movedSoFar, direction * -1.0, 0.5, threshold, 0, isMetapart)
@@ -3683,7 +3604,7 @@ end
 
 local function safeMoveAlongLine(part, ignoreList, direction, threshold, isMetapart)
 	--Check if colliding?
-	if #List.filterOutItems(ignoreList, part:GetTouchingParts()) > 0 then
+	if List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
 --		searchOut(part, ignoreList, direction, 0 - math.min(part.Size.X / 2, part.Size.Y / 2, part.Size.Z / 2), part.CFrame.p, nil)
 --		
 --		local collisions = part:GetTouchingParts()
@@ -3711,7 +3632,7 @@ local function searchDirectionUntilCollideGross(part, ignoreList, movedSoFar, di
 	if (movedSoFar ~= movedSoFar) then return false end
 	
 	--print("searchDirectionUntilCollide touching")
-	if #List.filterOutItems(ignoreList, part:GetTouchingParts()) > 0 then
+	if List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
 
 		safeMoveAlongLine(part, ignoreList, direction, threshold, isMetapart)
 		return true
@@ -3723,7 +3644,7 @@ end
 
 local function moveUntilCollide(part, ignoreList, direction, threshold, maxDist)
 --print("moveuntilcollide touching")
-	if #List.filterOutItems(ignoreList, part:GetTouchingParts()) == 0 then
+	if not List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
 		return searchDirectionUntilCollideGross(part, ignoreList, Vector3.new(0,0,0), direction, threshold, maxDist)
 	end
 	return false
@@ -3731,7 +3652,7 @@ end
 -----------------------Metapart--------------------------
 
 local function moveUntilCollideMetapart(metapart, ignoreList, direction, maxDist)
-	if #List.filterOutItems(ignoreList, metapart:GetTouchingParts()) == 0 then
+	if not List.itemsHasItemNotInList(metapart:GetTouchingParts(), ignoreList) then
 		return searchDirectionUntilCollideGross(metapart, ignoreList, Vector3.new(0,0,0), direction, 0.0002, maxDist, true) 
 	end
 	return false
@@ -3753,7 +3674,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX2829F758D3A94F8984069E0774F5F0CA">
+		<Item class="ModuleScript" referent="RBXEA0A673824EC499F8115B9FC7D28BFD9">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Utility</string>
@@ -3869,13 +3790,13 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXB51629390F9049A59CA6D757716F332E">
+		<Item class="ModuleScript" referent="RBXF03556069F554E8395D5AA01D636E01E">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">List</string>
 				<ProtectedString name="Source"><![CDATA[local function itemExistsInList(item, list)
-	for i, v in ipairs(list) do
-		if v == item then
+	for i = 1, #list do
+		if list[i] == item then
 			return true
 		end
 	end
@@ -3883,17 +3804,45 @@ return module
 end
 
 local function filterOutItems(items, list)
+	if not items then return list end
 	--print("itemsSize:", #items)
 --	local tickTime = tick()
 	local ret = {}
-	for i, v in ipairs(list) do
-		if not items or not itemExistsInList(v, items) then
-			table.insert(ret, v)
+	for i = 1, #list do
+		if not itemExistsInList(list[i], items) then
+			table.insert(ret, list[i])
 		end
 	end
 --	local finalTime = tick()
 --	print("filter time of", #items, "items took", (finalTime - tickTime) * 1000)
 	return ret
+end
+
+local function listContainsAnyItems(items, list)
+	local map = {}
+	for i = 1, #list do
+		map[list[i]] = true
+	end
+	
+	for i = 1, #items do
+		if map[items[i]] then return true end
+	end
+	return false
+end
+
+local function itemsHasItemNotInList(items, list)
+	if not list and items then return true end
+	if not list and not items then return false end
+	
+	local map = {}
+	for i = 1, #list do
+		map[list[i]] = true
+	end
+	
+	for i = 1, #items do
+		if not map[items[i]] then return true end
+	end
+	return false
 end
 
 local function combineLists(t1, t2)
@@ -3949,12 +3898,14 @@ module.combineLists = combineLists
 module.createIgnoreListGivenWhiteList = createIgnoreListGivenWhiteList
 module.removeDuplicates = removeDuplicates
 module.listDoesNotContainType = listDoesNotContainType
+module.listContainsAnyItems = listContainsAnyItems
+module.itemsHasItemNotInList = itemsHasItemNotInList
 
 return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXA9B0171B0BF8405BAAECB10FB74B862D">
+		<Item class="ModuleScript" referent="RBX64C85B006CA449A5BCE7B743AFC66E39">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Plane</string>
@@ -3977,7 +3928,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX366A8C323D214596BA63C488B373DDFB">
+		<Item class="ModuleScript" referent="RBX0F188EA21ACE4CD694AA6CF681F781AE">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Selection</string>
@@ -4041,7 +3992,7 @@ module.getFilteredSelectionMetapart = getFilteredSelectionMetapart
 return module]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXCB7C9F1687474164AE8638FB16CD7265">
+		<Item class="ModuleScript" referent="RBX9320C40D12FE47089385384D0A8C80AE">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Metapart</string>
@@ -4311,7 +4262,6 @@ function createMetaPart(object, subscribe)
 					--print("translateFromTo", from, to)
 					local difference = to.p - from.p--finalObject.info.oCFrame
 					--sanitize?
-					
 					for i = 1, #finalObject.roots do
 						finalObject.roots[i].CFrame = finalObject.roots[i].CFrame + difference				
 					end
@@ -5005,7 +4955,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX88E7FA465DCC45BDB1050EC53BEAC542">
+		<Item class="ModuleScript" referent="RBX490BFFF3F1B44C199C303468F9B8C901">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">FuzzyMath</string>
@@ -5153,7 +5103,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX45A14B442C324B43816C82EF503C53BA">
+		<Item class="ModuleScript" referent="RBX120FDED517234D7989E9F70741E2A90C">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Round</string>
@@ -5188,7 +5138,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXB80FBD50588A41CB82DF7523829478A5">
+		<Item class="ModuleScript" referent="RBX9F06FB4E6A674F53B0FFBF164363CC57">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Extent</string>
@@ -5449,7 +5399,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXD07F41DB931B4918B8D53744C77A2B68">
+		<Item class="ModuleScript" referent="RBXC5A79401DBF54CD7BB559950539BFAEB">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Adornments</string>
@@ -6714,10 +6664,7 @@ local function updateAdornmentPositions()
 		else
 			local location = getAdornmentWorldCFrame(v[2]).p
 			
---			if k == R_XZ then
---				print(location)
---			end
-		
+	
 			if v[1]:IsA("BoxHandleAdornment") then
 				local sizeIncrease = math.max((location - cameraPos).Magnitude / 10.0, 1.0)
 				v[1].Size = v[6] * sizeIncrease
@@ -6758,13 +6705,9 @@ local function updateAdornmentPositions()
 	end
 	
 	
-	if planeSelectionActive then
-		adornKeeper[H_PLANE][2].ImageColor3 = rbxBlue
-		adornKeeper[H_PLANE][2].ImageTransparency = 0
-	else
 		local transition = nil
 	
-		if planeHoverTransition then
+		if planeHoverTransition or planeSelectionActive then
 			if currentPlaneHoverTransitionLevel < 1 then
 				currentPlaneHoverTransitionLevel = math.min(currentPlaneHoverTransitionLevel + planeHoverTransitionSpeed, 1)
 				transition = Utility.smoothstep(0, 1, currentPlaneHoverTransitionLevel)
@@ -6787,7 +6730,12 @@ local function updateAdornmentPositions()
 				miniPlaneLines[i].ImageColor3 = Utility.colorAdd(Utility.colorMultiply(black, transition), Utility.colorMultiply(white, 1-transition))
 			end
 		end
-	end
+		
+		if planeSelectionActive then
+			adornKeeper[H_PLANE][2].ImageColor3 = rbxBlue
+			adornKeeper[H_PLANE][2].ImageTransparency = 0
+		end
+--	end
 	
 	
 	
@@ -6914,6 +6862,7 @@ end
 
 local function setPlaneSelectingMode(value)
 	planeSelectionActive = value
+	planeHoverTransition = value
 end
 
 local function destroyAdorns()
@@ -7069,7 +7018,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX6CFCFB5D9C48488C9E01F7A4E2975549">
+		<Item class="ModuleScript" referent="RBXB6B8CEAD45A248F7BBECA6A6AD381172">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Input</string>
@@ -7126,7 +7075,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXC8749FB674EC4CB491A0A9ADB157D6BB">
+		<Item class="ModuleScript" referent="RBX28C381712E2E4AD59303A35576F6299E">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Rubberband</string>
