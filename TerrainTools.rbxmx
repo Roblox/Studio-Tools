@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBXB62728F139FB4675B7FE75012B0CE985">
+	<Item class="Model" referent="RBX61963FD562BB4E0FA404862C81CAB406">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,888 @@
 			<string name="Name">Terrain Tools</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="ModuleScript" referent="RBX2EB5BE9C5EF14C68A51DA9F7D52E7BBA">
+		<Item class="Script" referent="RBXAC000488C4F349C48E30239F8AEE4427">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">TerrainBrushScript</string>
+				<ProtectedString name="Source"><![CDATA[--Made by Stickmasterluke
+
+
+
+
+while not workspace:WaitForChild('Terrain').IsSmooth do
+	workspace.Terrain.Changed:wait()
+end
+
+local on = false
+local setup = false
+local currentTool = nil
+
+
+--[[
+	How to add a module:
+		1. Add the require to the modules table below.
+		2. Add a plugin button for it into the pluginButtons table, with the same index as used in the modules table.
+		3. You win.
+
+	How modules work
+		Your ModuleScript should return a table. The table can contain the following functions
+			On	= This function will be called when your tool is selected. Will hand in the mouse object, and a Deselect function to turn it off.
+			Off	= This function will be called when your tool is deselected.
+			operation = This function will be called when this toolset's brushing functionality is used
+				operation(centerPoint, materialsTable, occupanciesTable, resolution, selectionSize, strength, desiredMaterial, brushShape, minBounds, maxBounds)
+]]
+
+local modules = {
+	['Smooth'] = require(script.Parent.SmootherModule),
+	['Generate'] = require(script.Parent.GenerationModule),
+	['Region Editor'] = require(script.Parent.RegionEditorModule),
+}
+
+
+local toolBar = plugin:CreateToolbar('Smooth Terrain')
+
+local plugins = {
+	{name = 'Generate',
+		button = toolBar:CreateButton(
+			'Generate',									--button title
+			'Generate landscapes of terrain.',			--hover text
+			'http://www.roblox.com/asset/?id=236006872'	--button image
+		),
+	},
+	{name = 'Add',
+		button = toolBar:CreateButton(
+			'Add',
+			'Click and hold to add terrain.',
+			'http://www.roblox.com/asset/?id=225328572'
+		),
+		usesMaterials = true,
+	},
+	{name = 'Subtract',
+		button = toolBar:CreateButton(
+			'Subtract',
+			'Click and hold to remove terrain.',
+			'http://www.roblox.com/asset/?id=225328818'
+		),
+	},
+	{name = 'Paint',
+		button = toolBar:CreateButton(
+			'Paint',
+			'Paint the material of the terrain.',
+			'http://www.roblox.com/asset/?id=225328954'
+		),
+		usesMaterials = true,
+	},
+	{name = 'Grow',
+		button = toolBar:CreateButton(
+			'Grow',
+			'Click and hold to grow and expand terrain.',
+			'http://www.roblox.com/asset/?id=225329153'
+		),
+		usesMaterials = true,
+	},
+	{name = 'Erode',
+		button = toolBar:CreateButton(
+			'Erode',
+			'Click and hold to erode and remove terrain.',
+			'http://www.roblox.com/asset/?id=225329301'
+		),
+	},
+	{name = 'Smooth',
+		button = toolBar:CreateButton(
+			'Smooth',
+			'Brush to smooth out rough or jagged terrain.',
+			'http://www.roblox.com/asset/?id=225329641'
+		),
+	},
+	{name = 'Region Editor',
+		button = toolBar:CreateButton(
+			'Regions',
+			'Manipulate regions of smooth terrain.',
+			'http://www.roblox.com/asset/?id=240631063'
+		),
+	},
+}
+
+for i,tool in pairs(plugins) do
+	tool.button.Click:connect(function()
+		if not on or (currentTool ~= nil and tool ~= currentTool) then	--if off or on but current tool isn't the desired tool, then select this tool.
+			if not setup then	--I do this so that things only get set up when this plugin is used.
+				FirstTimeSetUp()
+			end
+			Selected(tool)
+		else
+			Deselected()
+		end
+	end)
+end
+
+function FirstTimeSetUp()
+	setup = true
+	local changeHistory = game:GetService('ChangeHistoryService')
+	local terrain = game.Workspace.Terrain
+	local coreGui = game:GetService('CoreGui')
+	local gui = script.Parent:WaitForChild('TerrainBrushGui')
+	local guiFrame = gui:WaitForChild('Frame')
+	local closeButton = guiFrame:WaitForChild('CloseButton')
+	local titlelabel = guiFrame:WaitForChild('TitleLabel')
+	local checkBox1 = guiFrame:WaitForChild('CheckBox1')
+	local checkBox2 = guiFrame:WaitForChild('CheckBox2')
+	local checkBox3 = guiFrame:WaitForChild('CheckBox3')
+	local toolTip1 = guiFrame:WaitForChild('ToolTip1')
+	local toolTip2 = guiFrame:WaitForChild('ToolTip2')
+	local label4 = guiFrame:WaitForChild('Label4')
+	local divider2 = guiFrame:WaitForChild('Divider2')
+	local library = assert(LoadLibrary('RbxGui'))
+	local mouse = plugin:GetMouse()
+	local userInput = game:GetService('UserInputService')
+
+	--SUB SETTINGS--	(Non-userfacing Settings)
+	local resolution = 4			--This is the size of voxels on Roblox. Why is this a variable? ;)
+	local minSelectionSize = 1
+	local maxSelectionSize = 16
+	local clickThreshold = .1
+	local toolTipShowTime = 3.5
+	local materialsTable = {	--Interface order is defined by order here
+		{enum = Enum.Material.Grass, image = 'http://www.roblox.com/asset/?id=225314676'},
+		{enum = Enum.Material.Sand, image = 'http://www.roblox.com/asset/?id=225315607'},
+		{enum = Enum.Material.Rock, image = 'http://www.roblox.com/asset/?id=225315178'},
+		{enum = Enum.Material.Slate, image = 'http://www.roblox.com/asset/?id=225315290'},
+		{enum = Enum.Material.Water, image = 'http://www.roblox.com/asset/?id=225315529'},
+		{enum = Enum.Material.WoodPlanks, image = 'http://www.roblox.com/asset/?id=225315705', forceSnapToGrid=true},
+		{enum = Enum.Material.Brick, image = 'http://www.roblox.com/asset/?id=225315419', forceSnapToGrid=true},
+		{enum = Enum.Material.Concrete, image = 'http://www.roblox.com/asset/?id=225314983'},
+		{enum = Enum.Material.Glacier, image = 'http://www.roblox.com/asset/?id=254541572'},
+		{enum = Enum.Material.Snow, image = 'http://www.roblox.com/asset/?id=254541898'},
+		{enum = Enum.Material.Sandstone, image = 'http://www.roblox.com/asset/?id=254541350'},
+		{enum = Enum.Material.Mud, image = 'http://www.roblox.com/asset/?id=254541862'},
+		{enum = Enum.Material.Basalt, image = 'http://www.roblox.com/asset/?id=254542066'},
+		{enum = Enum.Material.Ground, image = 'http://www.roblox.com/asset/?id=254542189'},
+		{enum = Enum.Material.CrackedLava, image = 'http://www.roblox.com/asset/?id=254541726'},
+	}
+	local brushShapes = {
+		['Sphere'] = {
+			name = 'Sphere',
+			button = guiFrame:WaitForChild('ShapeButton1'),
+			image = 'http://www.roblox.com/asset/?id=225799533',
+			selectedImage = 'http://www.roblox.com/asset/?id=225801914',
+		},
+		['Box'] = {
+			name = 'Box',
+			button = guiFrame:WaitForChild('ShapeButton2'),
+			image = 'http://www.roblox.com/asset/?id=225799696',
+			selectedImage = 'http://www.roblox.com/asset/?id=225802254',
+		},
+	}
+	----------------
+
+	----SETTINGS----	(Interface Settings)
+	local selectionSize = 6
+	local strength = .5
+	local snapToGrid = false
+	local planeLock = false
+	local brushShape = 'Sphere'
+	local materialSelection = materialsTable[1]
+	local dynamicMaterial = false
+	----------------
+
+	----Variables----
+	local forcePlaneLock = false
+	local forceSnapToGrid = false
+	local forceDynamicMaterial = false
+	local forceDynamicMaterialTo = true
+	local forceMaterial = nil
+	local selectionPart = nil
+	local selectionObject = nil
+	local gridLineParts = {}
+	local currentLoopTag = nil
+	local lastMainPoint = Vector3.new(0, 0, 0)
+	local click = false
+	local firstOperation = tick()
+	local downKeys = {}
+	local lastPlanePoint = Vector3.new(0, 0, 0)
+	local lastNormal = Vector3.new(0, 1, 0)
+	local lastCursorDistance = 300
+	local toolTip1Change = nil
+	local toolTip2Change = nil
+	local materialAir = Enum.Material.Air
+	local materialWater = Enum.Material.Water
+	local ceil = math.ceil
+	local floor = math.floor
+	local abs = math.abs
+	local min = math.min
+	local max = math.max
+	local sqrt = math.sqrt
+	local sin = math.sin
+	local cos = math.cos
+	local pi = math.pi
+	---------------
+
+
+	--Gui Setup--
+	local selectionSizeSlider, selectionSizeValue = library.CreateSlider(maxSelectionSize, 90, UDim2.new(1, -98, 0, 40))
+	selectionSizeSlider.Parent = guiFrame
+	selectionSizeValue.Changed:connect(function()
+		selectionSize = selectionSizeValue.Value
+		if selectionPart then
+			selectionPart.Size = Vector3.new(1, 1, 1) * selectionSize * resolution + Vector3.new(.1, .1, .1)
+		end
+
+		toolTip1.Visible = true
+		local currentToolTip1Change = {}
+		toolTip1Change = currentToolTip1Change
+		wait(toolTipShowTime)
+		if toolTip1Change == currentToolTip1Change then
+			toolTip1.Visible = false
+		end
+	end)
+	selectionSizeValue.Value = selectionSize
+	toolTip1.Visible = false
+
+
+	local strengthslider, strengthValue = library.CreateSlider(101, 90, UDim2.new(1, -98, 0, 65))
+	strengthslider.Parent = guiFrame
+	strengthValue.Changed:connect(function()
+		strength = (strengthValue.Value - 1) / 100
+		if selectionObject then
+			selectionObject.SurfaceTransparency = .95 - strength * .3
+		end
+
+		toolTip2.Visible = true
+		local currentToolTip2Change = {}
+		toolTip2Change = currentToolTip2Change
+		wait(toolTipShowTime)
+		if toolTip2Change == currentToolTip2Change then
+			toolTip2.Visible = false
+		end
+	end)
+	strengthValue.Value = strength * 100
+	toolTip2.Visible = false
+
+
+	function setBrushShape(newBrushShape)
+		brushShape = newBrushShape
+		for _,v in pairs(brushShapes) do
+			--v.button.Image = (newBrushShape == v) and v.selectedImage or v.image
+			v.button.ImageTransparency = (newBrushShape == v.name) and 0 or .5
+			v.button.ImageColor3 = (newBrushShape == v.name) and Color3.new(1,1,1) or Color3.new(.5,.5,.5)
+		end
+		clearSelection()
+	end
+	for _,v in pairs(brushShapes) do
+		v.button.MouseButton1Down:connect(function()
+			setBrushShape(v.name)
+		end)
+	end
+
+	local function setMaterialSelection(newMaterialSelection)
+		materialSelection = newMaterialSelection
+		forceSnapToGrid = materialSelection.forceSnapToGrid
+		updateSnapToGrid()
+		for _, v in pairs(guiFrame:GetChildren()) do
+			if string.sub(v.Name,1,14) == 'MaterialButton' then
+				if v.Name == 'MaterialButton' .. materialSelection.enum.Name then
+					v.BackgroundTransparency = .1
+				else
+					v.BackgroundTransparency = 1
+				end
+			end
+		end
+	end
+	for i,materialSubTable in pairs(materialsTable) do
+		local newMaterialButton = Instance.new('ImageButton')
+		newMaterialButton.Name = 'MaterialButton' .. materialSubTable.enum.Name
+		newMaterialButton.BorderSizePixel = 2
+		newMaterialButton.BorderColor3 = Color3.new(.2, 1, 1)
+		newMaterialButton.BackgroundColor3 = Color3.new(.2, 1, 1)
+		newMaterialButton.BackgroundTransparency = 1
+		newMaterialButton.Image = materialSubTable.image
+		newMaterialButton.Size = UDim2.new(0, 35, 0, 35)
+		newMaterialButton.Position = UDim2.new(0, 5 + ((i-1) % 4) * 40, 0, 195 + ceil(i/4) * 40)
+		newMaterialButton.MouseButton1Down:connect(function()
+			setMaterialSelection(materialsTable[i])
+		end)
+		newMaterialButton.Parent = guiFrame
+	end
+
+	function resizeGuiFrame()
+		local materialsDynamic = dynamicMaterial
+		if forceDynamicMaterial then
+			materialsDynamic = forceDynamicMaterialTo
+		end
+		local desiredSize = UDim2.new(0, 180, 0, 210)
+		if currentTool and currentTool.usesMaterials then
+			checkBox3.Visible=true
+			label4.Visible=true
+			divider2.Visible=true
+			desiredSize = desiredSize + UDim2.new(0, 0, 0, 35)
+			if not materialsDynamic then
+				desiredSize = desiredSize + UDim2.new(0, 0, 0, 5 + ceil(#materialsTable / 4) * 40)	--Dynamically resizes frame if we add more materials later.
+			end
+		else
+			checkBox3.Visible=false
+			label4.Visible=false
+			divider2.Visible=false
+		end
+		guiFrame.Size = desiredSize
+		--guiFrame:TweenSize(desiredSize, 'Out', 'Quad', .5)	--illegal in studio
+	end
+
+
+	function updatePlaneLock()
+		checkBox1.Style = forcePlaneLock and Enum.ButtonStyle.RobloxRoundButton or Enum.ButtonStyle.RobloxRoundDefaultButton
+		checkBox1.Text = (planeLock or forcePlaneLock) and 'X' or ''
+		checkBox1.AutoButtonColor = not forcePlaneLock
+		if not (planeLock or forcePlaneLock) then
+			clearGrid()
+		end
+	end
+	checkBox1.MouseButton1Down:connect(function()
+		planeLock = not planeLock
+		updatePlaneLock()
+	end)
+
+	function updateSnapToGrid()
+		checkBox2.Style = forceSnapToGrid and Enum.ButtonStyle.RobloxRoundButton or Enum.ButtonStyle.RobloxRoundDefaultButton
+		checkBox2.Text = (snapToGrid or forceSnapToGrid) and 'X' or ''
+		checkBox2.AutoButtonColor = not forceSnapToGrid
+	end
+	checkBox2.MouseButton1Down:connect(function()
+		snapToGrid = not snapToGrid
+		updateSnapToGrid()
+	end)
+
+	function updateDynamicMaterial()
+		local isDynamic = dynamicMaterial
+		if forceDynamicMaterial then
+			isDynamic = forceDynamicMaterialTo
+		end
+		checkBox3.Style = forceDynamicMaterial and Enum.ButtonStyle.RobloxRoundButton or Enum.ButtonStyle.RobloxRoundDefaultButton
+		checkBox3.AutoButtonColor = not forceDynamicMaterial
+		checkBox3.Text =  isDynamic and 'X' or ''
+		resizeGuiFrame()
+		for _, v in pairs(guiFrame:GetChildren()) do
+			if string.sub(v.Name,1,14) == 'MaterialButton' then
+				v.Visible = not isDynamic
+			end
+		end
+	end
+	checkBox3.MouseButton1Down:connect(function()
+		dynamicMaterial = not dynamicMaterial
+		updateDynamicMaterial()
+	end)
+	-------------
+
+
+	do
+		local runService = game:GetService('RunService').RenderStepped
+		function quickWait(waitTime)
+			if not waitTime then
+				runService:wait()
+			elseif waitTime < .033333 then
+				local startTick = tick()
+				runService:wait()
+				local delta = tick() - startTick
+				if delta <= waitTime * .5 then
+					quickWait(waitTime - delta)
+				end
+			else
+				wait(waitTime)
+			end
+		end
+	end
+
+	function clearSelection()
+		if selectionObject then
+			selectionObject:Destroy()
+			selectionObject = nil
+		end
+		if selectionPart then
+			selectionPart:Destroy()
+			selectionPart = nil
+		end
+	end
+
+	function clearGrid()
+		for i, v in pairs(gridLineParts) do
+			if v then
+				v:Destroy()
+			end
+			gridLineParts[i] = nil
+		end
+	end
+
+	function drawGrid(point, normal, transparency, color)
+		local transparency = transparency or .95
+		local color = BrickColor.new(color or 'Institutional white')--'Pastel light blue')
+		local gridCellSize = selectionSize * resolution
+		local gridSize = 10
+		local baseCframe = CFrame.new(point, point + normal)
+		local normalSpase = CFrame.new(Vector3.new(0, 0, 0), normal):pointToObjectSpace(point)
+		local roundedNormalOffset = (Vector3.new((normalSpase.x / gridCellSize) % 1, (normalSpase.y / gridCellSize) % 1, 0) - Vector3.new(.5, .5, 0)) * -gridCellSize
+		for u = 1, gridSize do
+			local linePart = gridLineParts[u]
+			if not linePart then
+				linePart = Instance.new('Part')
+				linePart.Transparency = 1
+				linePart.TopSurface = 'Smooth'
+				linePart.BottomSurface = 'Smooth'
+				linePart.Anchored = true
+				linePart.CanCollide = false
+				linePart.formFactor = 'Custom'
+				local selectionBox = Instance.new('SelectionBox')
+				selectionBox.Color = color
+				selectionBox.Transparency = transparency
+				selectionBox.Adornee = linePart
+				selectionBox.Parent = linePart
+				linePart.Parent = gui
+				gridLineParts[u] = linePart
+			elseif linePart.SelectionBox.Transparency ~= transparency or linePart.SelectionBox.Color ~= color then
+				linePart.SelectionBox.Transparency = transparency
+				linePart.SelectionBox.Color = color
+			end
+			local percent = (u - 1) / (gridSize - 1)
+			linePart.Size = Vector3.new(gridCellSize * gridSize * sin(math.acos(percent * 1.8 - .9)), 0, 0)
+			linePart.CFrame = baseCframe * CFrame.new(0, (percent - .5) * (gridSize - 1) * gridCellSize, 0) * CFrame.new(roundedNormalOffset)
+		end
+		for u = 1, gridSize do
+			local linePart = gridLineParts[gridSize + u]
+			if not linePart then
+				linePart = Instance.new('Part')
+				linePart.Transparency = 1
+				linePart.TopSurface = 'Smooth'
+				linePart.BottomSurface = 'Smooth'
+				linePart.Anchored = true
+				linePart.CanCollide = false
+				linePart.formFactor = 'Custom'
+				local selectionBox = Instance.new('SelectionBox')
+				selectionBox.Color = color
+				selectionBox.Transparency = transparency
+				selectionBox.Adornee = linePart
+				selectionBox.Parent = linePart
+				linePart.Parent = gui
+				gridLineParts[gridSize + u] = linePart
+			elseif linePart.SelectionBox.Transparency ~= transparency or linePart.SelectionBox.Color ~= color then
+				linePart.SelectionBox.Transparency = transparency
+				linePart.SelectionBox.Color = color
+			end
+			local percent = (u - 1) / (gridSize - 1)
+			linePart.Size = Vector3.new(0, gridCellSize * gridSize * sin(math.acos(percent * 1.8 - .9)), 0)
+			linePart.CFrame = baseCframe * CFrame.new((percent - .5) * (gridSize - 1) * gridCellSize, 0, 0) * CFrame.new(roundedNormalOffset)
+		end
+	end
+
+	local function getCell(list, x, y, z)
+		return list and list[x] and list[x][y] and list[x][y][z]
+	end
+
+	local function getNeighborOccupancies(list, x, y, z, includeSelf)
+		local fullNeighbor = false
+		local emptyNeighbor = false
+		local neighborOccupancies = includeSelf and getCell(list, x, y, z) or 0
+		local totalNeighbors = includeSelf and 1 or 0
+		local nearMaterial = materialSelection.enum
+		for axis = 1, 3 do
+			for offset = -1, 1, 2 do
+				local neighbor = nil
+				if axis == 1 then
+					neighbor = list[x + offset] and list[x + offset][y][z]
+				elseif axis == 2 then
+					neighbor = list[x][y + offset] and list[x][y + offset][z]
+				elseif axis == 3 then
+					neighbor = list[x][y][z + offset]
+				end
+				if neighbor then
+					if neighbor >= 1 then
+						fullNeighbor = true
+					end
+					if neighbor <= 0 then
+						emptyNeighbor = true
+					end
+					totalNeighbors = totalNeighbors + 1
+					neighborOccupancies = neighborOccupancies + neighbor
+				end
+			end
+		end
+		return neighborOccupancies / (totalNeighbors ~= 0 and totalNeighbors or getCell(list, x, y, z)), fullNeighbor, emptyNeighbor
+	end
+
+	local function round(n)
+		return floor(n + .5)
+	end
+
+	function findFace()
+		local cameraLookVector = game.Workspace.CurrentCamera.CoordinateFrame.lookVector
+		--[[local absx = abs(cameraLookVector.x)		--this code is for 90 plane locking
+		local absy = abs(cameraLookVector.y)
+		local absz = abs(cameraLookVector.z)
+		if absy >= absx and absy >= absz then	--preference towards y axis planes
+			return Vector3.new(0, cameraLookVector.y / absy, 0)
+		elseif absx >= absz then
+			return	Vector3.new(cameraLookVector.x / absx, 0, 0)
+		end
+		return Vector3.new(0, 0, cameraLookVector.z / absz)]]
+
+		return Vector3.new(round(cameraLookVector.x), round(cameraLookVector.y), round(cameraLookVector.z)).unit	--this code is for 45 degree plane locking
+	end
+
+	function lineToPlaneIntersection(linePoint, lineDirection, planePoint, planeNormal)
+		local denominator = lineDirection:Dot(planeNormal)
+		if denominator == 0 then
+			return linePoint
+		end
+		local distance = ((planePoint - linePoint):Dot(planeNormal)) / denominator
+		return linePoint + lineDirection * distance
+	end
+
+
+	function operation(centerPoint)
+		local isDynamic = dynamicMaterial
+		if forceDynamicMaterial then
+			isDynamic = forceDynamicMaterialTo
+		end
+		local desiredMaterial = isDynamic and nearMaterial or materialSelection.enum
+
+		local radius = selectionSize * .5 * resolution
+		local minBounds = Vector3.new(floor((centerPoint.x - radius) / resolution), floor((centerPoint.y - radius) / resolution), floor((centerPoint.z - radius) / resolution)) * resolution
+		local maxBounds = Vector3.new(ceil((centerPoint.x + radius) / resolution), ceil((centerPoint.y + radius) / resolution), ceil((centerPoint.z + radius) / resolution)) * resolution
+		local region = Region3.new(minBounds, maxBounds)
+
+		local materials, occupancies = terrain:ReadVoxels(region, resolution)
+
+		if modules[currentTool.name] then
+			if modules[currentTool.name]['operation'] then
+
+				local middle = materials[ceil(#materials * .5)]	--This little section of code sets nearMaterial to middle of matrix
+				if middle then	--dig X
+					local middle = middle[ceil(#middle * .5)]
+					if middle then	--dig Y
+						local middle = middle[ceil(#middle * .5)]
+						if middle and middle ~= materialAir then	--dig Z
+							nearMaterial = middle
+							desiredMaterial = isDynamic and nearMaterial or desiredMaterial
+						end
+					end
+				end
+
+				modules[currentTool.name]['operation'](centerPoint, materials, occupancies, resolution, selectionSize, strength, desiredMaterial, brushShape, minBounds, maxBounds)
+			end
+		else
+
+			for ix, vx in ipairs(occupancies) do
+				local cellVectorX = minBounds.x + (ix - .5) * resolution - centerPoint.x
+
+				for iy, vy in pairs(vx) do
+					local cellVectorY = minBounds.y + (iy - .5) * resolution - centerPoint.y
+
+					for iz, cellOccupancy in pairs(vy) do
+						local cellVectorZ = minBounds.z + (iz - .5) * resolution - centerPoint.z
+
+						local cellMaterial = materials[ix][iy][iz]
+						local distance = sqrt(cellVectorX * cellVectorX + cellVectorY * cellVectorY + cellVectorZ * cellVectorZ)
+	
+						local magnitudePercent = 1
+						local brushOccupancy = 1
+						if brushShape == 'Sphere' then
+							magnitudePercent = cos(min(1, distance / (radius + resolution * .5)) * pi * .5)
+							brushOccupancy = max(0, min(1, (radius + .5 * resolution - distance) / resolution))
+						elseif brushShape == 'Box' then
+							if not (snapToGrid or forceSnapToGrid) then
+								local xOutside = 1 - max(0, abs(cellVectorX / resolution) + .5 - selectionSize * .5)
+								local yOutside = 1 - max(0, abs(cellVectorY / resolution) + .5 - selectionSize * .5)
+								local zOutside = 1 - max(0, abs(cellVectorZ / resolution) + .5 - selectionSize * .5)
+								brushOccupancy = xOutside * yOutside * zOutside
+							end
+						end
+
+						if cellMaterial ~= materialAir and cellMaterial ~= nearMaterial then
+							nearMaterial = cellMaterial
+							if isDynamic then
+								desiredMaterial = nearMaterial
+							end
+						end
+	
+						if currentTool.name == 'Add' then
+							if selectionSize <= 2 then
+								if brushOccupancy >= .5 then
+									if cellMaterial == materialAir or cellMaterial == materialWater or cellOccupancy <= 0 then
+										materials[ix][iy][iz] = desiredMaterial
+									end
+									occupancies[ix][iy][iz] = 1
+								end 
+							else
+								if brushOccupancy > cellOccupancy then
+									occupancies[ix][iy][iz] = brushOccupancy
+								end
+								if brushOccupancy >= .5 and (cellMaterial == materialAir or cellMaterial == materialWater) then
+									materials[ix][iy][iz] = desiredMaterial
+								end
+							end
+						elseif currentTool.name == 'Subtract' then
+							if selectionSize <= 2 then
+								if brushOccupancy >= .5 then
+									occupancies[ix][iy][iz] = 0
+									materials[ix][iy][iz] = materialAir
+								end
+							else
+								local desiredOccupancy = 1 - brushOccupancy
+								if desiredOccupancy < cellOccupancy then
+									occupancies[ix][iy][iz] = desiredOccupancy
+								end
+								if desiredOccupancy <= 0 then
+									materials[ix][iy][iz] = materialAir
+								end
+							end
+						elseif currentTool.name == 'Grow' then
+							if brushOccupancy >= .5 then
+								local desiredOccupancy = cellOccupancy
+								local neighborOccupancies, fullNeighbor ,emptyNeighbor = getNeighborOccupancies(occupancies, ix, iy, iz)
+								if cellOccupancy > 0 or fullNeighbor then	--problem if selection size is small.
+									desiredOccupancy = desiredOccupancy + neighborOccupancies * (strength + .1) * .25 * brushOccupancy * magnitudePercent
+								end
+								if cellMaterial == materialAir or cellOccupancy <= 0 and desiredOccupancy > 0 then
+									materials[ix][iy][iz] = desiredMaterial
+								end
+								occupancies[ix][iy][iz] = desiredOccupancy
+							end
+						elseif currentTool.name == 'Erode' then
+							local flippedBrushOccupancy = 1 - brushOccupancy
+							if flippedBrushOccupancy <= .5 then
+								local desiredOccupancy = cellOccupancy
+								local emptyNeighbor = false
+								local neighborOccupancies = 6
+								for axis = 1, 3 do
+									for offset = -1, 1, 2 do
+										local neighbor = nil
+										if axis == 1 then
+											neighbor = occupancies[ix + offset] and occupancies[ix + offset][iy][iz]
+										elseif axis == 2 then
+											neighbor = occupancies[ix][iy + offset] and occupancies[ix][iy + offset][iz]
+										elseif axis == 3 then
+											neighbor = occupancies[ix][iy][iz + offset]
+										end
+										if neighbor then
+											if neighbor <= 0 then
+												emptyNeighbor = true
+											end
+											neighborOccupancies = neighborOccupancies - neighbor
+										end
+									end
+								end
+								if cellOccupancy < 1 or emptyNeighbor then
+									desiredOccupancy = desiredOccupancy - (neighborOccupancies / 6) * (strength + .1) * .25 * brushOccupancy * magnitudePercent
+								end
+								if cellMaterial == materialAir or cellOccupancy <= 0 and desiredOccupancy > 0 then
+									materials[ix][iy][iz] = desiredMaterial
+								end
+								occupancies[ix][iy][iz] = desiredOccupancy
+							end
+						elseif currentTool.name == 'Paint' then
+							if brushOccupancy > 0 and cellOccupancy > 0 then
+								materials[ix][iy][iz] = desiredMaterial
+							end
+						end
+					end
+				end
+			end
+		end
+		terrain:WriteVoxels(region, resolution, materials, occupancies)
+	end
+
+	
+	function Selected(tool)
+		plugin:Activate(true)
+		if tool.button then
+			tool.button:SetActive(true)
+			lastTool = tool
+		end
+		on = true
+		currentTool = tool
+		forceSnapToGrid = tool.usesMaterials and materialSelection.forceSnapToGrid
+		updateSnapToGrid()
+
+		if modules[tool.name] and modules[tool.name]['On'] then
+			modules[tool.name].On(mouse,Deselected)
+		end
+		if not modules[tool.name] or modules[tool.name]['operation'] then
+
+			resizeGuiFrame()
+			titlelabel.Text = tool.name
+			gui.Parent = coreGui
+	
+			forcePlaneLock = tool.name == 'Add' or tool.name == 'Subtract'
+			updatePlaneLock()
+
+			forceDynamicMaterial = tool.name == 'Subtract' or tool.name == 'Erode' or tool.name == 'Paint' or tool.name == 'Smooth' or tool.name == 'Smoother'
+			forceDynamicMaterialTo = not (forceDynamicMaterial and tool.name == 'Paint')
+			updateDynamicMaterial()
+	
+			local loopTag = {}	--using table as a unique value for debouncing
+			currentLoopTag = loopTag
+	
+			while currentLoopTag and currentLoopTag == loopTag do
+				local t = tick()
+				local radius = selectionSize * .5 * resolution
+				
+				local mainPoint = mouse.Hit.p
+	
+				if tool.name == 'Add' then
+					mainPoint = mainPoint - mouse.UnitRay.Direction * .05
+				elseif tool.name == 'Subtract' or tool.name == 'Paint' or tool.name == 'Grow' then
+					mainPoint = mainPoint + mouse.UnitRay.Direction * .05
+				end
+	
+				if mouse.Target == nil then	--cage the cursor so that it does not fly away
+					mainPoint = game.Workspace.CurrentCamera.CoordinateFrame.p + mouse.UnitRay.Direction * lastCursorDistance --limits the distance of the mainPoint if the mouse is not hitting an object
+				end
+	
+				if not mouseDown or click then
+					lastPlanePoint = mainPoint
+					lastNormal = findFace()
+				end
+	
+				if planeLock or forcePlaneLock then
+					mainPoint = lineToPlaneIntersection(mouse.Hit.p, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)
+				end
+	
+				if snapToGrid or forceSnapToGrid then
+					local snapOffset = Vector3.new(1, 1, 1) * (radius % resolution)		--in studs
+					local tempMainPoint = (mainPoint - snapOffset) / resolution + Vector3.new(.5, .5, .5)	--in voxels
+					mainPoint = Vector3.new(floor(tempMainPoint.x), floor(tempMainPoint.y), floor(tempMainPoint.z)) * resolution + snapOffset
+				end
+	
+				if mouseDown then
+					if click then
+						firstOperation = t
+						lastMainPoint = mainPoint
+					end
+					if click or t > firstOperation + clickThreshold then
+						click = false
+						local difference = mainPoint - lastMainPoint
+						local dragDistance = (difference).magnitude
+						local crawlDistance = radius * .5			--Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
+						if dragDistance > crawlDistance then
+							local differenceVector = difference.unit
+							local dragDistance = min(dragDistance, crawlDistance * 2 + 20)	--limiting this so that it does not attempt too many operations within a single drag.
+							local samples=ceil(dragDistance / crawlDistance - .1)
+							for i = 1, samples do
+								operation(lastMainPoint + differenceVector * dragDistance * (i / samples))
+							end
+							mainPoint = lastMainPoint + differenceVector * dragDistance
+						else
+							operation(mainPoint)
+						end
+						lastMainPoint = mainPoint
+					end
+				end
+	
+				if not selectionPart then
+					selectionPart = Instance.new('Part')
+					selectionPart.Name = 'SelectionPart'
+					selectionPart.Transparency = 1
+					selectionPart.TopSurface = 'Smooth'
+					selectionPart.BottomSurface = 'Smooth'
+					selectionPart.Anchored = true
+					selectionPart.CanCollide = false
+					selectionPart.formFactor = 'Custom'
+					selectionPart.Size = Vector3.new(1, 1, 1) * selectionSize * resolution + Vector3.new(.1, .1, .1)
+					selectionPart.Parent = gui
+				end
+				if not selectionObject then
+					selectionObject = Instance.new(brushShape == 'Sphere' and 'SelectionSphere' or 'SelectionBox')
+					selectionObject.Name = 'SelectionObject'
+					selectionObject.Color = BrickColor.new('Toothpaste')
+					selectionObject.SurfaceTransparency = .95 - strength * .3
+					selectionObject.SurfaceColor = BrickColor.new('Toothpaste')
+					selectionObject.Adornee = selectionPart
+					selectionObject.Parent = selectionPart
+				end
+				selectionPart.CFrame = CFrame.new(mainPoint)
+	
+				if planeLock or forcePlaneLock then
+					local mainPointIntersect = lineToPlaneIntersection(mainPoint, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)	--we need to get this otherwise the plane can shift whiel drawing
+					drawGrid(mainPointIntersect, lastNormal, mouseDown and .8)
+				end
+	
+				lastCursorDistance = max(20 + selectionSize * resolution * 1.5,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
+	
+				quickWait()
+			end
+		end
+	end
+	
+	function Deselected()
+		currentLoopTag = nil
+		gui.Parent = script.Parent
+		clearSelection()
+		clearGrid()
+		if lastTool then
+			lastTool.button:SetActive(false)
+		end
+		mouseDown = false
+		on = false
+		local lastCurrentTool = currentTool
+		currentTool = nil
+		if lastCurrentTool and modules[lastCurrentTool.name] and modules[lastCurrentTool.name]['Off'] then
+			modules[lastCurrentTool.name].Off()
+		end
+	end
+
+	function scrollwheel(change)
+		if on then
+			if downKeys[Enum.KeyCode.LeftShift] or downKeys[Enum.KeyCode.RightShift] then
+				selectionSize = max(minSelectionSize, min(maxSelectionSize, selectionSize + change))
+				selectionSizeValue.Value = selectionSize
+			end
+			if downKeys[Enum.KeyCode.LeftControl] or downKeys[Enum.KeyCode.RightControl] then
+				strength = max(0, min(1, strength + change * (1/(maxSelectionSize-minSelectionSize))))
+				strengthValue.Value = round(strength * 100 + 1)
+			end
+		end
+	end
+
+	userInput.InputBegan:connect(function(event, soaked)
+		downKeys[event.KeyCode] = true
+		if event.UserInputType == Enum.UserInputType.MouseButton1 and not soaked and on then
+			mouseDown = true
+			click = true
+		end
+	end)
+	userInput.InputEnded:connect(function(event, soaked)
+		downKeys[event.KeyCode] = nil
+		if event.UserInputType == Enum.UserInputType.MouseButton1 and mouseDown then
+			mouseDown = false
+			changeHistory:SetWaypoint('Terrain '..currentTool.name)
+		end
+	end)
+	mouse.WheelForward:connect(function()
+		scrollwheel(1)
+	end)
+	mouse.WheelBackward:connect(function()
+		scrollwheel(-1)
+	end)
+
+	closeButton.MouseButton1Down:connect(Deselected)
+
+	plugin.Deactivation:connect(function()
+		if on then
+			Deselected()
+		end
+	end)
+
+	setBrushShape(brushShape)
+	setMaterialSelection(materialSelection)
+	updatePlaneLock()
+	updateSnapToGrid()
+	updateDynamicMaterial()
+end
+
+
+]]></ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBX5626F55D07D64919A94524E234194CA5">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">GenerationModule</string>
@@ -268,8 +1149,6 @@ local newguiFrame = newgui:WaitForChild('Frame')
 local scrollingFrame = newguiFrame:WaitForChild('ScrollingFrame')
 local canvasFrame = scrollingFrame:WaitForChild('Canvas')
 local coreGui = game:GetService('CoreGui')
-newgui.Parent = nil
-newguiFrame.Visible = true
 
 -- UI gui load.  Required for all the GUI code
 local RbxGui = LoadLibrary("RbxGui")
@@ -1096,7 +1975,7 @@ function GenerateTerrain()
 	--
 	-- Returns: MountainMask, MountainHeight
 	------------------------------------------------------------------------------------------------------
-	local function ApplyMountains(baseLayer)
+	function ApplyMountains(baseLayer)
 		CancelValues.setAmountFunc(0)
 		UpdateGenerationProgressMessage("(4/10) Building Mountain Layer")
 
@@ -1302,11 +2181,11 @@ function GenerateTerrain()
 					end
 				end
 			end
-			local mouseC1=nil
-			local mouseC2=nil
-			local mouseC3=nil
-			local mouseC4=nil
-			local mouseC5=nil
+			mouseC1=nil
+			mouseC2=nil
+			mouseC3=nil
+			mouseC4=nil
+			mouseC5=nil
 			if mouse then
 				mouseC1 = mouse.Button1Down:connect(function()
 					mouseDown = true
@@ -2083,7 +2962,7 @@ function GenerateTerrain()
 			local base = Base:Clone()
 			base.Parent = tree
 			base.Size = Vector3.new(width,height,width)
-			local basecf = CFrame.new(0,height/2,0)*CFrame.Angles(0,math.rad(math.random(1,360)),0)
+			basecf = CFrame.new(0,height/2,0)*CFrame.Angles(0,math.rad(math.random(1,360)),0)
 			weldit(foundation,base,basecf)
 			Branch(base,complexity)
 			return tree
@@ -2754,7 +3633,7 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX596C5649392C4A6082D71DD70A3813AE">
+		<Item class="ModuleScript" referent="RBXA31B820CC41544199D03DBBB639B74EA">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">SmootherModule</string>
@@ -2893,11 +3772,11 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX1F46AA14635B4A56AD517022020D4C28">
+		<Item class="ScreenGui" referent="RBX1F4188584DE04F5E84CC9A2F0DD82187">
 			<Properties>
 				<string name="Name">TerrainBrushGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX35B5939E51874623B71920797824598C">
+			<Item class="Frame" referent="RBXB56EEAB4BDAC4113AF9D41846E6F5E12">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -2907,10 +3786,6 @@ return {
 					<bool name="ClipsDescendants">false</bool>
 					<bool name="Draggable">false</bool>
 					<string name="Name">Frame</string>
-					<Ref name="NextSelectionDown">null</Ref>
-					<Ref name="NextSelectionLeft">null</Ref>
-					<Ref name="NextSelectionRight">null</Ref>
-					<Ref name="NextSelectionUp">null</Ref>
 					<UDim2 name="Position">
 						<XS>0</XS>
 						<XO>0</XO>
@@ -2918,8 +3793,6 @@ return {
 						<YO>0</YO>
 					</UDim2>
 					<float name="Rotation">0</float>
-					<bool name="Selectable">false</bool>
-					<Ref name="SelectionImageObject">null</Ref>
 					<UDim2 name="Size">
 						<XS>0</XS>
 						<XO>180</XO>
@@ -2928,10 +3801,10 @@ return {
 					</UDim2>
 					<token name="SizeConstraint">0</token>
 					<token name="Style">6</token>
-					<bool name="Visible">false</bool>
+					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX240E3977910541968E65BEF1FB6135BB">
+				<Item class="TextButton" referent="RBXF1E2420B426E408DAAC1D07B88435703">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -2945,10 +3818,6 @@ return {
 						<token name="FontSize">4</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">CloseButton</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>1</XS>
 							<XO>-26</XO>
@@ -2956,9 +3825,7 @@ return {
 							<YO>0</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>25</XO>
@@ -2980,7 +3847,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX208F64C2AB96436E9EBE7F31FCE98BBD">
+				<Item class="TextLabel" referent="RBXF0BEF6DEC9F44500AC2D5CEC4AFCB6D6">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -2992,10 +3859,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">TitleLabel</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -3003,8 +3866,6 @@ return {
 							<YO>0</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -3025,7 +3886,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX1D95F1D9BC4F4771815CEB87C5BA9BF8">
+				<Item class="TextLabel" referent="RBX511F1B97A64546E9B817E9E1B742EDE1">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3037,10 +3898,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">5</token>
 						<string name="Name">Label1</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -3048,8 +3905,6 @@ return {
 							<YO>30</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>47</XO>
@@ -3070,7 +3925,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX624372CCDE8B4410B15B4992F14FD85A">
+				<Item class="TextLabel" referent="RBX58001682B78C48FC9CFC6A55EC8022C8">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3082,10 +3937,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">5</token>
 						<string name="Name">Label2</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -3093,8 +3944,6 @@ return {
 							<YO>55</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>47</XO>
@@ -3115,7 +3964,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXC50FD07356194178A73302340D9A739F">
+				<Item class="TextLabel" referent="RBX7508EDA43BCD45B19AEB0AF1606BFE59">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3127,10 +3976,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">5</token>
 						<string name="Name">Label3</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -3138,8 +3983,6 @@ return {
 							<YO>85</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>47</XO>
@@ -3160,7 +4003,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX57C5D16863B64430B4186C4A49DDC231">
+				<Item class="TextLabel" referent="RBX558AFF13D121479CAD57C671CA4D969C">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3172,10 +4015,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">Label4</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -3183,8 +4022,6 @@ return {
 							<YO>203</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>60</XO>
@@ -3205,7 +4042,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX6B6C674E9A91413C902F5EE4154CC519">
+				<Item class="TextButton" referent="RBX4C5EACB342DB4193B345A8243118E4D4">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -3219,10 +4056,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">CheckBox2</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -3230,9 +4063,7 @@ return {
 							<YO>160</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>26</XO>
@@ -3253,7 +4084,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX5BC40C57377B4227B789194BD0F0560D">
+					<Item class="TextLabel" referent="RBX8008B05C3ADA49A5920B651A85D7B367">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3265,10 +4096,6 @@ return {
 							<token name="Font">4</token>
 							<token name="FontSize">5</token>
 							<string name="Name">Label</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0</XS>
 								<XO>25</XO>
@@ -3276,8 +4103,6 @@ return {
 								<YO>-10</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>0</XS>
 								<XO>90</XO>
@@ -3299,7 +4124,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="ImageButton" referent="RBXA8C9BDDF0EF04190AA9C97EC507B8528">
+				<Item class="ImageButton" referent="RBX7C85ED03B06E45BFA3DCBF63837D49DB">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -3322,10 +4147,6 @@ return {
 						<float name="ImageTransparency">0</float>
 						<bool name="Modal">false</bool>
 						<string name="Name">ShapeButton1</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>73</XO>
@@ -3333,9 +4154,7 @@ return {
 							<YO>81</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>32</XO>
@@ -3348,7 +4167,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="ImageButton" referent="RBX32E1CD82491B4442890C8962681739E0">
+				<Item class="ImageButton" referent="RBX652F5B6ADD3C4C60898B7E4E5EDEE3A4">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -3371,10 +4190,6 @@ return {
 						<float name="ImageTransparency">0</float>
 						<bool name="Modal">false</bool>
 						<string name="Name">ShapeButton2</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>118</XO>
@@ -3382,9 +4197,7 @@ return {
 							<YO>81</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>32</XO>
@@ -3397,7 +4210,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX74879ED2A93B49D9A899551BB23F0CB4">
+				<Item class="TextLabel" referent="RBX93148F20DA3D4287A473DF7DE97FC38F">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3409,10 +4222,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">Divider2</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -3420,8 +4229,6 @@ return {
 							<YO>195</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -3441,7 +4248,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX15FC8A4CA4EA47C584D54A5E2792003A">
+					<Item class="TextLabel" referent="RBX430EDCBF29F44397B22D71486B5334CF">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3453,10 +4260,6 @@ return {
 							<token name="Font">4</token>
 							<token name="FontSize">6</token>
 							<string name="Name">SubDivider</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0.5</XS>
 								<XO>-1</XO>
@@ -3464,8 +4267,6 @@ return {
 								<YO>2</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>0</XS>
 								<XO>2</XO>
@@ -3485,7 +4286,7 @@ return {
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">2</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBXD8DA7DFAEAB744628DD513261077817B">
+						<Item class="TextLabel" referent="RBX6D4AB04D77EA4AE687D90130C5182BC4">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4286479998</Color3>
@@ -3497,10 +4298,6 @@ return {
 								<token name="Font">4</token>
 								<token name="FontSize">6</token>
 								<string name="Name">Blocker</string>
-								<Ref name="NextSelectionDown">null</Ref>
-								<Ref name="NextSelectionLeft">null</Ref>
-								<Ref name="NextSelectionRight">null</Ref>
-								<Ref name="NextSelectionUp">null</Ref>
 								<UDim2 name="Position">
 									<XS>1</XS>
 									<XO>0</XO>
@@ -3508,8 +4305,6 @@ return {
 									<YO>0</YO>
 								</UDim2>
 								<float name="Rotation">0</float>
-								<bool name="Selectable">false</bool>
-								<Ref name="SelectionImageObject">null</Ref>
 								<UDim2 name="Size">
 									<XS>0</XS>
 									<XO>81</XO>
@@ -3532,7 +4327,7 @@ return {
 						</Item>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX6E46C00D34A7416CA11127E9873F5E75">
+				<Item class="TextLabel" referent="RBX32C6D0BDCA854C219FF359957DB5DC9D">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3544,10 +4339,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">Divider1</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -3555,8 +4346,6 @@ return {
 							<YO>120</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -3577,7 +4366,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX5E285DD932C846828E3AA89ACB8EF0FC">
+				<Item class="TextButton" referent="RBXD51ED08C08B24B0BA66B9FAF17887FAF">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -3591,10 +4380,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">CheckBox3</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>90</XO>
@@ -3602,9 +4387,7 @@ return {
 							<YO>200</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>26</XO>
@@ -3625,7 +4408,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX3C92998963FA41D7804F0E2EB0D180B7">
+					<Item class="TextLabel" referent="RBX2A39110F8C674AED8D68F1F7D1B0B350">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3637,10 +4420,6 @@ return {
 							<token name="Font">4</token>
 							<token name="FontSize">5</token>
 							<string name="Name">Label</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0</XS>
 								<XO>20</XO>
@@ -3648,8 +4427,6 @@ return {
 								<YO>-10</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>0</XS>
 								<XO>90</XO>
@@ -3671,7 +4448,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBXC72F155BB713481890649E4A564A76F3">
+				<Item class="Frame" referent="RBX1D82DC23CFB14401804BC7BC6E1116EA">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3681,10 +4458,6 @@ return {
 						<bool name="ClipsDescendants">false</bool>
 						<bool name="Draggable">false</bool>
 						<string name="Name">DoubleBacking</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>-7</XO>
@@ -3692,8 +4465,6 @@ return {
 							<YO>-7</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>16</XO>
@@ -3706,7 +4477,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXF3D396FD11B04427B42BF16CDAAF69D2">
+				<Item class="TextButton" referent="RBX6146EF09B92247BF8A3E818B69ABE40D">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -3720,10 +4491,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">CheckBox1</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -3731,9 +4498,7 @@ return {
 							<YO>130</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>26</XO>
@@ -3754,7 +4519,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX87CE8F010251441990739A76A34BB4CA">
+					<Item class="TextLabel" referent="RBXF7467A2504794F3A9D364F9007B7AFDC">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3766,10 +4531,6 @@ return {
 							<token name="Font">4</token>
 							<token name="FontSize">5</token>
 							<string name="Name">Label</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0</XS>
 								<XO>25</XO>
@@ -3777,8 +4538,6 @@ return {
 								<YO>-10</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>0</XS>
 								<XO>90</XO>
@@ -3800,7 +4559,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX76B13C37A06A4AA1A5D2499B5D503363">
+				<Item class="TextLabel" referent="RBXB8C4586253F84B4C93301A5A413D23AD">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3812,10 +4571,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">5</token>
 						<string name="Name">ToolTip2</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>1</XS>
 							<XO>10</XO>
@@ -3823,8 +4578,6 @@ return {
 							<YO>55</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>47</XO>
@@ -3844,7 +4597,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">3</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX8A2C6DCDC61C460D972EA7AEE45CBC0C">
+					<Item class="TextLabel" referent="RBX9087DFEA68C64FEEA120B3A2A9F0514C">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3856,10 +4609,6 @@ return {
 							<token name="Font">4</token>
 							<token name="FontSize">5</token>
 							<string name="Name">Shadow</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0</XS>
 								<XO>1</XO>
@@ -3867,8 +4616,6 @@ return {
 								<YO>1</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>0</XS>
 								<XO>47</XO>
@@ -3890,7 +4637,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBX0CB137EA241C42F1A841F63B48458AB5">
+				<Item class="TextLabel" referent="RBXDA1B5029FBF145C18B610668051B989D">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3902,10 +4649,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">5</token>
 						<string name="Name">ToolTip1</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>1</XS>
 							<XO>10</XO>
@@ -3913,8 +4656,6 @@ return {
 							<YO>30</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>47</XO>
@@ -3934,7 +4675,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">3</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX0A09E5C5361C499295CCCBC90B0B326A">
+					<Item class="TextLabel" referent="RBX623F9EE85A9A4BEFA86726DA4AE2D62B">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -3946,10 +4687,6 @@ return {
 							<token name="Font">4</token>
 							<token name="FontSize">5</token>
 							<string name="Name">Shadow</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0</XS>
 								<XO>1</XO>
@@ -3957,8 +4694,6 @@ return {
 								<YO>1</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>0</XS>
 								<XO>47</XO>
@@ -3982,7 +4717,7 @@ return {
 				</Item>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBX78FFD72FC1544532A18469F120075708">
+		<Item class="ModuleScript" referent="RBX8970D56ED60A499E90077947BA2EA615">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">RegionEditorModule</string>
@@ -4026,7 +4761,7 @@ function FirstTimeSetUp()
 	setup = true
 	local changeHistory = game:GetService('ChangeHistoryService')
 	local terrain = game.Workspace.Terrain
-	local coreGui = game.Players.LocalPlayer and game.Players.LocalPlayer:WaitForChild('PlayerGui') or game:GetService('CoreGui')
+	local coreGui = game:GetService('CoreGui')
 	local gui = script.Parent:WaitForChild('TerrainRegionGui')
 	local guiFrame = gui:WaitForChild('Frame')
 	local closeButton = guiFrame:WaitForChild('CloseButton')
@@ -4624,9 +5359,7 @@ function FirstTimeSetUp()
 
 			terrain:PasteRegion(copyRegion,Vector3int16.new(selectionStart.x-1,selectionStart.y-1,selectionStart.z-1),true)
 			setButton('Move')
-			if not game.Players.LocalPlayer then
-				changeHistory:SetWaypoint('Terrain Paste')
-			end
+			changeHistory:SetWaypoint('Terrain Paste')
 			selectionEffect(nil,nil,'Lime green',1.2,1,.5)
 		end
 	end)
@@ -4660,9 +5393,7 @@ function FirstTimeSetUp()
 			selectionStart, selectionEnd = nil, nil
 			setButton('Select')
 
-			if not game.Players.LocalPlayer then
-				changeHistory:SetWaypoint('Terrain Delete')
-			end
+			changeHistory:SetWaypoint('Terrain Delete')
 			selectionEffect(oldStart,oldEnd,'Really red',1,1.2,.5)
 		end
 	end)
@@ -4737,7 +5468,6 @@ function FirstTimeSetUp()
 		--regionEditButton:SetActive(true)
 		on = true
 		gui.Parent = coreGui
-		gui.Frame.Visible = true
 
 		if not selectionPart then
 			selectionPart = Instance.new('Part')
@@ -4785,8 +5515,6 @@ function FirstTimeSetUp()
 	function Deselected()
 		setButton('Select')
 		gui.Parent = script.Parent
-		gui.Frame.Visible = false		
-		
 		clearSelection()
 		--regionEditButton:SetActive(false)
 		behindThis = nil
@@ -4862,9 +5590,7 @@ function FirstTimeSetUp()
 				selectionStart = selectionStart + dragVector
 				selectionEnd = selectionEnd + dragVector
 			end
-			if not game.Players.LocalPlayer then
-				changeHistory:SetWaypoint('Terrain '..button)
-			end
+			changeHistory:SetWaypoint('Terrain '..button)
 		end
 		if dragAngle and dragAngle ~= 0 then
 			local rotationCFrame = CFrame.Angles(
@@ -4883,9 +5609,7 @@ function FirstTimeSetUp()
 			selectionEnd = selectionStart + centerOffset + Vector3.new(temporarySizeX, temporarySizeY, temporarySizeZ) - Vector3.new(1, 1, 1)
 			selectionStart = selectionStart + centerOffset
 			lockInMap()
-			if not game.Players.LocalPlayer then
-				changeHistory:SetWaypoint('Terrain '..button)
-			end
+			changeHistory:SetWaypoint('Terrain '..button)
 		end
 
 		dragVector = nil
@@ -4909,11 +5633,9 @@ function FirstTimeSetUp()
 		lockedOccupancies = nil
 		setButton('Select')
 	end
-	
-	if not game.Players.LocalPlayer then
-		changeHistory.OnUndo:connect(historyChanged)
-		changeHistory.OnRedo:connect(historyChanged)
-	end
+
+	changeHistory.OnUndo:connect(historyChanged)
+	changeHistory.OnRedo:connect(historyChanged)
 
 end
 
@@ -4941,11 +5663,11 @@ return {
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ScreenGui" referent="RBX60889E443AE64B78B5B6A2969D5EF89C">
+		<Item class="ScreenGui" referent="RBX71EB37583A2E46E2A3A8E24B22003A00">
 			<Properties>
 				<string name="Name">TerrainRegionGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX5FA234C786A24D5CA1375C3D80CE2BF2">
+			<Item class="Frame" referent="RBX10D06D0EA2764001919257D9433B1F08">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4955,10 +5677,6 @@ return {
 					<bool name="ClipsDescendants">false</bool>
 					<bool name="Draggable">false</bool>
 					<string name="Name">Frame</string>
-					<Ref name="NextSelectionDown">null</Ref>
-					<Ref name="NextSelectionLeft">null</Ref>
-					<Ref name="NextSelectionRight">null</Ref>
-					<Ref name="NextSelectionUp">null</Ref>
 					<UDim2 name="Position">
 						<XS>0</XS>
 						<XO>0</XO>
@@ -4966,8 +5684,6 @@ return {
 						<YO>0</YO>
 					</UDim2>
 					<float name="Rotation">0</float>
-					<bool name="Selectable">false</bool>
-					<Ref name="SelectionImageObject">null</Ref>
 					<UDim2 name="Size">
 						<XS>0</XS>
 						<XO>180</XO>
@@ -4976,10 +5692,10 @@ return {
 					</UDim2>
 					<token name="SizeConstraint">0</token>
 					<token name="Style">6</token>
-					<bool name="Visible">false</bool>
+					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX3104FEE19C914764B8CE6BC7B109CC5B">
+				<Item class="TextButton" referent="RBXCFDF63E2C6E04BD9B6466A0F77CA655E">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -4993,10 +5709,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonSelect</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5004,9 +5716,7 @@ return {
 							<YO>35</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -5028,7 +5738,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXEE5805618F6841EEBF6451A382012200">
+				<Item class="TextButton" referent="RBX4D405A0534FC4FDF890DF5E404005508">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5042,10 +5752,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonRotate</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5053,9 +5759,7 @@ return {
 							<YO>125</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -5077,7 +5781,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX27EB5CCA1F7E44688D4C51F9A8AFF8DE">
+				<Item class="TextButton" referent="RBX1A4CE5A1E9634626BBC29BFE94BADD0F">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5091,10 +5795,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonResize</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5102,9 +5802,7 @@ return {
 							<YO>95</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -5126,7 +5824,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX6BF8931FD2F840FCA5F43CCF0435D24F">
+				<Item class="TextLabel" referent="RBX2F39CB22B70C4BC682C7C24362130C31">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5138,10 +5836,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">Divider2</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -5149,8 +5843,6 @@ return {
 							<YO>165</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -5171,7 +5863,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXF12C3C7A1FEB4ABAAE1CD5E13CFEB443">
+				<Item class="TextButton" referent="RBX8A438389EDC5470B8B6764A496750C47">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5185,10 +5877,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonCopy</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5196,9 +5884,7 @@ return {
 							<YO>175</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -5220,7 +5906,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX2ECD4875AE274B87BB2DFBDE5FCA605D">
+				<Item class="TextButton" referent="RBXD0847DC0C35F425688FE8F0D8DF23A6D">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5234,10 +5920,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonPaste</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5245,9 +5927,7 @@ return {
 							<YO>205</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -5269,7 +5949,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX116680A070DC4DAF9CEF31356551A9E8">
+				<Item class="TextButton" referent="RBX85D5D283D5014573AD6B0CA39401F456">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5283,10 +5963,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonFillAir</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5294,9 +5970,7 @@ return {
 							<YO>285</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>30</XO>
@@ -5317,7 +5991,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXC899F6FF780149918CA9B975A2258AE2">
+					<Item class="TextLabel" referent="RBX1C5FDFA556204052A3466F0817FC670C">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5329,10 +6003,6 @@ return {
 							<token name="Font">4</token>
 							<token name="FontSize">6</token>
 							<string name="Name">Label</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0</XS>
 								<XO>30</XO>
@@ -5340,8 +6010,6 @@ return {
 								<YO>-10</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>0</XS>
 								<XO>90</XO>
@@ -5363,7 +6031,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextLabel" referent="RBXA0F18F77E1E14365A99F9A269790A00C">
+				<Item class="TextLabel" referent="RBX1C20DC072A214382828F5C106E9C127C">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5375,10 +6043,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">Divider3</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -5386,8 +6050,6 @@ return {
 							<YO>275</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -5408,7 +6070,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX1CA5B872B7E44342A2450BC3C89CFAE7">
+				<Item class="TextButton" referent="RBX9E0320B3BBF140E3BD4A5C5640412074">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5422,10 +6084,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonFillWater</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5433,9 +6091,7 @@ return {
 							<YO>315</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>30</XO>
@@ -5456,7 +6112,7 @@ return {
 						<bool name="Visible">false</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBX4FE27F60B30845FF9E0B63CF431EECB1">
+					<Item class="TextLabel" referent="RBX0B4F76DBB31C4AAB82798FCEB3233FB4">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5468,10 +6124,6 @@ return {
 							<token name="Font">4</token>
 							<token name="FontSize">6</token>
 							<string name="Name">Label</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0</XS>
 								<XO>30</XO>
@@ -5479,8 +6131,6 @@ return {
 								<YO>-10</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>0</XS>
 								<XO>90</XO>
@@ -5502,7 +6152,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX43BF5B82E5F34CDDAF08258FBBE2F3F7">
+				<Item class="Frame" referent="RBX5946C076328F43B3AF3653B013D74042">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5512,10 +6162,6 @@ return {
 						<bool name="ClipsDescendants">false</bool>
 						<bool name="Draggable">false</bool>
 						<string name="Name">DoubleBacking</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>-7</XO>
@@ -5523,8 +6169,6 @@ return {
 							<YO>-7</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>16</XO>
@@ -5537,7 +6181,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX4900C222B5334015A44064B58C71D199">
+				<Item class="TextButton" referent="RBX4BCD02A8384F4DD883BE5D56C0448CDD">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5551,10 +6195,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonMove</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5562,9 +6202,7 @@ return {
 							<YO>65</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -5586,7 +6224,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX91873563D6594DB99BDE280CD71A1BA5">
+				<Item class="TextButton" referent="RBXE44F9BEEF82F4997AD5623614A164F7E">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5600,10 +6238,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ButtonDelete</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5611,9 +6245,7 @@ return {
 							<YO>235</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -5635,7 +6267,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX1FFD977992BB402A963A0C2F24ACACC8">
+				<Item class="TextLabel" referent="RBX6D9749053AC84EA7A4156E88CF1510C8">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5647,10 +6279,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">TitleLabel</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -5658,8 +6286,6 @@ return {
 							<YO>0</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -5680,7 +6306,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBXCA616A7E6F0E429B9FB4D7E05132A4E7">
+				<Item class="TextButton" referent="RBX2ECEF6FE486D4DE3AE06DA4B20436137">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -5694,10 +6320,6 @@ return {
 						<token name="FontSize">4</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">CloseButton</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>1</XS>
 							<XO>-26</XO>
@@ -5705,9 +6327,7 @@ return {
 							<YO>0</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>25</XO>
@@ -5731,11 +6351,11 @@ return {
 				</Item>
 			</Item>
 		</Item>
-		<Item class="ScreenGui" referent="RBXEE7E1A1CC7C4400F90A21C96A8028609">
+		<Item class="ScreenGui" referent="RBX3FF171EA67AE4D7E9C8BB25CA8D3B038">
 			<Properties>
 				<string name="Name">TerrainGenerationGui</string>
 			</Properties>
-			<Item class="Frame" referent="RBX3C7E16044834498782504A7871CA7057">
+			<Item class="Frame" referent="RBXCB6584CF30804AA3857743F80A166348">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5745,10 +6365,6 @@ return {
 					<bool name="ClipsDescendants">false</bool>
 					<bool name="Draggable">false</bool>
 					<string name="Name">Frame</string>
-					<Ref name="NextSelectionDown">null</Ref>
-					<Ref name="NextSelectionLeft">null</Ref>
-					<Ref name="NextSelectionRight">null</Ref>
-					<Ref name="NextSelectionUp">null</Ref>
 					<UDim2 name="Position">
 						<XS>0</XS>
 						<XO>0</XO>
@@ -5756,8 +6372,6 @@ return {
 						<YO>0</YO>
 					</UDim2>
 					<float name="Rotation">0</float>
-					<bool name="Selectable">false</bool>
-					<Ref name="SelectionImageObject">null</Ref>
 					<UDim2 name="Size">
 						<XS>0</XS>
 						<XO>200</XO>
@@ -5766,10 +6380,10 @@ return {
 					</UDim2>
 					<token name="SizeConstraint">0</token>
 					<token name="Style">6</token>
-					<bool name="Visible">false</bool>
+					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="TextButton" referent="RBX5EBB3CB599CC42199C410D29D147B996">
+				<Item class="TextButton" referent="RBX80F77AA733F54A42B7C6985A2F86B82D">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -5783,10 +6397,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">ClearButton</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -5794,9 +6404,7 @@ return {
 							<YO>-35</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -5818,7 +6426,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBX3A3DE5D0CF5149A592003F6ED523168A">
+				<Item class="TextLabel" referent="RBX5B8A9991975D4351B88312DD0AB2768B">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5830,10 +6438,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">Divider</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -5841,8 +6445,6 @@ return {
 							<YO>-80</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -5863,7 +6465,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="Frame" referent="RBX702D9B0143DB436E8A2C8E35E1DD9D3F">
+				<Item class="Frame" referent="RBX687C2DBC367A4E6385928AF722FE91B5">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5873,10 +6475,6 @@ return {
 						<bool name="ClipsDescendants">false</bool>
 						<bool name="Draggable">false</bool>
 						<string name="Name">DoubleBacking</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>-7</XO>
@@ -5884,8 +6482,6 @@ return {
 							<YO>-7</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>16</XO>
@@ -5898,7 +6494,7 @@ return {
 						<int name="ZIndex">1</int>
 					</Properties>
 				</Item>
-				<Item class="TextLabel" referent="RBXA26652DF0BD7406094383B813ACB3596">
+				<Item class="TextLabel" referent="RBX258A15165181441D9FF66010845DFF6E">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -5910,10 +6506,6 @@ return {
 						<token name="Font">4</token>
 						<token name="FontSize">6</token>
 						<string name="Name">TitleLabel</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -5921,8 +6513,6 @@ return {
 							<YO>0</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -5943,7 +6533,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="TextButton" referent="RBX5512CAD22F0C4479B06E5A46587ABCA6">
+				<Item class="TextButton" referent="RBXFAAD2E56B2D5453680E50D0FC05A5683">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">false</bool>
@@ -5957,10 +6547,6 @@ return {
 						<token name="FontSize">4</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">CloseButton</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>1</XS>
 							<XO>-26</XO>
@@ -5968,9 +6554,7 @@ return {
 							<YO>0</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>25</XO>
@@ -5992,7 +6576,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="ScrollingFrame" referent="RBXBEB046202CFE4CD98609F0CCF371E7CE">
+				<Item class="ScrollingFrame" referent="RBX9D3D366E428B447F88F32E83DA8637AB">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6014,10 +6598,6 @@ return {
 						<bool name="Draggable">false</bool>
 						<Content name="MidImage"><url>rbxasset://textures/ui/smooth.png</url></Content>
 						<string name="Name">ScrollingFrame</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -6027,8 +6607,6 @@ return {
 						<float name="Rotation">0</float>
 						<int name="ScrollBarThickness">12</int>
 						<bool name="ScrollingEnabled">true</bool>
-						<bool name="Selectable">true</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -6040,7 +6618,7 @@ return {
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">2</int>
 					</Properties>
-					<Item class="Frame" referent="RBX1C761D0E328C42618E425E8BD8D219AA">
+					<Item class="Frame" referent="RBX014FF518C2F74642BDBAFCC91F63C5CE">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6050,10 +6628,6 @@ return {
 							<bool name="ClipsDescendants">false</bool>
 							<bool name="Draggable">false</bool>
 							<string name="Name">Canvas</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>0</XS>
 								<XO>0</XO>
@@ -6061,8 +6635,6 @@ return {
 								<YO>0</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
 							<UDim2 name="Size">
 								<XS>1</XS>
 								<XO>-13</XO>
@@ -6076,7 +6648,7 @@ return {
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="TextButton" referent="RBX778A634F82944235B973F49EFA1DBBD2">
+				<Item class="TextButton" referent="RBX7FA8EC9134AA40AF8A7FA3CB792C3411">
 					<Properties>
 						<bool name="Active">true</bool>
 						<bool name="AutoButtonColor">true</bool>
@@ -6090,10 +6662,6 @@ return {
 						<token name="FontSize">6</token>
 						<bool name="Modal">false</bool>
 						<string name="Name">GenerateButton</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>10</XO>
@@ -6101,9 +6669,7 @@ return {
 							<YO>-70</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">true</bool>
 						<bool name="Selected">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>-20</XO>
@@ -6125,7 +6691,7 @@ return {
 						<int name="ZIndex">2</int>
 					</Properties>
 				</Item>
-				<Item class="Frame" referent="RBX128386BE2A714DB1A8D9C02EB4EA139E">
+				<Item class="Frame" referent="RBX1387D3B73ED44945B5D62391EF24359F">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4278190080</Color3>
@@ -6135,10 +6701,6 @@ return {
 						<bool name="ClipsDescendants">false</bool>
 						<bool name="Draggable">false</bool>
 						<string name="Name">ScrollBackground</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>1</XS>
 							<XO>-12</XO>
@@ -6146,8 +6708,6 @@ return {
 							<YO>30</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>12</XO>
@@ -6161,7 +6721,7 @@ return {
 					</Properties>
 				</Item>
 			</Item>
-			<Item class="TextButton" referent="RBX7590D38F089D41B4A6D30BD4ACC37230">
+			<Item class="TextButton" referent="RBXA00810F4B64D45198B90878A4E5EF9A8">
 				<Properties>
 					<bool name="Active">true</bool>
 					<bool name="AutoButtonColor">true</bool>
@@ -6175,10 +6735,6 @@ return {
 					<token name="FontSize">6</token>
 					<bool name="Modal">false</bool>
 					<string name="Name">TemplateCheckBox</string>
-					<Ref name="NextSelectionDown">null</Ref>
-					<Ref name="NextSelectionLeft">null</Ref>
-					<Ref name="NextSelectionRight">null</Ref>
-					<Ref name="NextSelectionUp">null</Ref>
 					<UDim2 name="Position">
 						<XS>0</XS>
 						<XO>5</XO>
@@ -6186,9 +6742,7 @@ return {
 						<YO>-36</YO>
 					</UDim2>
 					<float name="Rotation">0</float>
-					<bool name="Selectable">true</bool>
 					<bool name="Selected">false</bool>
-					<Ref name="SelectionImageObject">null</Ref>
 					<UDim2 name="Size">
 						<XS>0</XS>
 						<XO>26</XO>
@@ -6209,7 +6763,7 @@ return {
 					<bool name="Visible">false</bool>
 					<int name="ZIndex">2</int>
 				</Properties>
-				<Item class="TextLabel" referent="RBXD5ADDA995C434D269BC22780AF255C4C">
+				<Item class="TextLabel" referent="RBXC2C637C481FF4F1C842E3AEA4D5D8A58">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6221,10 +6775,6 @@ return {
 						<token name="Font">2</token>
 						<token name="FontSize">5</token>
 						<string name="Name">Label</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>20</XO>
@@ -6232,8 +6782,6 @@ return {
 							<YO>-10</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>0</XS>
 							<XO>90</XO>
@@ -6255,7 +6803,7 @@ return {
 					</Properties>
 				</Item>
 			</Item>
-			<Item class="TextButton" referent="RBX0E453F1F6CF246F392BE87FCF1814488">
+			<Item class="TextButton" referent="RBX6B93488EDD37491CB6903B68B628A715">
 				<Properties>
 					<bool name="Active">true</bool>
 					<bool name="AutoButtonColor">false</bool>
@@ -6269,10 +6817,6 @@ return {
 					<token name="FontSize">6</token>
 					<bool name="Modal">false</bool>
 					<string name="Name">TemplateSection</string>
-					<Ref name="NextSelectionDown">null</Ref>
-					<Ref name="NextSelectionLeft">null</Ref>
-					<Ref name="NextSelectionRight">null</Ref>
-					<Ref name="NextSelectionUp">null</Ref>
 					<UDim2 name="Position">
 						<XS>0</XS>
 						<XO>0</XO>
@@ -6280,9 +6824,7 @@ return {
 						<YO>0</YO>
 					</UDim2>
 					<float name="Rotation">0</float>
-					<bool name="Selectable">true</bool>
 					<bool name="Selected">false</bool>
-					<Ref name="SelectionImageObject">null</Ref>
 					<UDim2 name="Size">
 						<XS>1</XS>
 						<XO>0</XO>
@@ -6303,7 +6845,7 @@ return {
 					<bool name="Visible">false</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="Frame" referent="RBX1C6C8B16D54D48FFAEFAF8EC99AC6A00">
+				<Item class="Frame" referent="RBXFAFFEC048A9448A5AFE03A6A7C503586">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6313,10 +6855,6 @@ return {
 						<bool name="ClipsDescendants">false</bool>
 						<bool name="Draggable">false</bool>
 						<string name="Name">Frame</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
 						<UDim2 name="Position">
 							<XS>0</XS>
 							<XO>0</XO>
@@ -6324,8 +6862,6 @@ return {
 							<YO>0</YO>
 						</UDim2>
 						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
 						<UDim2 name="Size">
 							<XS>1</XS>
 							<XO>0</XO>
@@ -6339,1059 +6875,6 @@ return {
 					</Properties>
 				</Item>
 			</Item>
-		</Item>
-		<Item class="LocalScript" referent="RBXF0D6575D62C143A6B11AE94A6A22D032">
-			<Properties>
-				<bool name="Disabled">false</bool>
-				<Content name="LinkedSource"><null></null></Content>
-				<string name="Name">TerrainBrushScript</string>
-				<ProtectedString name="Source"><![CDATA[--Made by Stickmasterluke
-
-
-while not workspace:WaitForChild('Terrain').IsSmooth do
-	workspace.Terrain.Changed:wait()
-end
-
-local on = false
-local setup = false
-local currentTool = nil
-local utilityModule = require(script.Parent.Utility)(plugin)
-
-
---[[
-	How to add a module:
-		1. Add the require to the modules table below.
-		2. Add a plugin button for it into the pluginButtons table, with the same index as used in the modules table.
-		3. You win.
-
-	How modules work
-		Your ModuleScript should return a table. The table can contain the following functions
-			On	= This function will be called when your tool is selected. Will hand in the mouse object, and a Deselect function to turn it off.
-			Off	= This function will be called when your tool is deselected.
-			operation = This function will be called when this toolset's brushing functionality is used
-				operation(centerPoint, materialsTable, occupanciesTable, resolution, selectionSize, strength, desiredMaterial, brushShape, minBounds, maxBounds)
-]]
-
-local modules = {
-	['Smooth'] = require(script.Parent.SmootherModule),
-	['Generate'] = utilityModule:GetUsingAsPlugin() and require(script.Parent.GenerationModule) or {},
-	['Region Editor'] = require(script.Parent.RegionEditorModule),
-}
-
-
-local buttonCreator = utilityModule:GetButtonCreator()
-
-local plugins = {
-	{name = 'Generate',
-		button = utilityModule:GetUsingAsPlugin() and buttonCreator:CreateButton(
-			'Generate',									--button title
-			'Generate landscapes of terrain.',			--hover text
-			'http://www.roblox.com/asset/?id=236006872'	--button image
-		),
-		studioOnly = true,
-	},
-	{name = 'Add',
-		button = buttonCreator:CreateButton(
-			'Add',
-			'Click and hold to add terrain.',
-			'http://www.roblox.com/asset/?id=225328572'
-		),
-		usesMaterials = true,
-	},
-	{name = 'Subtract',
-		button = buttonCreator:CreateButton(
-			'Subtract',
-			'Click and hold to remove terrain.',
-			'http://www.roblox.com/asset/?id=225328818'
-		),
-	},
-	{name = 'Paint',
-		button = buttonCreator:CreateButton(
-			'Paint',
-			'Paint the material of the terrain.',
-			'http://www.roblox.com/asset/?id=225328954'
-		),
-		usesMaterials = true,
-	},
-	{name = 'Grow',
-		button = buttonCreator:CreateButton(
-			'Grow',
-			'Click and hold to grow and expand terrain.',
-			'http://www.roblox.com/asset/?id=225329153'
-		),
-		usesMaterials = true,
-	},
-	{name = 'Erode',
-		button = buttonCreator:CreateButton(
-			'Erode',
-			'Click and hold to erode and remove terrain.',
-			'http://www.roblox.com/asset/?id=225329301'
-		),
-	},
-	{name = 'Smooth',
-		button = buttonCreator:CreateButton(
-			'Smooth',
-			'Brush to smooth out rough or jagged terrain.',
-			'http://www.roblox.com/asset/?id=225329641'
-		),
-	},
-	{name = 'Region Editor',
-		button = buttonCreator:CreateButton(
-			'Regions',
-			'Manipulate regions of smooth terrain.',
-			'http://www.roblox.com/asset/?id=240631063'
-		),
-	},
-}
-
-for i,tool in pairs(plugins) do
-	if not tool.studioOnly or (utilityModule:GetUsingAsPlugin() and tool.studioOnly) then
-		tool.button.Click:connect(function()
-			if not on or (currentTool ~= nil and tool ~= currentTool) then	--if off or on but current tool isn't the desired tool, then select this tool.
-				if not setup then	--I do this so that things only get set up when this plugin is used.
-					FirstTimeSetUp()
-				end
-				Selected(tool)
-			else
-				Deselected()
-			end
-		end)
-		if not utilityModule:GetUsingAsPlugin() then
-			if tool.button.Deselected then
-				tool.button.Deselected:connect(function()
-					Deselected()
-				end)
-			end
-		end
-	end
-end
-
-function FirstTimeSetUp()
-	setup = true
-	local changeHistory = utilityModule:GetUsingAsPlugin() and game:GetService('ChangeHistoryService') or nil 
-	local terrain = game.Workspace.Terrain
-	local coreGui = utilityModule:GetCoreGui()
-	local gui = script.Parent:WaitForChild('TerrainBrushGui')
-	local guiFrame = gui:WaitForChild('Frame')
-	local closeButton = guiFrame:WaitForChild('CloseButton')
-	local titlelabel = guiFrame:WaitForChild('TitleLabel')
-	local checkBox1 = guiFrame:WaitForChild('CheckBox1')
-	local checkBox2 = guiFrame:WaitForChild('CheckBox2')
-	local checkBox3 = guiFrame:WaitForChild('CheckBox3')
-	local toolTip1 = guiFrame:WaitForChild('ToolTip1')
-	local toolTip2 = guiFrame:WaitForChild('ToolTip2')
-	local label4 = guiFrame:WaitForChild('Label4')
-	local divider2 = guiFrame:WaitForChild('Divider2')
-	local library = assert(LoadLibrary('RbxGui'))
-	local mouse = utilityModule:GetMouse()
-	local userInput = game:GetService('UserInputService')
-	local prevCameraType = game.Workspace.CurrentCamera.CameraType
-
-	--SUB SETTINGS--	(Non-userfacing Settings)
-	local resolution = 4			--This is the size of voxels on Roblox. Why is this a variable? ;)
-	local minSelectionSize = 1
-	local maxSelectionSize = 16
-	local clickThreshold = .1
-	local toolTipShowTime = 3.5
-	local materialsTable = {	--Interface order is defined by order here
-		{enum = Enum.Material.Grass, image = 'http://www.roblox.com/asset/?id=225314676'},
-		{enum = Enum.Material.Sand, image = 'http://www.roblox.com/asset/?id=225315607'},
-		{enum = Enum.Material.Rock, image = 'http://www.roblox.com/asset/?id=225315178'},
-		{enum = Enum.Material.Slate, image = 'http://www.roblox.com/asset/?id=225315290'},
-		{enum = Enum.Material.Water, image = 'http://www.roblox.com/asset/?id=225315529'},
-		{enum = Enum.Material.WoodPlanks, image = 'http://www.roblox.com/asset/?id=225315705', forceSnapToGrid=true},
-		{enum = Enum.Material.Brick, image = 'http://www.roblox.com/asset/?id=225315419', forceSnapToGrid=true},
-		{enum = Enum.Material.Concrete, image = 'http://www.roblox.com/asset/?id=225314983'},
-		{enum = Enum.Material.Glacier, image = 'http://www.roblox.com/asset/?id=254541572'},
-		{enum = Enum.Material.Snow, image = 'http://www.roblox.com/asset/?id=254541898'},
-		{enum = Enum.Material.Sandstone, image = 'http://www.roblox.com/asset/?id=254541350'},
-		{enum = Enum.Material.Mud, image = 'http://www.roblox.com/asset/?id=254541862'},
-		{enum = Enum.Material.Basalt, image = 'http://www.roblox.com/asset/?id=254542066'},
-		{enum = Enum.Material.Ground, image = 'http://www.roblox.com/asset/?id=254542189'},
-		{enum = Enum.Material.CrackedLava, image = 'http://www.roblox.com/asset/?id=254541726'},
-	}
-	local brushShapes = {
-		['Sphere'] = {
-			name = 'Sphere',
-			button = guiFrame:WaitForChild('ShapeButton1'),
-			image = 'http://www.roblox.com/asset/?id=225799533',
-			selectedImage = 'http://www.roblox.com/asset/?id=225801914',
-		},
-		['Box'] = {
-			name = 'Box',
-			button = guiFrame:WaitForChild('ShapeButton2'),
-			image = 'http://www.roblox.com/asset/?id=225799696',
-			selectedImage = 'http://www.roblox.com/asset/?id=225802254',
-		},
-	}
-	----------------
-
-	----SETTINGS----	(Interface Settings)
-	local selectionSize = 6
-	local strength = .5
-	local snapToGrid = false
-	local planeLock = false
-	local brushShape = 'Sphere'
-	local materialSelection = materialsTable[1]
-	local dynamicMaterial = false
-	----------------
-
-	----Variables----
-	local forcePlaneLock = false
-	local forceSnapToGrid = false
-	local forceDynamicMaterial = false
-	local forceDynamicMaterialTo = true
-	local forceMaterial = nil
-	local nearMaterial = nil
-	local selectionPart = nil
-	local selectionObject = nil
-	local gridLineParts = {}
-	local currentLoopTag = nil
-	local lastMainPoint = Vector3.new(0, 0, 0)
-	local click = false
-	local firstOperation = tick()
-	local downKeys = {}
-	local lastPlanePoint = Vector3.new(0, 0, 0)
-	local lastNormal = Vector3.new(0, 1, 0)
-	local lastCursorDistance = 300
-	local toolTip1Change = nil
-	local toolTip2Change = nil
-	local materialAir = Enum.Material.Air
-	local materialWater = Enum.Material.Water
-	local ceil = math.ceil
-	local floor = math.floor
-	local abs = math.abs
-	local min = math.min
-	local max = math.max
-	local sqrt = math.sqrt
-	local sin = math.sin
-	local cos = math.cos
-	local pi = math.pi
-	---------------
-
-
-	local selectionSizeSlider, selectionSizeValue = library.CreateSlider(maxSelectionSize, 90, UDim2.new(1, -98, 0, 40))
-	selectionSizeSlider.Parent = guiFrame
-	selectionSizeValue.Changed:connect(function()
-		selectionSize = selectionSizeValue.Value
-		if selectionPart then
-			selectionPart.Size = Vector3.new(1, 1, 1) * selectionSize * resolution + Vector3.new(.1, .1, .1)
-		end
-
-		toolTip1.Visible = true
-		local currentToolTip1Change = {}
-		toolTip1Change = currentToolTip1Change
-		wait(toolTipShowTime)
-		if toolTip1Change == currentToolTip1Change then
-			toolTip1.Visible = false
-		end
-	end)
-	selectionSizeValue.Value = selectionSize
-	toolTip1.Visible = false
-
-
-	local strengthslider, strengthValue = library.CreateSlider(101, 90, UDim2.new(1, -98, 0, 65))
-	strengthslider.Parent = guiFrame
-	strengthValue.Changed:connect(function()
-		strength = (strengthValue.Value - 1) / 100
-		if selectionObject then
-			selectionObject.SurfaceTransparency = .95 - strength * .3
-		end
-
-		toolTip2.Visible = true
-		local currentToolTip2Change = {}
-		toolTip2Change = currentToolTip2Change
-		wait(toolTipShowTime)
-		if toolTip2Change == currentToolTip2Change then
-			toolTip2.Visible = false
-		end
-	end)
-	strengthValue.Value = strength * 100
-	toolTip2.Visible = false
-
-	function setBrushShape(newBrushShape)
-		brushShape = newBrushShape
-		for _,v in pairs(brushShapes) do
-			--v.button.Image = (newBrushShape == v) and v.selectedImage or v.image
-			v.button.ImageTransparency = (newBrushShape == v.name) and 0 or .5
-			v.button.ImageColor3 = (newBrushShape == v.name) and Color3.new(1,1,1) or Color3.new(.5,.5,.5)
-		end
-		clearSelection()
-	end
-	for _,v in pairs(brushShapes) do
-		v.button.MouseButton1Down:connect(function()
-			setBrushShape(v.name)
-		end)
-	end
-
-	local function setMaterialSelection(newMaterialSelection)
-		materialSelection = newMaterialSelection
-		forceSnapToGrid = materialSelection.forceSnapToGrid
-		updateSnapToGrid()
-		for _, v in pairs(guiFrame:GetChildren()) do
-			if string.sub(v.Name,1,14) == 'MaterialButton' then
-				if v.Name == 'MaterialButton' .. materialSelection.enum.Name then
-					v.BackgroundTransparency = .1
-				else
-					v.BackgroundTransparency = 1
-				end
-			end
-		end
-	end
-	for i,materialSubTable in pairs(materialsTable) do
-		local newMaterialButton = Instance.new('ImageButton')
-		newMaterialButton.Name = 'MaterialButton' .. materialSubTable.enum.Name
-		newMaterialButton.BorderSizePixel = 2
-		newMaterialButton.BorderColor3 = Color3.new(.2, 1, 1)
-		newMaterialButton.BackgroundColor3 = Color3.new(.2, 1, 1)
-		newMaterialButton.BackgroundTransparency = 1
-		newMaterialButton.Image = materialSubTable.image
-		newMaterialButton.Size = UDim2.new(0, 35, 0, 35)
-		newMaterialButton.Position = UDim2.new(0, 5 + ((i-1) % 4) * 40, 0, 195 + ceil(i/4) * 40)
-		newMaterialButton.MouseButton1Down:connect(function()
-			setMaterialSelection(materialsTable[i])
-		end)
-		newMaterialButton.Parent = guiFrame
-	end
-
-	function resizeGuiFrame()
-		local materialsDynamic = dynamicMaterial
-		if forceDynamicMaterial then
-			materialsDynamic = forceDynamicMaterialTo
-		end
-		local desiredSize = UDim2.new(0, 180, 0, 210)
-		if currentTool and currentTool.usesMaterials then
-			checkBox3.Visible=true
-			label4.Visible=true
-			divider2.Visible=true
-			desiredSize = desiredSize + UDim2.new(0, 0, 0, 35)
-			if not materialsDynamic then
-				desiredSize = desiredSize + UDim2.new(0, 0, 0, 5 + ceil(#materialsTable / 4) * 40)	--Dynamically resizes frame if we add more materials later.
-			end
-		else
-			checkBox3.Visible=false
-			label4.Visible=false
-			divider2.Visible=false
-		end
-		guiFrame.Size = desiredSize
-		--guiFrame:TweenSize(desiredSize, 'Out', 'Quad', .5)	--illegal in studio
-	end
-
-
-	function updatePlaneLock()
-		checkBox1.Style = forcePlaneLock and Enum.ButtonStyle.RobloxRoundButton or Enum.ButtonStyle.RobloxRoundDefaultButton
-		checkBox1.Text = (planeLock or forcePlaneLock) and 'X' or ''
-		checkBox1.AutoButtonColor = not forcePlaneLock
-		if not (planeLock or forcePlaneLock) then
-			clearGrid()
-		end
-	end
-	checkBox1.MouseButton1Down:connect(function()
-		planeLock = not planeLock
-		updatePlaneLock()
-	end)
-
-	function updateSnapToGrid()
-		checkBox2.Style = forceSnapToGrid and Enum.ButtonStyle.RobloxRoundButton or Enum.ButtonStyle.RobloxRoundDefaultButton
-		checkBox2.Text = (snapToGrid or forceSnapToGrid) and 'X' or ''
-		checkBox2.AutoButtonColor = not forceSnapToGrid
-	end
-	checkBox2.MouseButton1Down:connect(function()
-		snapToGrid = not snapToGrid
-		updateSnapToGrid()
-	end)
-
-	function updateDynamicMaterial()
-		local isDynamic = dynamicMaterial
-		if forceDynamicMaterial then
-			isDynamic = forceDynamicMaterialTo
-		end
-		checkBox3.Style = forceDynamicMaterial and Enum.ButtonStyle.RobloxRoundButton or Enum.ButtonStyle.RobloxRoundDefaultButton
-		checkBox3.AutoButtonColor = not forceDynamicMaterial
-		checkBox3.Text =  isDynamic and 'X' or ''
-		resizeGuiFrame()
-		for _, v in pairs(guiFrame:GetChildren()) do
-			if string.sub(v.Name,1,14) == 'MaterialButton' then
-				v.Visible = not isDynamic
-			end
-		end
-	end
-	checkBox3.MouseButton1Down:connect(function()
-		dynamicMaterial = not dynamicMaterial
-		updateDynamicMaterial()
-	end)
-	-------------
-
-
-	do
-		local runService = game:GetService('RunService').RenderStepped
-		function quickWait(waitTime)
-			if not waitTime then
-				runService:wait()
-			elseif waitTime < .033333 then
-				local startTick = tick()
-				runService:wait()
-				local delta = tick() - startTick
-				if delta <= waitTime * .5 then
-					quickWait(waitTime - delta)
-				end
-			else
-				wait(waitTime)
-			end
-		end
-	end
-
-	function clearSelection()
-		if selectionObject then
-			selectionObject:Destroy()
-			selectionObject = nil
-		end
-		if selectionPart then
-			selectionPart:Destroy()
-			selectionPart = nil
-		end
-	end
-
-	function clearGrid()
-		for i, v in pairs(gridLineParts) do
-			if v then
-				v:Destroy()
-			end
-			gridLineParts[i] = nil
-		end
-	end
-
-	function drawGrid(point, normal, transparency, color)
-		local transparency = transparency or .95
-		local color = BrickColor.new(color or 'Institutional white')--'Pastel light blue')
-		local gridCellSize = selectionSize * resolution
-		local gridSize = 10
-		local baseCframe = CFrame.new(point, point + normal)
-		local normalSpase = CFrame.new(Vector3.new(0, 0, 0), normal):pointToObjectSpace(point)
-		local roundedNormalOffset = (Vector3.new((normalSpase.x / gridCellSize) % 1, (normalSpase.y / gridCellSize) % 1, 0) - Vector3.new(.5, .5, 0)) * -gridCellSize
-		for u = 1, gridSize do
-			local linePart = gridLineParts[u]
-			if not linePart then
-				linePart = Instance.new('Part')
-				linePart.Transparency = 1
-				linePart.TopSurface = 'Smooth'
-				linePart.BottomSurface = 'Smooth'
-				linePart.Anchored = true
-				linePart.CanCollide = false
-				linePart.formFactor = 'Custom'
-				local selectionBox = Instance.new('SelectionBox')
-				selectionBox.Color = color
-				selectionBox.Transparency = transparency
-				selectionBox.Adornee = linePart
-				selectionBox.Parent = linePart
-				linePart.Parent = gui
-				gridLineParts[u] = linePart
-			elseif linePart.SelectionBox.Transparency ~= transparency or linePart.SelectionBox.Color ~= color then
-				linePart.SelectionBox.Transparency = transparency
-				linePart.SelectionBox.Color = color
-			end
-			local percent = (u - 1) / (gridSize - 1)
-			linePart.Size = Vector3.new(gridCellSize * gridSize * sin(math.acos(percent * 1.8 - .9)), 0, 0)
-			linePart.CFrame = baseCframe * CFrame.new(0, (percent - .5) * (gridSize - 1) * gridCellSize, 0) * CFrame.new(roundedNormalOffset)
-		end
-		for u = 1, gridSize do
-			local linePart = gridLineParts[gridSize + u]
-			if not linePart then
-				linePart = Instance.new('Part')
-				linePart.Transparency = 1
-				linePart.TopSurface = 'Smooth'
-				linePart.BottomSurface = 'Smooth'
-				linePart.Anchored = true
-				linePart.CanCollide = false
-				linePart.formFactor = 'Custom'
-				local selectionBox = Instance.new('SelectionBox')
-				selectionBox.Color = color
-				selectionBox.Transparency = transparency
-				selectionBox.Adornee = linePart
-				selectionBox.Parent = linePart
-				linePart.Parent = gui
-				gridLineParts[gridSize + u] = linePart
-			elseif linePart.SelectionBox.Transparency ~= transparency or linePart.SelectionBox.Color ~= color then
-				linePart.SelectionBox.Transparency = transparency
-				linePart.SelectionBox.Color = color
-			end
-			local percent = (u - 1) / (gridSize - 1)
-			linePart.Size = Vector3.new(0, gridCellSize * gridSize * sin(math.acos(percent * 1.8 - .9)), 0)
-			linePart.CFrame = baseCframe * CFrame.new((percent - .5) * (gridSize - 1) * gridCellSize, 0, 0) * CFrame.new(roundedNormalOffset)
-		end
-	end
-
-	local function getCell(list, x, y, z)
-		return list and list[x] and list[x][y] and list[x][y][z]
-	end
-
-	local function getNeighborOccupancies(list, x, y, z, includeSelf)
-		local fullNeighbor = false
-		local emptyNeighbor = false
-		local neighborOccupancies = includeSelf and getCell(list, x, y, z) or 0
-		local totalNeighbors = includeSelf and 1 or 0
-		local nearMaterial = materialSelection.enum
-		for axis = 1, 3 do
-			for offset = -1, 1, 2 do
-				local neighbor = nil
-				if axis == 1 then
-					neighbor = list[x + offset] and list[x + offset][y][z]
-				elseif axis == 2 then
-					neighbor = list[x][y + offset] and list[x][y + offset][z]
-				elseif axis == 3 then
-					neighbor = list[x][y][z + offset]
-				end
-				if neighbor then
-					if neighbor >= 1 then
-						fullNeighbor = true
-					end
-					if neighbor <= 0 then
-						emptyNeighbor = true
-					end
-					totalNeighbors = totalNeighbors + 1
-					neighborOccupancies = neighborOccupancies + neighbor
-				end
-			end
-		end
-		return neighborOccupancies / (totalNeighbors ~= 0 and totalNeighbors or getCell(list, x, y, z)), fullNeighbor, emptyNeighbor
-	end
-
-	local function round(n)
-		return floor(n + .5)
-	end
-
-	function findFace()
-		local cameraLookVector = game.Workspace.CurrentCamera.CoordinateFrame.lookVector
-		--[[local absx = abs(cameraLookVector.x)		--this code is for 90 plane locking
-		local absy = abs(cameraLookVector.y)
-		local absz = abs(cameraLookVector.z)
-		if absy >= absx and absy >= absz then	--preference towards y axis planes
-			return Vector3.new(0, cameraLookVector.y / absy, 0)
-		elseif absx >= absz then
-			return	Vector3.new(cameraLookVector.x / absx, 0, 0)
-		end
-		return Vector3.new(0, 0, cameraLookVector.z / absz)]]
-
-		return Vector3.new(round(cameraLookVector.x), round(cameraLookVector.y), round(cameraLookVector.z)).unit	--this code is for 45 degree plane locking
-	end
-
-	function lineToPlaneIntersection(linePoint, lineDirection, planePoint, planeNormal)
-		local denominator = lineDirection:Dot(planeNormal)
-		if denominator == 0 then
-			return linePoint
-		end
-		local distance = ((planePoint - linePoint):Dot(planeNormal)) / denominator
-		return linePoint + lineDirection * distance
-	end
-
-
-	function operation(centerPoint)
-		local isDynamic = dynamicMaterial
-		if forceDynamicMaterial then
-			isDynamic = forceDynamicMaterialTo
-		end
-		local desiredMaterial = isDynamic and nearMaterial or materialSelection.enum
-
-		local radius = selectionSize * .5 * resolution
-		local minBounds = Vector3.new(floor((centerPoint.x - radius) / resolution), floor((centerPoint.y - radius) / resolution), floor((centerPoint.z - radius) / resolution)) * resolution
-		local maxBounds = Vector3.new(ceil((centerPoint.x + radius) / resolution), ceil((centerPoint.y + radius) / resolution), ceil((centerPoint.z + radius) / resolution)) * resolution
-		local region = Region3.new(minBounds, maxBounds)
-
-		local materials, occupancies = terrain:ReadVoxels(region, resolution)
-
-		if modules[currentTool.name] then
-			if modules[currentTool.name]['operation'] then
-
-				local middle = materials[ceil(#materials * .5)]	--This little section of code sets nearMaterial to middle of matrix
-				if middle then	--dig X
-					local middle = middle[ceil(#middle * .5)]
-					if middle then	--dig Y
-						local middle = middle[ceil(#middle * .5)]
-						if middle and middle ~= materialAir then	--dig Z
-							nearMaterial = middle
-							desiredMaterial = isDynamic and nearMaterial or desiredMaterial
-						end
-					end
-				end
-
-				modules[currentTool.name]['operation'](centerPoint, materials, occupancies, resolution, selectionSize, strength, desiredMaterial, brushShape, minBounds, maxBounds)
-			end
-		else
-
-			for ix, vx in ipairs(occupancies) do
-				local cellVectorX = minBounds.x + (ix - .5) * resolution - centerPoint.x
-
-				for iy, vy in pairs(vx) do
-					local cellVectorY = minBounds.y + (iy - .5) * resolution - centerPoint.y
-
-					for iz, cellOccupancy in pairs(vy) do
-						local cellVectorZ = minBounds.z + (iz - .5) * resolution - centerPoint.z
-
-						local cellMaterial = materials[ix][iy][iz]
-						local distance = sqrt(cellVectorX * cellVectorX + cellVectorY * cellVectorY + cellVectorZ * cellVectorZ)
-	
-						local magnitudePercent = 1
-						local brushOccupancy = 1
-						if brushShape == 'Sphere' then
-							magnitudePercent = cos(min(1, distance / (radius + resolution * .5)) * pi * .5)
-							brushOccupancy = max(0, min(1, (radius + .5 * resolution - distance) / resolution))
-						elseif brushShape == 'Box' then
-							if not (snapToGrid or forceSnapToGrid) then
-								local xOutside = 1 - max(0, abs(cellVectorX / resolution) + .5 - selectionSize * .5)
-								local yOutside = 1 - max(0, abs(cellVectorY / resolution) + .5 - selectionSize * .5)
-								local zOutside = 1 - max(0, abs(cellVectorZ / resolution) + .5 - selectionSize * .5)
-								brushOccupancy = xOutside * yOutside * zOutside
-							end
-						end
-
-						if cellMaterial ~= materialAir and cellMaterial ~= nearMaterial then
-							nearMaterial = cellMaterial
-							if isDynamic then
-								desiredMaterial = nearMaterial
-							end
-						end
-	
-						if currentTool.name == 'Add' then
-							if selectionSize <= 2 then
-								if brushOccupancy >= .5 then
-									if cellMaterial == materialAir or cellMaterial == materialWater or cellOccupancy <= 0 then
-										materials[ix][iy][iz] = desiredMaterial
-									end
-									occupancies[ix][iy][iz] = 1
-								end 
-							else
-								if brushOccupancy > cellOccupancy then
-									occupancies[ix][iy][iz] = brushOccupancy
-								end
-								if brushOccupancy >= .5 and (cellMaterial == materialAir or cellMaterial == materialWater) then
-									materials[ix][iy][iz] = desiredMaterial
-								end
-							end
-						elseif currentTool.name == 'Subtract' then
-							if selectionSize <= 2 then
-								if brushOccupancy >= .5 then
-									occupancies[ix][iy][iz] = 0
-									materials[ix][iy][iz] = materialAir
-								end
-							else
-								local desiredOccupancy = 1 - brushOccupancy
-								if desiredOccupancy < cellOccupancy then
-									occupancies[ix][iy][iz] = desiredOccupancy
-								end
-								if desiredOccupancy <= 0 then
-									materials[ix][iy][iz] = materialAir
-								end
-							end
-						elseif currentTool.name == 'Grow' then
-							if brushOccupancy >= .5 then
-								local desiredOccupancy = cellOccupancy
-								local neighborOccupancies, fullNeighbor ,emptyNeighbor = getNeighborOccupancies(occupancies, ix, iy, iz)
-								if cellOccupancy > 0 or fullNeighbor then	--problem if selection size is small.
-									desiredOccupancy = desiredOccupancy + neighborOccupancies * (strength + .1) * .25 * brushOccupancy * magnitudePercent
-								end
-								if cellMaterial == materialAir or cellOccupancy <= 0 and desiredOccupancy > 0 then
-									materials[ix][iy][iz] = desiredMaterial
-								end
-								occupancies[ix][iy][iz] = desiredOccupancy
-							end
-						elseif currentTool.name == 'Erode' then
-							local flippedBrushOccupancy = 1 - brushOccupancy
-							if flippedBrushOccupancy <= .5 then
-								local desiredOccupancy = cellOccupancy
-								local emptyNeighbor = false
-								local neighborOccupancies = 6
-								for axis = 1, 3 do
-									for offset = -1, 1, 2 do
-										local neighbor = nil
-										if axis == 1 then
-											neighbor = occupancies[ix + offset] and occupancies[ix + offset][iy][iz]
-										elseif axis == 2 then
-											neighbor = occupancies[ix][iy + offset] and occupancies[ix][iy + offset][iz]
-										elseif axis == 3 then
-											neighbor = occupancies[ix][iy][iz + offset]
-										end
-										if neighbor then
-											if neighbor <= 0 then
-												emptyNeighbor = true
-											end
-											neighborOccupancies = neighborOccupancies - neighbor
-										end
-									end
-								end
-								if cellOccupancy < 1 or emptyNeighbor then
-									desiredOccupancy = desiredOccupancy - (neighborOccupancies / 6) * (strength + .1) * .25 * brushOccupancy * magnitudePercent
-								end
-								if cellMaterial == materialAir or cellOccupancy <= 0 and desiredOccupancy > 0 then
-									materials[ix][iy][iz] = desiredMaterial
-								end
-								occupancies[ix][iy][iz] = desiredOccupancy
-							end
-						elseif currentTool.name == 'Paint' then
-							if brushOccupancy > 0 and cellOccupancy > 0 then
-								materials[ix][iy][iz] = desiredMaterial
-							end
-						end
-					end
-				end
-			end
-		end
-		terrain:WriteVoxels(region, resolution, materials, occupancies)
-	end
-
-	
-	function Selected(tool)
-		if plugin then
-			plugin:Activate(true)
-		end
-		if tool.button then
-			tool.button:SetActive(true)
-			lastTool = tool
-		end
-		if not userInput.MouseEnabled then
-			prevCameraType = game.Workspace.CurrentCamera.CameraType
-			game.Workspace.CurrentCamera.CameraType = Enum.CameraType.Fixed	
-		end
-		on = true
-		currentTool = tool
-		forceSnapToGrid = tool.usesMaterials and materialSelection.forceSnapToGrid
-		updateSnapToGrid()
-
-		if modules[tool.name] and modules[tool.name]['On'] then
-			modules[tool.name].On(mouse,Deselected)
-		end
-		if not modules[tool.name] or modules[tool.name]['operation'] then
-
-			resizeGuiFrame()
-			titlelabel.Text = tool.name
-			gui.Parent = coreGui
-			gui.Frame.Visible = true
-	
-			forcePlaneLock = tool.name == 'Add' or tool.name == 'Subtract'
-			updatePlaneLock()
-
-			forceDynamicMaterial = tool.name == 'Subtract' or tool.name == 'Erode' or tool.name == 'Paint' or tool.name == 'Smooth' or tool.name == 'Smoother'
-			forceDynamicMaterialTo = not (forceDynamicMaterial and tool.name == 'Paint')
-			updateDynamicMaterial()
-	
-			local loopTag = {}	--using table as a unique value for debouncing
-			currentLoopTag = loopTag
-	
-			while currentLoopTag and currentLoopTag == loopTag do
-				local t = tick()
-				local radius = selectionSize * .5 * resolution
-				
-				local mainPoint = mouse.Hit.p
-	
-				if tool.name == 'Add' then
-					mainPoint = mainPoint - mouse.UnitRay.Direction * .05
-				elseif tool.name == 'Subtract' or tool.name == 'Paint' or tool.name == 'Grow' then
-					mainPoint = mainPoint + mouse.UnitRay.Direction * .05
-				end
-	
-				if mouse.Target == nil then	--cage the cursor so that it does not fly away
-					mainPoint = game.Workspace.CurrentCamera.CoordinateFrame.p + mouse.UnitRay.Direction * lastCursorDistance --limits the distance of the mainPoint if the mouse is not hitting an object
-				end
-	
-				if not mouseDown or click then
-					lastPlanePoint = mainPoint
-					lastNormal = findFace()
-				end
-	
-				if planeLock or forcePlaneLock then
-					mainPoint = lineToPlaneIntersection(mouse.Hit.p, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)
-				end
-	
-				if snapToGrid or forceSnapToGrid then
-					local snapOffset = Vector3.new(1, 1, 1) * (radius % resolution)		--in studs
-					local tempMainPoint = (mainPoint - snapOffset) / resolution + Vector3.new(.5, .5, .5)	--in voxels
-					mainPoint = Vector3.new(floor(tempMainPoint.x), floor(tempMainPoint.y), floor(tempMainPoint.z)) * resolution + snapOffset
-				end
-	
-				if mouseDown then
-					if click then
-						firstOperation = t
-						lastMainPoint = mainPoint
-					end
-					
-					if click or t > firstOperation + clickThreshold then
-						click = false
-						local difference = mainPoint - lastMainPoint
-						local dragDistance = (difference).magnitude
-						local crawlDistance = radius * .5			--Maybe adjustable setting? Considering using a different method of crawling, with a percent rather than a finite distance.
-						if dragDistance > crawlDistance then
-							local differenceVector = difference.unit
-							local dragDistance = min(dragDistance, crawlDistance * 2 + 20)	--limiting this so that it does not attempt too many operations within a single drag.
-							local samples=ceil(dragDistance / crawlDistance - .1)
-							for i = 1, samples do
-								operation(lastMainPoint + differenceVector * dragDistance * (i / samples))
-							end
-							mainPoint = lastMainPoint + differenceVector * dragDistance
-						else
-							operation(mainPoint)
-						end
-						lastMainPoint = mainPoint
-					end
-				end
-	
-				if not selectionPart then
-					selectionPart = Instance.new('Part')
-					selectionPart.Name = 'SelectionPart'
-					selectionPart.Transparency = 1
-					selectionPart.TopSurface = 'Smooth'
-					selectionPart.BottomSurface = 'Smooth'
-					selectionPart.Anchored = true
-					selectionPart.CanCollide = false
-					selectionPart.formFactor = 'Custom'
-					selectionPart.Size = Vector3.new(1, 1, 1) * selectionSize * resolution + Vector3.new(.1, .1, .1)
-					selectionPart.Parent = gui
-				end
-				if not selectionObject then
-					selectionObject = Instance.new(brushShape == 'Sphere' and 'SelectionSphere' or 'SelectionBox')
-					selectionObject.Name = 'SelectionObject'
-					selectionObject.Color = BrickColor.new('Toothpaste')
-					selectionObject.SurfaceTransparency = .95 - strength * .3
-					selectionObject.SurfaceColor = BrickColor.new('Toothpaste')
-					selectionObject.Adornee = selectionPart
-					selectionObject.Parent = selectionPart
-				end
-				
-				if not userInput.TouchEnabled or mouseDown then
-					selectionPart.CFrame = CFrame.new(mainPoint)
-					
-					if planeLock or forcePlaneLock then
-						local mainPointIntersect = lineToPlaneIntersection(mainPoint, mouse.UnitRay.Direction, lastPlanePoint, lastNormal)	--we need to get this otherwise the plane can shift whiel drawing
-						drawGrid(mainPointIntersect, lastNormal, mouseDown and .8)
-					end
-				end
-	
-				lastCursorDistance = max(20 + selectionSize * resolution * 1.5,(mainPoint - game.Workspace.CurrentCamera.CoordinateFrame.p).magnitude)
-	
-				quickWait()
-			end
-		end
-	end
-	
-	function Deselected()
-		if not userInput.MouseEnabled then
-			game.Workspace.CurrentCamera.CameraType = prevCameraType		
-		end
-		currentLoopTag = nil
-		gui.Parent = script.Parent
-		gui.Frame.Visible = false
-		
-		clearSelection()
-		clearGrid()
-		if lastTool then
-			lastTool.button:SetActive(false)
-		end
-		mouseDown = false
-		on = false
-		local lastCurrentTool = currentTool
-		currentTool = nil
-		if lastCurrentTool and modules[lastCurrentTool.name] and modules[lastCurrentTool.name]['Off'] then
-			modules[lastCurrentTool.name].Off()
-		end
-	end
-
-	closeButton.MouseButton1Down:connect(Deselected)
-
-	--Touch controls
-	local fingerTouches = {}
-	local NumUnsunkTouches = 0
-
-	local StartingDiff = nil
-	local startingSelectionSize = nil
-
-	local function OnTouchBegan(input, processed)
-		fingerTouches[input] = processed
-		if not processed then
-			click = true
-			NumUnsunkTouches = NumUnsunkTouches + 1
-		end
-	end
-
-	local function OnTouchChanged(input, processed)
-		if fingerTouches[input] == nil then
-			fingerTouches[input] = processed
-			if not processed then
-				NumUnsunkTouches = NumUnsunkTouches + 1
-			end
-		end
-
-		if NumUnsunkTouches == 1 then
-			if fingerTouches[input] == false then
-				mouseDown = true
-			end
-		else
-			mouseDown = false
-		end
-		if NumUnsunkTouches == 2 then
-			local unsunkTouches = {}
-			for touch, wasSunk in pairs(fingerTouches) do
-				if not wasSunk then
-					table.insert(unsunkTouches, touch)
-				end
-			end
-			if #unsunkTouches == 2 then
-				local difference = (unsunkTouches[1].Position - unsunkTouches[2].Position).magnitude
-				if StartingDiff and startingSelectionSize then
-					local scale = difference/max(0.01, StartingDiff)
-					selectionSize = max(minSelectionSize, min(maxSelectionSize, startingSelectionSize/scale))
-					selectionSizeValue.Value = selectionSize
-				else
-					StartingDiff = difference
-					startingSelectionSize = selectionSizeValue.Value
-				end
-			end
-		else
-			StartingDiff = nil
-			startingSelectionSize = nil
-		end
-	end
-
-	local function OnTouchEnded(input, processed)
-		if fingerTouches[input] == false then
-			if NumUnsunkTouches == 1 then
-				mouseDown = false
-			elseif NumUnsunkTouches == 2 then
-				StartingDiff = nil
-				startingSelectionSize = nil
-				mouseDown = true
-			end
-		end
-
-		if fingerTouches[input] ~= nil and fingerTouches[input] == false then
-			NumUnsunkTouches = NumUnsunkTouches - 1
-		end
-		fingerTouches[input] = nil
-	end
-	
-	-- Input Handling
-	userInput.InputBegan:connect(function(event, soaked)
-		downKeys[event.KeyCode] = true
-		if event.UserInputType == Enum.UserInputType.MouseButton1 and not soaked and on then
-			mouseDown = true
-			click = true
-		elseif event.UserInputType == Enum.UserInputType.Touch and on then
-			OnTouchBegan(event, soaked)
-		end
-	end)
-	
-	userInput.InputChanged:connect(function(input, processed)
-		if input.UserInputType == Enum.UserInputType.Touch then
-			OnTouchChanged(input, processed)
-		end
-	end)
-	
-	userInput.InputEnded:connect(function(event, soaked)
-		downKeys[event.KeyCode] = nil
-		if event.UserInputType == Enum.UserInputType.MouseButton1 and mouseDown then
-			mouseDown = false
-			if changeHistory then
-				changeHistory:SetWaypoint('Terrain '..currentTool.name)
-			end
-		elseif event.UserInputType == Enum.UserInputType.Touch then
-			OnTouchEnded(event, soaked)
-		end
-	end)
-
-	function scrollwheel(change)
-		if on then
-			if downKeys[Enum.KeyCode.LeftShift] or downKeys[Enum.KeyCode.RightShift] then
-				selectionSize = max(minSelectionSize, min(maxSelectionSize, selectionSize + change))
-				selectionSizeValue.Value = selectionSize
-			end
-			if downKeys[Enum.KeyCode.LeftControl] or downKeys[Enum.KeyCode.RightControl] then
-				strength = max(0, min(1, strength + change * (1/(maxSelectionSize-minSelectionSize))))
-				strengthValue.Value = round(strength * 100 + 1)
-			end
-		end
-	end
-	
-	mouse.WheelForward:connect(function()
-		scrollwheel(1)
-	end)
-	
-	mouse.WheelBackward:connect(function()
-		scrollwheel(-1)
-	end)
-
-	if plugin then
-		plugin.Deactivation:connect(function()
-			if on then
-				Deselected()
-			end
-		end)
-	end
-
-	setBrushShape(brushShape)
-	setMaterialSelection(materialSelection)
-	updatePlaneLock()
-	updateSnapToGrid()
-	updateDynamicMaterial()
-end
-
-
-]]></ProtectedString>
-			</Properties>
-		</Item>
-		<Item class="ModuleScript" referent="RBXC0102923FAC94184B62A0D302E303F6C">
-			<Properties>
-				<Content name="LinkedSource"><null></null></Content>
-				<string name="Name">Utility</string>
-				<ProtectedString name="Source"><![CDATA[local utility = {}
-local initialised = false
-
-function initialiseUtility(plugin)
-	if not initialised then
-		utility.usingAsPlugin = (plugin ~= nil)
-		utility.plugin = plugin	
-		
-		local function createIngameButtonCreator()
-			local buttonCreator = {}
-			
-			function buttonCreator:CreateButton(name, hint, image)
-				local backpack = game.Players.LocalPlayer:WaitForChild("Backpack")	
-				
-				local tool = Instance.new("HopperBin")
-				tool.TextureId = image
-				tool.Parent = backpack
-				--tool.ToolTip = hint --HopperBins don't have a ToolTip, tools don't work without a handle
-				
-				local result = {}
-				result.Click = tool.Selected
-				result.Deselected = tool.Deselected
-				function result:SetActive(active)
-					--Do nothing
-				end
-				return result	
-			end
-			
-			return buttonCreator
-		end
-		
-		function utility:GetButtonCreator()
-			return utility.usingAsPlugin and utility.plugin:CreateToolbar('Smooth Terrain') or createIngameButtonCreator()
-		end
-		
-		function utility:GetUsingAsPlugin()
-			return utility.usingAsPlugin
-		end
-		
-		function utility:GetCoreGui()
-			return utility.usingAsPlugin and game:GetService("CoreGui") or game.Players.LocalPlayer.PlayerGui
-		end
-		
-		function utility:GetMouse()
-			return utility.usingAsPlugin and utility.plugin:GetMouse() or game.Players.LocalPlayer:GetMouse()
-		end
-	end
-
-	return utility
-end
-
-return initialiseUtility]]></ProtectedString>
-			</Properties>
 		</Item>
 	</Item>
 </roblox>
