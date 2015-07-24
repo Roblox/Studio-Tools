@@ -27,8 +27,6 @@
 				<string name="Name">Precision</string>
 				<ProtectedString name="Source"><![CDATA[local plugin,settings = plugin,settings
 
-if not settings():GetFFlag("TransformToolEnabled") then return end
-
 local Collision = require(script.Parent.Collision)
 local Utility = require(script.Parent.Utility)
 local List = require(script.Parent.List)
@@ -1027,8 +1025,6 @@ function updatePart()
 			UnjoinSelection()
 			BreakJoints(selectedPart)
 		end
-		
-		
 		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2)))
 		
 		local totalDist = Utility.distanceVector3(preactionCFrame.p, selectedPart.CFrame.p)
@@ -1056,29 +1052,26 @@ function updatePart()
 			selectedPart.CFrame = preactionCFrame - (positionDiff / 2)
 						
 		end
-		
-		
-		
+
 		if currentHandle == S_X_POS then
 			local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 			local side = (localCamera / Utility.absVector3(localCamera))
 			Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
-			selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
+							selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
 			
 		elseif currentHandle == S_Z_POS then
 			local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 			local side = (localCamera / Utility.absVector3(localCamera))
 			Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, -1)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, 1)),
-			selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
+							selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
 		end
 		
-		filteredSelectionMetapart.Size = selectedPart.Size
-		filteredSelectionMetapart.CFrame = selectedPart.CFrame
+--		filteredSelectionMetapart.Size = selectedPart.Size
+--		filteredSelectionMetapart.CFrame = selectedPart.CFrame
 		
 	elseif currentHandle == S_X_NEG or 
-	--currentHandle == S_Y_NEG or
 	currentHandle == S_Z_NEG then
 		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
 		if shouldBreakJoints then
