@@ -1,7 +1,7 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Model" referent="RBXE5E19109B617405AA380F7295A482AB2">
+	<Item class="Model" referent="RBXFF48B6F5FC3A49258275900CE593573C">
 		<Properties>
 			<CoordinateFrame name="ModelInPrimary">
 				<X>0</X>
@@ -20,7 +20,7 @@
 			<string name="Name">PrecisionDragger</string>
 			<Ref name="PrimaryPart">null</Ref>
 		</Properties>
-		<Item class="Script" referent="RBXD2132E8335464624B054741D85D07100">
+		<Item class="Script" referent="RBX32238E2E0B5D45398607F92063AEAE64">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -138,6 +138,8 @@ local workplaneFrame = CFrame.new()
 
 local currentlyOverHandle = false
 local initialPos = nil
+
+local mouseOffsetOnGrabHandle = nil
 
 ------------------------------------
 
@@ -810,26 +812,14 @@ function preUpdatePart()
 			currentDist = currentDist * -1
 		end
 	elseif currentHandle == S_X_POS_Z_POS or currentHandle == S_X_NEG_Z_NEG or currentHandle == S_X_POS_Z_NEG or currentHandle == S_X_NEG_Z_POS then
-		--local moveVector = (adornee.CFrame:pointToWorldSpace(Vector3.new(0, 1, 0)) - adornee.CFrame.p).Unit
-		--local planeNormal = Vector3.new(lookVector.Direction - (lookVector.Direction:Dot(moveVector) * moveVector)
+
 		local planeNormal = (adornee.CFrame:pointToWorldSpace(Vector3.new(0, 1, 0)) - adornee.CFrame.p).Unit
 	
 		local dist = planeNormal:Dot(worldCFrame.p)
-		
 		local dotProd = lookVector.Direction:Dot(planeNormal)
-	
 		local t = -((-dist) + lookVector.Origin:Dot(planeNormal)) / dotProd
-	
 		local intersection = lookVector.Origin + lookVector.Direction * t
-		
-		--local origin = initialPos - (moveVector.Unit * 800)
-		
-		--local point = intersection--Ray.new(initialPos , moveVector.Unit):ClosestPoint(intersection)
-		
-		--local upV = Vector3.new(1, 0, 1)
-		
-		
-		--print("Diff:", intersection - initialPos)
+				
 		currentDist = originalCFrame:pointToObjectSpace(intersection + originalCFrame.p) - originalCFrame:pointToObjectSpace(initialPos + originalCFrame.p)
 		
 		if currentHandle == S_X_NEG_Z_POS or currentHandle == S_X_NEG_Z_NEG then
@@ -839,12 +829,9 @@ function preUpdatePart()
 		if currentHandle == S_X_POS_Z_NEG or currentHandle == S_X_NEG_Z_NEG then
 			currentDist = currentDist * Vector3.new(1, 1, -1)
 		end
-		
-		--currentDist = (point - initialPos).Magnitude * upV
-		
+				
 	elseif currentHandle == R_XY or currentHandle == R_XZ or currentHandle == R_YZ then
-		--print(initialPos)
-		
+
 		local planeNormal = (adornee.CFrame:pointToWorldSpace(Vector3.new(currentHandle == R_YZ and 1 or 0, currentHandle == R_XZ and 1 or 0, currentHandle == R_XY and 1 or 0)) - adornee.CFrame.p).Unit
 		
 		local dist = planeNormal:Dot(worldCFrame.p)
@@ -857,6 +844,12 @@ function preUpdatePart()
 				
 		isInsideRotate = false
 	end
+
+	if not mouseOffsetOnGrabHandle then
+		mouseOffsetOnGrabHandle = currentDist
+	else
+		currentDist = currentDist - mouseOffsetOnGrabHandle
+	end
 end
 
 local planePreviouslySelected = false
@@ -867,7 +860,6 @@ local itemToUpdate = nil
 			local function sanitizeFloatTest(value)
 				return value > 0.0 and (math.ceil((value * sanitizationPrecision) - 0.5) / sanitizationPrecision) or (math.floor((value * sanitizationPrecision) + 0.5) / sanitizationPrecision)
 			end
-
 
 			local function sanitizeCFrameTest(value)
 				local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = value:components()
@@ -887,8 +879,6 @@ local itemToUpdate = nil
 			end
 
 function updatePart()
-	
-	--local tickOut1 = tick()
 	
 	local filteredSelectionMetapart = Selection.getFilteredSelectionMetapart()
 	local filteredSelection = Selection.getFilteredSelection()
@@ -917,9 +907,7 @@ function updatePart()
 			return
 		end
 	end
-	
-	--local tickOut5 = tick()
-		
+			
 	local allowAdornUpdate = true
 	
 	if selectedPart and shouldBreakJoints then
@@ -933,29 +921,19 @@ function updatePart()
 	local preactionCFrame
 	local preActionSize
 	
-	--local tickOut6 = tick()
-	
 	if selectedPart and not itemToUpdate then
 		preactionCFrame = selectedPart.CFrame
 		preActionSize = selectedPart.Size
 	end
 	
-	--local tickOut7 = tick()
-	
 	handleWasDragged = true
-	
-	--checking to see if we were colliding before updating the selected parts
 	
 	local selection = Selection.getFilteredSelection()
 	
 	if #selection == 0 then
 		resetDragger()
-		--Adorn.releaseHandle()
-		--print("BAD ADORN")
 		return
 	end	
-	
-	--local tickOut8 = tick()
 	
 	local isPreviouslyColliding = false
 	if plugin.CollisionEnabled then
@@ -965,9 +943,7 @@ function updatePart()
 		end
 		invisiblePart.Parent = nil
 	end
-	
-	--local tickOut9 = tick()
-	
+			
 	if currentHandle == S_Y_POS then
 		local yScale = -Adorn.getYScale()
 		currentDist = currentDist * -yScale
@@ -982,7 +958,7 @@ function updatePart()
 		local totalDist = Utility.distanceVector3(preactionCFrame.p, selectedPart.CFrame.p)
 		local diff = (preactionCFrame.p - selectedPart.CFrame.p).unit
 		
-		if plugin.CollisionEnabled and #selectedPart:GetTouchingParts() > 0 --[[ DREMOVE - selectedPart:IsColliding() --]] then
+		if plugin.CollisionEnabled and #selectedPart:GetTouchingParts() > 0 then
 			selectedPart.Size = preActionSize
 			if shouldBreakJoints then
 				UnjoinSelection()
@@ -1005,27 +981,36 @@ function updatePart()
 						
 		end
 		
-		if currentHandle == S_Y_POS then
-			local normal = selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, 1, 0)) - selectedPart.CFrame.p
-			local cameraDirection = game.Workspace.Camera.CoordinateFrame.lookVector
-			local projectedCameraDirection = cameraDirection - (cameraDirection:Dot(normal) * normal)
-			
-			local tangent = projectedCameraDirection:Cross(normal).unit 
+		local normal = selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, 1, 0)) - selectedPart.CFrame.p
+		local cameraDirection = game.Workspace.Camera.CoordinateFrame.lookVector
+		local projectedCameraDirection = cameraDirection - (cameraDirection:Dot(normal) * normal)
 		
-			Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, -1, 0)), 
-							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, 1, 0)),
-			tangent)
+		local tangent = projectedCameraDirection:Cross(normal).unit 
+	
+		Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, -1, 0)), 
+						selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, 1, 0)),
+		tangent)
 			
-		end
 		
 	elseif currentHandle == S_X_POS or
 	currentHandle == S_Z_POS then
-		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+				
 		if shouldBreakJoints then
 			UnjoinSelection()
 			BreakJoints(selectedPart)
 		end
-		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2)))
+		
+		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
+			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
+			
+			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new((originalSize - selectedPart.Size) * 0.5
+				* Vector3.new(currentHandle == S_X_POS and -1 or 0, -1, currentHandle == S_Z_POS and -1 or 0)))
+
+		else
+			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) * 0.5)))
+		end
 		
 		local totalDist = Utility.distanceVector3(preactionCFrame.p, selectedPart.CFrame.p)
 		local diff = (preactionCFrame.p - selectedPart.CFrame.p).unit
@@ -1073,17 +1058,27 @@ function updatePart()
 		
 	elseif currentHandle == S_X_NEG or 
 	currentHandle == S_Z_NEG then
-		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+	
 		if shouldBreakJoints then
 			UnjoinSelection()
 			BreakJoints(selectedPart)
 		end
-		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(((originalSize - selectedPart.Size) / 2)))
-		
+	
+		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
+			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
+			
+			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new((originalSize - selectedPart.Size) * 0.5
+				* Vector3.new(currentHandle == S_X_NEG and 1 or 0, -1, currentHandle == S_Z_NEG and 1 or 0)))
+		else
+			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(((originalSize - selectedPart.Size) * 0.5)))
+		end
+				
 		local totalDist = Utility.distanceVector3(preactionCFrame.p, selectedPart.CFrame.p)
 		local diff = (preactionCFrame.p - selectedPart.CFrame.p).unit
 				
-		if plugin.CollisionEnabled and #selectedPart:GetTouchingParts() > 0 --[[ DREMOVE - selectedPart:IsColliding() --]] then
+		if plugin.CollisionEnabled and #selectedPart:GetTouchingParts() > 0 then
 			selectedPart.Size = preActionSize
 			if shouldBreakJoints then
 				UnjoinSelection()
@@ -1123,11 +1118,13 @@ function updatePart()
 		
 		
 	elseif currentHandle == S_X_POS_Z_POS then
-		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		
 		if shouldBreakJoints then
 			UnjoinSelection()
 			BreakJoints(selectedPart)
 		end
+		
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
 		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2)))
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
@@ -1143,12 +1140,21 @@ function updatePart()
 		
 		
 	elseif currentHandle == S_X_NEG_Z_POS then
-		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		
 		if shouldBreakJoints then
 			UnjoinSelection()
 			BreakJoints(selectedPart)
 		end
-		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, 1)))
+		
+		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
+			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
+			
+			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 1, 1)))
+		else
+			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, 1)))
+		end
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = (localCamera / Utility.absVector3(localCamera))
@@ -1162,12 +1168,21 @@ function updatePart()
 		selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
 		
 	elseif currentHandle == S_X_NEG_Z_NEG then
-		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		
 		if shouldBreakJoints then
 			UnjoinSelection()
 			BreakJoints(selectedPart)
 		end
-		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, -1)))
+		
+		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
+			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
+			
+			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 1, -1)))
+		else
+			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)			
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, -1)))
+		end
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = (localCamera / Utility.absVector3(localCamera))
@@ -1181,12 +1196,21 @@ function updatePart()
 		selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
 		
 	elseif currentHandle == S_X_POS_Z_NEG	then
-		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+
 		if shouldBreakJoints then
 			UnjoinSelection()
 			BreakJoints(selectedPart)
 		end
-		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 0, -1)))
+
+		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
+			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
+			
+			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 1, -1)))
+		else
+			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 0, -1)))
+		end
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = (localCamera / Utility.absVector3(localCamera))
@@ -1865,29 +1889,17 @@ local firstMove = true
 
 function movePart(delta, collision)
 	Adorn.setAllAdornVisibility(false)
-	
-	--print("movepart")
-	
---	local tick1 = tick()
-	
+		
 	if not secondaryPart then
-		--print("WARNING: NO SECONDARY PART", Enum.MessageType.MessageError)
 		return
 	end
-	
-	--print("return1")
 	
 	if not dragPart then
-		--print("NO DRAGPART")
 		return
 	end
-	
-	--print("return 2")
-	
+		
 	adornmentUpdateNeeded = true
---	local tick2 = tick()
 	local selection = getCurrentSelectionWithChildren()
---	local tick3 = tick()
 	if not setAnchoredStateForMovingParts then
 		setAnchoredStateForMovingParts = true
 		for i, v in ipairs(selection) do
@@ -1895,15 +1907,12 @@ function movePart(delta, collision)
 			v.Anchored = true
 		end
 	end
-	
---	local tick4 = tick()
-	
-	--print("dragPArt:", dragPart)
+		
 	local extentRotation = getBestExtentRotation()
 		
 	if not extentRotation or not selectedPart then return end
-	--print("return 3")
-	setPartRotation(dragPart, #selection > 1 and workplaneFrame or extentRotation)--extentRotation)
+	
+	setPartRotation(dragPart, #selection > 1 and workplaneFrame or extentRotation)
 
 	if firstMove then -- this is expensive, only doing first time
 		firstMove = false
@@ -2544,7 +2553,6 @@ function planeDrag()
 end
 
 function freeDrag()
-	--print("freedrag")
 	if clickOnUpdate then
 		selectPart()
 		clickOnUpdate = false
@@ -2896,11 +2904,8 @@ end
 function grabHandle(handle, position)
 	
 	if not position then return end
-	--print("selectedPart", selectedPart)
 	originalPosition = position
 	currentDist = Vector3.new(0,0,0)
-	
-	
 	
 	if handle ~= R_XY and 
 		handle ~= R_XZ and
@@ -2916,41 +2921,34 @@ function grabHandle(handle, position)
 	originalSize = filteredSelectionMetapart.Size
 		
 	previousAABBCFrame = invisiblePart.CFrame
-	--print("grabHandle- setting AABBCFrame", previousAABBCFrame)
+	
+	mouseOffsetOnGrabHandle = nil --will be set in preUpdatePart
+	
+	preUpdatePart()
 end
 
 function releaseHandle()
-	--print("release handle")
 	
 	itemToUpdate = nil
 	rotationalDiff = 0
-	
-	--print("from releaseHandle")
-	--updateInvisiblePart("release handle")
-	--updateRotatePart(Selection.getFilteredSelection())
-	
+		
 	local handle = Adorn.getCurrentHandle()
 	
 	if (handle == H_NONE) then return end
-	--print("otherwise")
 	
-	--updatePart()
 	JoinSelection()
-	--print("releaseHandle")
-	--setWaypoint()
 	
 	originalPosition = nil
 	currentDist = nil
 	originalSize = nil
 	originalCFrame = nil
 	previousAABBCFrame = nil
-	--print("releaseHandle - setting AABBCFrame", previousAABBCFrame)
 end
 
 function recreateAdornment()
 	if not adornmentUpdateNeeded then return end
 	adornmentUpdateNeeded = false
-	--print("recreateAdornment")	
+		
 	if not invisiblePart then
 		invisiblePart = Instance.new("Part", nil)
 		invisiblePart.Name = "InvisibleParte1b1aec5"
@@ -2973,19 +2971,13 @@ function recreateAdornment()
 
 	if (#selection > 0) then
 		Adorn.setPlaneVisibility(true)
-		--print("size:", #selection)
 		if (#selection == 1) and selection[1]:IsA("BasePart") then--and game.Selection:Get()[1]:IsA("BasePart") then
 			Adorn.adornInstanceWithScale(selection[1])
 		else
-			--print("fromrecreateadornments")
 			Adorn.setScaleAdornVisibility(false)
 		end
-		
-		
-		
 	end
 	
-	--print("from recreateAdornments")
 	updateRotatePart()
 	updateInvisiblePart()
 end
@@ -2994,12 +2986,7 @@ function isInSelection(part)
 	if not part then return nil end
 	
 	local selection = game.Selection:Get()
-	
-	--model
---	if part:IsA("Model") and not part:IsA("Workspace") then
---		part = part.Object
---	end
-	
+		
 	for _,p in ipairs(selection) do
 		if p == part then return true end
 	end
@@ -3048,23 +3035,16 @@ end
 
 function selectPart(instances)
 	if currentlyOverHandle then return end
-	
-	--print("selectPart")
-	
+		
 	castPlane = nil
 	local ray = mouse.UnitRay
 	ray = Ray.new(ray.Origin, ray.Direction * 800)
 	
 	local part, location = game.Workspace:FindPartOnRay(ray)
-	
-	--print("PART", part)
-	
-	
+		
 	local alreadySelected = false
 	if List.itemExistsInList(part, game.Selection:Get()) then
 		alreadySelected = true
-		--print("ITEM ALREADY EXISTS IN SELECTION")
-		--print("selectedPart", selectedPart)
 	end
 	
 	if instances then
@@ -3110,13 +3090,9 @@ function selectPart(instances)
 			setSelection(selection)
 		end
 		
-		if shouldBreakJoints and not alreadySelected then
-			BreakJoints(part)
-		end
 		startLocation = location
 				
 		if pV0 and pV1 and pV2 then
-			--print("select part")
 			part = Metapart.convertToPart(part)
 			local localLocation = secondaryPart.CFrame:pointToObjectSpace(secondaryLocation)
 			local partDist = secondaryPart.CFrame:pointToObjectSpace(location) - localLocation
@@ -3137,7 +3113,6 @@ function selectPart(instances)
 				adornmentUpdateNeeded = true
 				local partGroup = Selection.getFilteredSelectionMetapart()
 				partGroup.CFrame = newRotation:toWorldSpace(selectedPartRotation:toObjectSpace(partGroup.CFrame))
-				--selectedPart.CFrame = newRotation:toWorldSpace(selectedPartRotation:toObjectSpace(selectedPart.CFrame))
 			end
 		end
 		grabPart()
@@ -3148,7 +3123,6 @@ function selectPart(instances)
 	
 	if selectedPart and selectedPart:IsA("FormFactorPart") then selectedPart.FormFactor = Enum.FormFactor.Custom end
 	
-	--print("selectPArt -adorn")
 	recreateAdornment()
 	
 end
@@ -3274,8 +3248,6 @@ end
 
 function inputChanged(evt)
 	
-	--print ("returning early")
-	--if true then return end
 	if (Input.getButtonState(Input.Enum.Key.MOUSE_BUTTON1) and 
 	evt.UserInputType == Enum.UserInputType.MouseMovement) or
 	(Adorn.isPlaneSelectingModeOn() and Adorn.getCurrentHandle() == H_PLANE) then
@@ -3374,7 +3346,7 @@ inputBeganConnection = uis.InputBegan:connect(keyPress)
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX6E14885EDA934FE7ABAA796EB62539C5">
+		<Item class="ModuleScript" referent="RBXD4E2E5155CD5450E9385590707C45D37">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Collision</string>
@@ -3667,7 +3639,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXEA0A673824EC499F8115B9FC7D28BFD9">
+		<Item class="ModuleScript" referent="RBXFF5624FEC0F442A598EFF5AF78462673">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Utility</string>
@@ -3761,6 +3733,11 @@ local function colorAdd(color1, color2)
 	return Color3.new(color1.r + color2.r, color1.g + color2.g, color1.b + color2.b)
 end
 
+local function customToSymmetric(value)
+	local v = value.X ~= 0 and value.X or (value.Y ~= 0 and value.Y or (value.Z ~= 0 and value.Z or 0))
+	return Vector3.new(v,v,v)
+end
+
 --------------------------------------------------------------
 --------------------------------------------------------------
 --------------------------------------------------------------
@@ -3775,6 +3752,8 @@ module.absVector3 = absVector3
 module.distanceVector3 = distanceVector3
 module.cleanVector3 = cleanVector3
 
+module.customToSymmetric = customToSymmetric
+
 module.smoothstep = smoothstep
 module.colorMultiply = colorMultiply
 module.colorAdd = colorAdd
@@ -3783,7 +3762,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXF03556069F554E8395D5AA01D636E01E">
+		<Item class="ModuleScript" referent="RBX7388EEFDA62E4B88BFB0E645FBA57CEF">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">List</string>
@@ -3898,7 +3877,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX64C85B006CA449A5BCE7B743AFC66E39">
+		<Item class="ModuleScript" referent="RBXCE34A64BF4EF44DAA3CA0B5534AB1E42">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Plane</string>
@@ -3921,7 +3900,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX0F188EA21ACE4CD694AA6CF681F781AE">
+		<Item class="ModuleScript" referent="RBXC1F19C1ED8FB454AA5F7CC77F8577911">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Selection</string>
@@ -3985,7 +3964,7 @@ module.getFilteredSelectionMetapart = getFilteredSelectionMetapart
 return module]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX9320C40D12FE47089385384D0A8C80AE">
+		<Item class="ModuleScript" referent="RBX878086A5BAB84AC48FF6166E14D97F56">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Metapart</string>
@@ -4948,7 +4927,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX490BFFF3F1B44C199C303468F9B8C901">
+		<Item class="ModuleScript" referent="RBX3D4844446CDF4548B040031F20C7114B">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">FuzzyMath</string>
@@ -5096,7 +5075,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX120FDED517234D7989E9F70741E2A90C">
+		<Item class="ModuleScript" referent="RBXE52F582989124525815DB72705E39426">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Round</string>
@@ -5131,7 +5110,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX9F06FB4E6A674F53B0FFBF164363CC57">
+		<Item class="ModuleScript" referent="RBX4814AA6E2A8C498EA9FBE2592E9F9E3E">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Extent</string>
@@ -5392,7 +5371,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXC5A79401DBF54CD7BB559950539BFAEB">
+		<Item class="ModuleScript" referent="RBXDB76DCC650044E09890A9A0966AD32AB">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Adornments</string>
@@ -5437,6 +5416,8 @@ local planeOriginLines = {}
 
 local rotateLines = {}
 
+local rotateAxisLine = {}
+
 local renderRotation = false
 local internalRotate = false
 
@@ -5473,9 +5454,9 @@ local S_X_POS_Z_POS = 7
 local S_X_POS_Z_NEG = 8
 local S_X_NEG_Z_POS = 9
 local S_X_NEG_Z_NEG = 10
-local R_XY = 11
-local R_XZ = 12
-local R_YZ = 13
+local R_XY = 11 -- 3
+local R_XZ = 12 -- 2
+local R_YZ = 13 -- 1
 local H_PLANE = 14
 
 local currentHandle = H_NONE
@@ -5719,11 +5700,9 @@ local function hoverEnterHandle(handle)
 	hoveredHandles[handle] = true
 	if not adornKeeper[handle][2].Visible or Input.getButtonState(Input.Enum.Key.MOUSE_BUTTON1)  then return end
 	if handle == currentHandle then currentlyOverHandle = true end
-	if currentHandle ~= H_NONE then return end
+	if handle >= currentHandle and currentHandle ~= H_NONE then return end
 	
 	if handle == H_PLANE then
-		--adornKeeper[handle][2].ImageColor3 = adornKeeper[handle][4][1]
-		--adornKeeper[handle][2].ImageTransparency = adornKeeper[handle][4][2]
 		planeHoverTransition = true
 	else
 		if not planeSelectionActive then
@@ -5750,10 +5729,8 @@ end
 local function hoverLeaveHandle(handle)
 	hoveredHandles[handle] = nil
 	if handle == currentHandle then currentlyOverHandle = false end
-	if Input.getButtonState(Input.Enum.Key.MOUSE_BUTTON1) then --[[print("returning")--]] return end
+	if Input.getButtonState(Input.Enum.Key.MOUSE_BUTTON1) then return end
 	if handle == H_PLANE then
-		--adornKeeper[handle][2].ImageColor3 = adornKeeper[handle][5][1]
-		--adornKeeper[handle][2].ImageTransparency = adornKeeper[handle][5][2]
 		planeHoverTransition = false
 	else
 		resetHandle(handle)
@@ -5925,6 +5902,20 @@ local function initializeAdorns()
 	imageLabel.InputEnded:connect(function(input) planeInputEnded(input) end)
 	
 	adornKeeper[H_PLANE] = {imageLabel, imageLabel, H_PLANE, {grey, 0}, {black, 0.5}, Vector2.new(1, 1), Vector2.new(1, 1)}
+	
+	rotateAxisLine[1] = Instance.new("LineHandleAdornment", cg)
+	rotateAxisLine[1].Visible = false
+	rotateAxisLine[1].Color3 = rbxRed
+	rotateAxisLine[1].Thickness = 3
+	rotateAxisLine[1].ZIndex = 5
+	
+	rotateAxisLine[2] = rotateAxisLine[1]:Clone()
+	rotateAxisLine[2].Parent = cg
+	rotateAxisLine[2].Color3 = rbxGreen
+	
+	rotateAxisLine[3] = rotateAxisLine[1]:Clone()
+	rotateAxisLine[3].Parent = cg
+	rotateAxisLine[3].Color3 = rbxBlue
 	
 	--measure
 	
@@ -6462,32 +6453,20 @@ local function updatePlanePosition()
 end
 
 local function getAdornmentWorldCFrame(adornment)
-	--if true then return adornment.WorldCFrame end
-	--print("adornment", adornment)
-	--print("adornee", adornment.Adornee)
+	
 	if adornment and adornment.Adornee then
-		--print("a point")
 		local adornee = adornment.Adornee
 		if adornee:IsA("Model") and not adornee:IsA("Workspace") then
-			--return CFrame.new()
-			--print("getAdornmentWorldCFrame")
 			adornee = Metapart.convertToPart(adornee)
 		end
-		--if adornee:IsA("BasePart") then
-		
 		
 			local cframe = adornee.CFrame
-			--print("name", adornment.Name)
-			--if adornment.Name == "R_XZ" then print("adornee:", adornee, adornee.CFrame) end
 			local worldSpaceCFrame = cframe * adornment.CFrame
 			local worldSpaceOffset = cframe:pointToWorldSpace(adornment.SizeRelativeOffset * adornee.Size * 0.5) - cframe.p
 			
-			--print("Cframe:", worldSpaceCFrame+worldSpaceOffset)
 			return worldSpaceCFrame + worldSpaceOffset;
-		--elseif adornee:IsA("Model") then
-		--end
 	end
-	--print("bad adornment")
+	
 	return CFrame.new()
 end
 
@@ -6526,15 +6505,9 @@ local function updateAdornmentPositions()
 		setPlaneVisibility(false)
 		setRotateAdornVisibility(false)
 		setScaleAdornVisibility(false)
-		--print("returning")
 		return
 	end
-	
---	
---	setTranslateAdornVisibility(true)
---	setPlaneVisibility(true)
---	setScaleAdornVisibility(not adornKeeper[R_XY][1].Adornee:IsA("Model") and selectionSize == 1)
-	
+		
 	if mouseDown then
 		if (currentHandle == R_XY or currentHandle == R_XZ or currentHandle == R_YZ) then
 			setRotateAdornVisibility(false)
@@ -6604,51 +6577,77 @@ local function updateAdornmentPositions()
 	end
 	
 	
-	--blue
+	--blue - Z Axis
 	adornKeeper[R_XY][2].SizeRelativeOffset = Vector3.new(octant.X, octant.Y, -octant.Z)
 	adornKeeper[R_XY][2].CFrame = CFrame.new(Vector3.new(octant.X * positionChange , octant.Y * positionChange, 0), 
 											 Vector3.new(octant.X * positionChange, octant.Y * positionChange, octant.Z))
 								 
 	adornKeeper[R_XY][2].CFrame = adornKeeper[R_XY][2].CFrame * CFrame.Angles(0, 0, ((octant.X > 0 and math.pi/2 or 0) + (octant.Y > 0 and 0 or math.pi/2) + (octant.Z > 0 and 0 or (octant.Y > 0 and -math.pi/2 or math.pi/2))) * (octant.X > 0 and 1 or -1))
 	
-	if currentHandle == R_XY and not mouseDown then
-		adornKeeper[R_XY][1].SizeRelativeOffset = adornKeeper[R_XY][2].SizeRelativeOffset									 
-		adornKeeper[R_XY][1].CFrame = adornKeeper[R_XY][2].CFrame
-		adornKeeper[R_XY][1].Visible = true
-		adornKeeper[R_XY][2].CFrame = adornKeeper[R_XY][2].CFrame + Vector3.new(0, 0, octant.Z * .075 * positionChange)
-	else
-		adornKeeper[R_XY][1].Visible = false
-	end
+	rotateAxisLine[3].Visible = false
+	adornKeeper[R_XY][1].Visible = false
+
+	if currentHandle == R_XY then
+		local length = adornee.Size.Z + 2
+		rotateAxisLine[3].Adornee = adornee
+		rotateAxisLine[3].CFrame = CFrame.new(Vector3.new(0, 0, length * 0.5))-- * CFrame.Angles(math.rad(90),0,0)
+		rotateAxisLine[3].Length = length
+		rotateAxisLine[3].Visible = true
+		
+		if not mouseDown then
+			adornKeeper[R_XY][1].SizeRelativeOffset = adornKeeper[R_XY][2].SizeRelativeOffset									 
+			adornKeeper[R_XY][1].CFrame = adornKeeper[R_XY][2].CFrame
+			adornKeeper[R_XY][1].Visible = true
+			adornKeeper[R_XY][2].CFrame = adornKeeper[R_XY][2].CFrame + Vector3.new(0, 0, octant.Z * .075 * positionChange)
+		end
+	end	
 	
-	--adornKeeper[R_XZ][1]
-	--green
+	--green - Y Axis
 	adornKeeper[R_XZ][2].SizeRelativeOffset = Vector3.new(octant.X, -octant.Y, octant.Z)
 	adornKeeper[R_XZ][2].CFrame = CFrame.new(Vector3.new(octant.X * (positionChange + .2), 0, octant.Z * (positionChange + .2)), Vector3.new(octant.X * (positionChange + .2), octant.Y, octant.Z * (positionChange + .2)))
 	adornKeeper[R_XZ][2].CFrame = adornKeeper[R_XZ][2].CFrame * CFrame.Angles(0, 0, (((octant.X > 0 and math.pi/2 or 0) + (octant.Z > 0 and math.pi/2 or 0) + (octant.Y > 0 and 0 or (octant.Z > 0 and -math.pi/2 or math.pi/2))) * (octant.X > 0 and 1 or -1) - (math.pi/2)))
 	
-	if currentHandle == R_XZ and not mouseDown then
-		adornKeeper[R_XZ][1].SizeRelativeOffset = adornKeeper[R_XZ][2].SizeRelativeOffset									 
-		adornKeeper[R_XZ][1].CFrame = adornKeeper[R_XZ][2].CFrame
-		adornKeeper[R_XZ][1].Visible = true
-		adornKeeper[R_XZ][2].CFrame = adornKeeper[R_XZ][2].CFrame + Vector3.new(0, octant.Y * .075 * positionChange, 0)
-	else
-		adornKeeper[R_XZ][1].Visible = false
-	end
+	rotateAxisLine[2].Visible = false
+	adornKeeper[R_XZ][1].Visible = false
+		
+	if currentHandle == R_XZ then
+		local length = adornee.Size.Y + 2
+		rotateAxisLine[2].Adornee = adornee
+		rotateAxisLine[2].CFrame = CFrame.new(Vector3.new(0, -length * 0.5, 0)) * CFrame.Angles(math.rad(90),0,0)
+		rotateAxisLine[2].Length = length
+		rotateAxisLine[2].Visible = true
+		
+		if not mouseDown then
+			adornKeeper[R_XZ][1].SizeRelativeOffset = adornKeeper[R_XZ][2].SizeRelativeOffset									 
+			adornKeeper[R_XZ][1].CFrame = adornKeeper[R_XZ][2].CFrame
+			adornKeeper[R_XZ][1].Visible = true
+			adornKeeper[R_XZ][2].CFrame = adornKeeper[R_XZ][2].CFrame + Vector3.new(0, octant.Y * .075 * positionChange, 0)
+		end
+	end		
 	
-	--red
+	
+	--red - X Axis
 	adornKeeper[R_YZ][2].SizeRelativeOffset = Vector3.new(-octant.X, octant.Y, octant.Z)
 	adornKeeper[R_YZ][2].CFrame = CFrame.new(Vector3.new(0, octant.Y * positionChange, octant.Z * positionChange), Vector3.new(octant.X, octant.Y * positionChange, octant.Z * positionChange))
 	adornKeeper[R_YZ][2].CFrame = adornKeeper[R_YZ][2].CFrame * CFrame.Angles(0, 0, ((octant.Z > 0 and math.pi/2 or 0) + (octant.Y > 0 and 0 or math.pi/2) + (octant.X > 0 and (octant.Y > 0 and -math.pi/2 or math.pi/2) or 0)) * (octant.Z > 0 and 1 or -1))
 	
-	if currentHandle == R_YZ and not mouseDown then
-		adornKeeper[R_YZ][1].SizeRelativeOffset = adornKeeper[R_YZ][2].SizeRelativeOffset									 
-		adornKeeper[R_YZ][1].CFrame = adornKeeper[R_YZ][2].CFrame
-		adornKeeper[R_YZ][1].Visible = true
-		adornKeeper[R_YZ][2].CFrame = adornKeeper[R_YZ][2].CFrame + Vector3.new(octant.X * 0.075 * positionChange, 0, 0)
-	else
-		adornKeeper[R_YZ][1].Visible = false
-	end
+	rotateAxisLine[1].Visible = false
+	adornKeeper[R_YZ][1].Visible = false
 	
+	if currentHandle == R_YZ then
+		local length = adornee.Size.X + 2
+		rotateAxisLine[1].Adornee = adornee
+		rotateAxisLine[1].CFrame = CFrame.new(Vector3.new(length * 0.5, 0, 0)) * CFrame.Angles(0,math.rad(90),0)
+		rotateAxisLine[1].Length = length
+		rotateAxisLine[1].Visible = true
+		
+		if not mouseDown then
+			adornKeeper[R_YZ][1].SizeRelativeOffset = adornKeeper[R_YZ][2].SizeRelativeOffset									 
+			adornKeeper[R_YZ][1].CFrame = adornKeeper[R_YZ][2].CFrame
+			adornKeeper[R_YZ][1].Visible = true
+			adornKeeper[R_YZ][2].CFrame = adornKeeper[R_YZ][2].CFrame + Vector3.new(octant.X * 0.075 * positionChange, 0, 0)
+		end
+	end	
 	
 	--resize adorns
 	for k,v in pairs(adornKeeper) do
@@ -7011,7 +7010,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXB6B8CEAD45A248F7BBECA6A6AD381172">
+		<Item class="ModuleScript" referent="RBX37EE36A0E09B455A9461F14E76C51AE1">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Input</string>
@@ -7068,7 +7067,7 @@ return module
 ]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX28C381712E2E4AD59303A35576F6299E">
+		<Item class="ModuleScript" referent="RBX65E143CBEB744869B17274F381CA0B5B">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Rubberband</string>
