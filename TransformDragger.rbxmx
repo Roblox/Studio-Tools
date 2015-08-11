@@ -451,7 +451,7 @@ end
 
 --- Collision ---
 local function moveUntilCollideWrapper(part, threshold, ignoreList, direction, maximum)
-	--return part:MoveUntilCollide(threshold, ignoreList, direction, maximum)
+	if not ignoreList then ignoreList = {} end
 	return Collision.moveUntilCollide(part, ignoreList, direction, threshold, maximum)
 end
 
@@ -460,15 +460,11 @@ local function rayCastWithWhiteList(ray, whiteList)
 	game.Workspace:FindPartOnRayWithIgnoreList(ray, ignoreList)
 end
 
---"SafeMove", "planeNormal", RBX::Vector3(0, 1, 0), "ignoreList", shared_ptr<const Instances>(), "threshold", 0.0002f, Security::None);
-
 local function safeMoveWrapper(part, threshold, ignoreList, direction)
-	--part:SafeMove(direction, ignoreList, threshold)
 	Collision.SafeMove(part, ignoreList, direction)
 end
 
 local function safeMoveWhiteList(part, direction, whiteList)
-	--safeMoveWrapper(part,0.0002, List.createIgnoreListGivenWhiteList(game.Workspace, whiteList), direction)
 	Collision.SafeMove(part, List.createIgnoreListGivenWhiteList(game.Workspace, whiteList), direction)
 end
 
