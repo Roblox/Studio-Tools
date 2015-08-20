@@ -2037,7 +2037,7 @@ function GenerateTerrain()
 		-- first off, a sanity check: check that the mountain height is higher than the base layer.
 		-- If not it doesn't make sense to place any mountains.
 		-- Also do this if there are no mountains requested
-		if GenerateOptions.mountainHeight <= GenerateOptions.baseHeight or GenerateOptions.mountainMode == "None" then
+		if GenerateOptions.mountainHeight <= GenerateOptions.baseHeight or GenerateOptions.mountainMode == "None" or GenerateOptions.mountainFrequency <= 0 then
 			-- just return no mountains
 			local mountains = {}
 			local mask = {}
