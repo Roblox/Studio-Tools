@@ -7292,14 +7292,15 @@ function initialiseUtility(plugin)
 			function buttonCreator:CreateButton(name, hint, image)
 				local backpack = game.Players.LocalPlayer:WaitForChild("Backpack")	
 				
-				local tool = Instance.new("HopperBin")
+				local tool = Instance.new("Tool")
 				tool.TextureId = image
+				tool.RequiresHandle = false
+				tool.ToolTip = hint
 				tool.Parent = backpack
-				--tool.ToolTip = hint --HopperBins don't have a ToolTip, tools don't work without a handle
 				
 				local result = {}
-				result.Click = tool.Selected
-				result.Deselected = tool.Deselected
+				result.Click = tool.Equipped
+				result.Deselected = tool.Unequipped
 				function result:SetActive(active)
 					--Do nothing
 				end
