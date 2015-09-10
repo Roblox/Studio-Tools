@@ -1,0 +1,5533 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<External>null</External>
+	<External>nil</External>
+	<Item class="Folder" referent="RBX096F749D680049F8BC543DD2C51BF420">
+		<Properties>
+			<string name="Name">Plugin</string>
+		</Properties>
+		<Item class="Script" referent="RBX128D7ACBD1D1441ABCE3246CF250BFC8">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">AnimationEditor</string>
+				<ProtectedString name="Source"><![CDATA[-----------------------------------------------------
+
+local Plugin = PluginManager():CreatePlugin()
+local toolbar = Plugin:CreateToolbar("Animations")
+local button = toolbar:CreateButton(
+	"", -- The text next to the icon. Leave Othis blank if the icon is sufficient.
+	"Animation Editor 2.0", -- hover text
+	"http://www.roblox.com/asset/?id=142301226" -- The icon file's name
+)
+
+local rootPart
+local cleanup = {}--Parts to be cleaned up on close
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- G E N E R I C    U T I L    C O D E
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+local function Repeat(func)
+	local flag = true
+	Spawn(function()
+		while flag do
+			func()
+			wait()
+		end	
+	end)
+
+	return (function()	flag = false end)
+end
+
+--the arcane and indelible work of Dominik the volcano
+function repairedCFrame(cf)
+	local sq=math.sqrt
+	local x,y,z,a,b,c,d,e,f,g,h,i=cf:components()
+	local j,k,l=f*g-d*i,a*i-c*g,c*d-a*f
+	local m,n,o=d*l-k*g,j*g-l*a,a*k-j*d
+	local l1,l2,l3=sq(a^2+d^2+g^2),sq(j^2+k^2+l^2),sq(m^2+n^2+o^2)
+	return CFrame.new(x,y,z,a/l1,j/l2,m/l3,d/l1,k/l2,n/l3,g/l1,l/l2,o/l3)
+end
+
+function isCFrameBroken(cframe)
+	local x, y, z, a, b, c, d, e, f, g, h, i = cframe:components()
+	
+	local r1 = Vector3.new(a, d, g)
+	local r2 = Vector3.new(b, e, h)
+	local r3 = Vector3.new(c, f, i)
+	
+	local function fuzzyEq(a, b)
+		return math.abs(a - b) < 0.001
+	end
+		
+	return (not fuzzyEq(r1.magnitude, 1) ) or (not fuzzyEq(r2.magnitude, 1) ) or (not fuzzyEq(r3.magnitude, 1) )
+end
+
+function spairs(t, order)
+    -- collect the keys
+    local keys = {}
+    for k in pairs(t) do keys[#keys+1] = k end
+
+    -- if order function given, sort by it by passing the table and keys a, b,
+    -- otherwise just sort the keys 
+    if order then
+        table.sort(keys, function(a,b) return order(t, a, b) end)
+    else
+        table.sort(keys)
+    end
+
+    -- return the iterator function
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i], t[keys[i]]
+        end
+    end
+end
+
+----------- udim stuff ----------------------------
+local function UD(a, b, c, d)
+	return UDim2.new(a, b, c, d)
+end
+local function CenterPos(w, h)
+	return UD(0.5, -w/2, 0.5, -h/2)
+end
+local function ConstSize(w, h)
+	return UD(0, w, 0, h)
+end
+
+function Make(ty, data)
+	local obj = Instance.new(ty)
+	for k, v in pairs(data) do
+		if type(k) == 'number' then
+			v.Parent = obj
+		else
+			obj[k] = v
+		end
+	end
+	return obj
+end
+
+function round(val)
+  return math.floor(val + 0.5)
+end
+
+function printCFrame(name, cf)
+	local anarray = {cf:components()}
+	local str = ""
+	for i,v in pairs(anarray) do
+		str = str .. " " .. i .. "# " .. v
+	end 
+	print(name .. " " .. str)
+end
+
+function printVector(vec)
+	print("X " .. vec.x .. " Y " .. vec.y .. " Z " .. vec.z)
+end
+
+function tablelength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
+
+local function weldBetween(a, b)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = CFrame.new()
+    weld.C1 = b.CFrame:inverse()*a.CFrame
+    weld.Parent = a
+    return weld;
+end
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- MOUSE EVENT CODE
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+local mouseOnLClick = {}
+local mouseOnRClick = {}
+
+local mouseOnLUp = {}
+local mouseOnRUp = {}
+
+function safeNil(item)
+	if (item == nil) then
+		return "NIL"
+	else
+		return item
+	end
+end
+
+function isSafeNIL(item)
+	return (item == "NIL")
+end
+
+function registerOn(event, guiElement, func)
+	guiElement = safeNil(guiElement)
+	local ord = 1
+	if (isSafeNIL(guiElement)) then
+		ord = 0
+	else 
+		local parent = guiElement.Parent
+		while (parent ~= nil and parent ~= game.Workspace) do
+			ord = ord + 1
+			parent = parent.Parent
+		end
+	end
+	local eventInstance = { Element = guiElement, Function = func, Order = ord}
+	table.insert(event, eventInstance)
+	return eventInstance
+end
+
+function unregisterOn(event, guiElement)
+	guiElement = safeNil(guiElement)
+	local i=1
+	while i <= #event do
+	    if event[i].Element == guiElement then
+	        table.remove(event, i)
+	    else
+	        i = i + 1
+	    end
+	end
+end
+
+function unregisterEvent(event, eventInstance)
+	local i=1
+	while i <= #event do
+	    if event[i] == eventInstance then
+	        table.remove(event, i)
+--	        print("Remove " .. eventInstance.Element.Name )
+	    else
+	        i = i + 1
+	    end
+	end
+end
+
+function clearAllEvents()
+	mouseOnLClick = {}
+	mouseOnRClick = {}
+
+	mouseOnLUp = {}
+	mouseOnRUp = {}
+end
+
+function isIn(guiElement, X, Y)
+	if (X >= guiElement.AbsolutePosition.X and X <= guiElement.AbsolutePosition.X + guiElement.AbsoluteSize.X and
+		Y >= guiElement.AbsolutePosition.Y and Y <= guiElement.AbsolutePosition.Y + guiElement.AbsoluteSize.Y) then
+		return true
+	else
+		return false
+	end			
+end
+
+function listEvent(event)
+	print("Event List --------------------------------------")
+	local i=1
+	while i <= #event do
+		local consume = "false"
+		if (event[i].Consume) then
+			consume = "true"
+		end
+		if (isSafeNIL(event[i].Element)) then
+			print("Nil " .. event[i].Order )
+		else
+			print(event[i].Element.Name .. " " .. event[i].Order)
+		end
+        i = i + 1
+	end
+end
+
+
+--------------------------------------------------------------------------------------------
+-- GUI Mouse Handlers
+--------------------------------------------------------------------------------------------
+
+local function mouseCallbackCheck(list)
+	local mouse = Plugin:GetMouse()
+	for _,elem in spairs(list, function(t, a, b) return t[a].Order > t[b].Order end) do
+		if (isSafeNIL(elem.Element)) then
+			if (elem.Function(mouse.X, mouse.Y)) then
+				break
+			end
+		elseif isIn(elem.Element, mouse.X, mouse.Y) then
+			if (elem.Function(mouse.X - elem.Element.AbsolutePosition.X, mouse.Y - elem.Element.AbsolutePosition.Y)) then
+				break
+			end
+		end
+	end
+end
+
+Plugin:GetMouse().Button1Down:connect(function()
+		mouseCallbackCheck(mouseOnLClick)
+	end
+)
+Plugin:GetMouse().Button2Down:connect(function()
+		mouseCallbackCheck(mouseOnRClick)
+	end
+)
+Plugin:GetMouse().Button1Up:connect(function()
+		mouseCallbackCheck(mouseOnLUp)
+	end
+)
+Plugin:GetMouse().Button2Up:connect(function()
+		mouseCallbackCheck(mouseOnRUp)
+	end
+)
+game:GetService("UserInputService").InputEnded:connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		mouseCallbackCheck(mouseOnLUp)
+	end
+end)
+
+local mousePosition2d = Vector2.new()
+game:GetService("UserInputService").InputChanged:connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		mousePosition2d = Vector2.new(input.Position.X, input.Position.Y)
+	end
+end)
+
+
+function saveModel()
+	local model = animationController.Parent:Clone()
+	model.Parent = game.ServerStorage
+	model.Name = "AnimationEditorDebugModel"
+end
+
+function mouseRaycast(ignoreList)
+	local ray = workspace.CurrentCamera:ViewportPointToRay(mousePosition2d.X, mousePosition2d.Y)
+	ray = Ray.new(ray.Origin, ray.Direction.Unit * 512)
+		
+	local part, point, normal
+	
+	--infinite loop that is broken out of, so don't worry
+	while true do
+		part, point, normal = workspace:FindPartOnRayWithIgnoreList(ray, ignoreList)
+		
+		if part then
+			local isTransparent = part.Transparency > 0.9
+			local isHumanoidRootPart = part.Name == "HumanoidRootPart"
+			
+			--calculate whether it's an active part or not
+			local isDisabled = false
+			local animatedPart = findAnimatedPart(part)
+			if animatedPart then
+				isDisabled = not partInclude[animatedPart.Name]
+			end
+			
+			local shouldSkip = isTransparent or isHumanoidRootPart or isDisabled
+			
+			if shouldSkip then
+				table.insert(ignoreList, part)
+			else
+				break
+			end
+		else
+			break
+		end
+	end
+	
+	return part, point, normal
+end
+
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- G L O B A L S 																						(Globals for CTRL-F)
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+timelineUI = nil
+menuUI = nil
+saveUI = nil
+loadUI = nil
+stopAnimUI = nil
+timeChangeUI = nil
+selectedLine = nil
+rotateMoveUI = nil
+
+local timelinemarginSize = 40
+local marginSize = 5
+local lineSize = 10
+local buttonSize = 15
+local nameSize = 150
+local headerSize = 45
+local timelineLength = 0
+local tickSeparation = 50
+local ticks = 1
+local tickSpacing = 0.25
+local lineCount = 0
+local cursorTime = 0
+local timeScale = 0.05 -- Pixels per second of animation
+
+partList = {}
+ghostingModel = {}
+undoMemory = {}
+partListByName = {}
+partToItemMap = {}
+partToLineNumber = {}
+rootPart = nil
+animationController = nil
+
+partInclude = {}
+
+modal = false
+rotateMode = true
+partSelection = nil
+selectedKeyframe = nil
+rotateStep = 0
+moveStep = 0
+screenWidth = game.Workspace.CurrentCamera.ViewportSize.X
+
+buttonOnColor = Color3.new(200/255, 200/255, 200/255)
+buttonOffColor = Color3.new(50/255, 50/255, 50/255)
+
+dropDownColor = Color3.new(21/255, 21/255, 21/255)--Color3.new(100/255, 100/255, 150/255)
+
+local lastAutoSaveTime = 0
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- D R O P   D O W N    M E N U
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+dropDownMouseClickEater = nil
+dropDownMenuClearEvent = nil
+
+function displayDropDownMenu(parent, choiceList, x, y)
+	local retval = nil
+	modal = true
+
+	local numButtons = tablelength(choiceList)
+
+	-- create frame
+	local dropDownUI = Make('Frame', {
+			Parent = parent,
+			Name = 'RootFrame',
+			Style = 'Custom',
+			Position = UD(0, x, 0, y),
+			Size = UD(0, 100, 0, (marginSize) + numButtons * (buttonSize + marginSize)),
+			BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+			BackgroundTransparency = 0.3,
+			ZIndex = 10,
+		})
+
+	local waitLock = false
+	local buttonIdx = 0
+	for idx, value in pairs(choiceList) do
+
+		local button = Make('TextButton', {
+			Parent = dropDownUI,
+			Name = value ..'Button',
+			Font = 'ArialBold',
+			FontSize = GuiSettings.TextMed,
+			TextColor3 = GuiSettings.TextColor,
+			Position = UD(0.05, 0, 0, marginSize + buttonIdx * (buttonSize + marginSize)),
+			Size = UD(0.9, 0, 0, buttonSize),
+			BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+			BackgroundTransparency = 0,
+			Text = value,
+			ZIndex = 11,
+		})
+
+		button.MouseButton1Click:connect(function()
+			waitLock = true
+			retval = value
+		end)
+
+
+		buttonIdx = buttonIdx + 1
+		
+	end
+
+	dropDownMouseClickEater = registerOn(mouseOnLClick, dropDownUI, function(x, y)	return true	end)
+	dropDownMenuClearEvent = registerOn(mouseOnLClick, nil, function(x, y)
+		waitLock = true
+		return true
+	end)
+
+	while( not waitLock ) do
+		wait()
+	end
+
+	dropDownUI.Parent = nil
+	unregisterEvent(mouseOnLClick, dropDownMouseClickEater)
+	unregisterEvent(mouseOnLClick, dropDownMenuClearEvent)
+
+	modal = false
+	return retval
+end
+
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- T E X T   E N T R Y   D I A L O G
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+function showTextExtryDialog(title, default)
+
+	modal = true
+
+	local dialogUI = Make('ScreenGui', 
+		{	
+			Name = "SaveUI",
+			Make('Frame', {
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0.5, -200, 0.5, 0),
+				Size = UD(0, 400, 0, marginSize + (lineSize + marginSize) * 5),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = title,
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+				Make('Frame', {
+					Parent = timelineUI,
+					Name = 'SaveNameFrame',
+					Style = 'Custom',
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 1),
+					Size = UD(0.9, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 100/255),
+					BackgroundTransparency = 0.3,
+					Make('TextBox', {
+						Name = 'SaveNameBox',
+						Font = 'ArialBold',
+						FontSize = 'Size14',
+						TextColor3 = GuiSettings.TextColor,
+						Position = UD(0.05, 0, 0, 0),
+						Size = UD(0.9, 0, 1, 0),
+						BackgroundTransparency = 1,
+						Text = default,
+						TextXAlignment = Enum.TextXAlignment.Left,
+					}),
+				}),
+
+				Make('TextButton', {
+					Name = 'OKButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "OK",
+				}),
+				Make('TextButton', {
+					Name = 'CancelButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.55, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Cancel",
+				}),
+
+			}),
+		})
+
+		local retval = default
+		local waitLock = false
+
+		dialogUI.RootFrame.OKButton.MouseButton1Click:connect(function()
+			retval = dialogUI.RootFrame.SaveNameFrame.SaveNameBox.Text
+			waitLock = true
+		end)
+
+		dialogUI.RootFrame.CancelButton.MouseButton1Click:connect(function()
+			retval = nil
+			waitLock = true
+		end)
+
+
+		dialogUI.Parent = game:GetService("CoreGui")
+
+
+		while( not waitLock ) do
+			wait()
+		end
+
+		dialogUI.Parent = nil
+		modal = false
+		return retval
+
+	end
+
+--confirm dialogue
+function showConfirmationDialog(text)
+
+	modal = true
+
+	local dialogUI = Make('ScreenGui', 
+		{	
+			Name = "SaveUI",
+			Make('Frame', {
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0.5, -200, 0.5, 0),
+				Size = UD(0, 400, 0, marginSize + (lineSize + marginSize) * 5),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				BorderSizePixel = 0,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize * 2),
+					BackgroundTransparency = 1,
+					Text = text,
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+				Make('TextButton', {
+					Name = 'OKButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "OK",
+				}),
+				Make('TextButton', {
+					Name = 'CancelButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.55, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Cancel",
+				}),
+
+			}),
+		})
+
+		local retval = default
+		local waitLock = false
+
+		dialogUI.RootFrame.OKButton.MouseButton1Click:connect(function()
+			retval = true
+			waitLock = true
+		end)
+
+		dialogUI.RootFrame.CancelButton.MouseButton1Click:connect(function()
+			retval = false
+			waitLock = true
+		end)
+
+
+		dialogUI.Parent = game:GetService("CoreGui")
+
+
+		while( not waitLock ) do
+			wait()
+		end
+
+		dialogUI.Parent = nil
+		modal = false
+		return retval
+
+	end
+
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- K E Y  F R A M E    C O D E
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+animationPriorityList = { 
+	"Core",
+	"Idle",
+	"Movement",
+	"Action"
+}
+
+animationPlayID = 0
+animationLength = 2.0
+keyframeList = {}
+loopAnimation = false
+animationPriority = "Action"
+animationFramerate = 1 / 20
+copyPoseList = {}
+poseColor =  Color3.new(200/255, 50/255, 150/255)
+copyPoseColor = Color3.new(150/255, 150/255, 200/255)
+
+
+function copyPose(part, pose)
+
+	if (copyPoseList[part.Name] == pose) then
+		copyPoseList[part.Name].UI.BackgroundColor3 = poseColor
+		copyPoseList[part.Name] = nil
+		return
+	elseif (copyPoseList[part.Name] ~= nil) then
+		copyPoseList[part.Name].UI.BackgroundColor3 = poseColor
+	end
+
+	copyPoseList[part.Name] = pose
+	pose.UI.BackgroundColor3 = copyPoseColor
+end
+
+function resetCopyPoseList()
+	for partName, pose in pairs(copyPoseList) do
+		pose.UI.BackgroundColor3 = poseColor
+	end
+	copyPoseList = {}
+end
+
+function pastePoses()
+	if (tablelength(copyPoseList) <= 0) then
+		return
+	end
+
+	local keyframe = getKeyframe(cursorTime)
+	if (keyframe == nil) then
+		keyframe = createKeyframe(cursorTime)
+	end
+
+	for partName, pose in pairs(copyPoseList) do
+		local item = partListByName[partName]
+		if (keyframe.Poses[item.Item] ~= pose) then
+			if (keyframe.Poses[item.Item] == nil) then
+				keyframe.Poses[item.Item] = initializePose(keyframe, item.Item)
+			end
+			
+			if keyframe.Poses[item.Item] then
+				keyframe.Poses[item.Item].CFrame = pose.CFrame
+			end
+		end
+	end	
+
+	resetCopyPoseList()
+	updateCursorPosition()
+end
+
+function keyframeTimeClamp(time)
+	-- clamp to 20 fps
+	time = round(time / animationFramerate)
+	time = time * animationFramerate
+
+	return time	
+end
+
+function deletePose(keyframe, part)
+	local active = partInclude[part.Name]
+	if (active and keyframe ~= nil and partToItemMap[part] ~= nil and partToItemMap[part].Motor6D ~= nil and keyframe.Poses[part] ~= nil) then
+
+		-- remove pose if it is currently the copied pose for this part
+		if (copyPoseList[part.Name] == keyframe.Poses[part]) then
+			copyPoseList[part.Name] = nil
+		end
+
+		keyframe.Poses[part] = nil
+
+		local ui = keyframe.UI:FindFirstChild('Pose' .. part.Name)
+
+		if (ui ~= nil) then
+			ui.Parent = nil
+			unregisterOn(mouseOnRClick, ui)
+			unregisterOn(mouseOnLClick, ui)
+		end
+
+
+		updateCursorPosition()
+	end
+end
+
+function initializePose(keyframe, part)
+	local active = partInclude[part.Name]
+	if (not active or keyframe == nil) then
+		return nil
+	end
+	local pose =  keyframe.Poses[part]
+	if (pose == nil and partToItemMap[part] ~= nil and partToItemMap[part].Motor6D ~= nil) then
+		resetCopyPoseList()
+		local previousPose = getClosestPose(keyframe.Time, part)
+		pose = {}
+		
+		if (previousPose == nil) then
+			pose.CFrame = CFrame.new()
+		else
+			pose.CFrame = previousPose.CFrame
+		end
+		
+		local data = partToItemMap[part]
+		pose.CFrame = getMotorC1(data, keyframe.Time) * data.OriginC1:inverse()
+		
+		pose.Item = partToItemMap[part]
+		pose.Time = keyframe.Time
+		keyframe.Poses[part] = pose
+
+		newPoseUI = Make('Frame', {
+			Parent = keyframe.UI,
+			Name = 'Pose' .. part.Name,
+			Style = 'Custom',
+			Position = UD(0, -lineSize / 4 + 1, 0, (partToLineNumber[part]) * (lineSize + marginSize) + lineSize / 3),
+			Size = UD(0, lineSize / 2, 0, lineSize / 2),
+			BackgroundColor3 = poseColor,
+			BackgroundTransparency = 0,
+		})
+		pose.UI = newPoseUI
+
+		registerOn(mouseOnRClick, newPoseUI, function(x, y)
+			if (isKeyDown("shift") and keyframe.Time > 0) then
+				deletePose(keyframe, part)
+			end
+			return true
+		end)
+
+		registerOn(mouseOnLClick, newPoseUI, function(x, y)
+			if (isKeyDown("ctrl")) then
+				copyPose(part, pose)
+				return true
+			end
+			return false
+		end)
+
+
+	end
+	return pose
+end
+
+function deleteKeyframe(time)
+	time = keyframeTimeClamp(time)
+	local keyframe = keyframeList[time]
+	if (keyframe ~= nil) then
+		for part, pose in pairs(keyframe.Poses) do
+			deletePose(keyframe, pose.Item.Item)
+		end
+		keyframe.UI.Parent = nil
+		keyframe.OptionsButton.Parent = nil
+		keyframe.OptionsButton = nil
+		keyframe.UI = nil
+		keyframeList[time] = nil
+	end
+end
+
+function createKeyframe(time)
+	time = keyframeTimeClamp(time)
+	local newKeyframe = keyframeList[time]
+	if (newKeyframe == nil) then
+
+		newKeyframe = {
+			Time = time,
+			Poses = {},		
+			Name = "Keyframe",
+			UI = Make('Frame', {
+				Parent = timelineUI.RootFrame.ScrollingFrame,
+				Name = 'Keyframe' .. time,
+				Style = 'Custom',
+				Position = UD(0, nameSize + marginSize + (time * timeScale), 0, -lineSize - marginSize),
+				Size = UD(0, 2, 0, (lineSize + marginSize) * (lineCount + 1)),
+				BackgroundColor3 = Color3.new(200/255, 50/255, 150/255),
+				BackgroundTransparency = 0,
+			}),
+			OptionsButton = Make("TextButton", {
+				Parent = timelineUI.RootFrame,
+				Name = "OptionsButton",
+				Size = UD(0, 12, 0, 12),
+				Position = UD(0, 0, 0, lineSize * 3),
+				BackgroundColor3 = Color3.new(200/255, 50/255, 150/255),
+				TextScaled = true,
+				TextColor3 = GuiSettings.TextColor,
+				Text = "...",
+			})
+		}
+		
+		local function getXY()
+			if not timelineUI:FindFirstChild("RootFrame") then
+				return 0, 0
+			end
+			
+			local x = newKeyframe.UI.AbsolutePosition.X - timelineUI.RootFrame.TimelineFrame.AbsolutePosition.X
+			local y = 0
+			return x, y
+		end
+	
+		local function moveOptionsButton()
+			if not timelineUI:FindFirstChild("RootFrame") then return end
+			
+			local x, y = getXY()
+			x = x + timelineUI.RootFrame.TimelineFrame.AbsolutePosition.X
+			local desiredX = (x - 6)
+			local deltaX = desiredX - newKeyframe.OptionsButton.AbsolutePosition.X
+			newKeyframe.OptionsButton.Position = newKeyframe.OptionsButton.Position + UDim2.new(0, deltaX, 0, 0)
+		end
+		
+		
+		local mouseDownTime = 0
+		local pos
+		
+		newKeyframe.OptionsButton.MouseButton1Down:connect(function()
+			lockUndoStep("keyframeMove")
+			mouseDownTime = tick()
+			pos = newKeyframe.Position
+			selectedKeyframe = newKeyframe
+		end)
+		
+		newKeyframe.OptionsButton.MouseButton1Click:connect(function()
+			mouseCallbackCheck(mouseOnLUp)
+			--print("Clickup")
+			local timeSinceMouseDown = tick() - mouseDownTime
+			--If 2s passes since clicking or the pos is changed, do not open menu.
+			if newKeyframe.Position ~= pos then return end
+			if timeSinceMouseDown > 2 then return end
+			
+			local x, y = getXY()
+			--print("Options menu")
+			keyframeContextMenu(x, y, false)
+		end)
+		
+		newKeyframe.OptionsButton.MouseButton1Down:connect(function()
+			--print("Options clicked")
+			selectedKeyframe = newKeyframe
+			local x, y = getXY()
+			keyframePositionShift(x, y)
+		end)
+
+		
+		newKeyframe.UI.Changed:connect(function()
+			moveOptionsButton()
+		end)
+		moveOptionsButton()
+
+		if (time <= 0.0) then
+			for part,elem in pairs(partList) do
+				initializePose(newKeyframe, part)
+			end
+		end
+
+		keyframeList[time] = newKeyframe
+	end
+	return newKeyframe
+end
+
+function resetKeyframeToDefaultPose(keyframe)
+	for part, item in pairs(partList) do
+		initializePose(keyframe, part)
+		local pose = keyframe.Poses[part]
+		if pose then
+			pose.CFrame = CFrame.new()	
+			item.Motor6D.C1 = item.OriginC1
+		end
+	end
+end
+
+function moveKeyframe(keyframe, time)
+	if (keyframeList[time] == nil) then
+		registerUndo({
+			action = "keyframeMove",
+			keyframe = keyframe,
+			oldTime = keyframe.Time,
+		})
+		keyframeList[keyframe.Time] = nil
+		keyframe.Time = time
+		for _, pose in pairs(keyframe.Poses) do
+			pose.Time = keyframe.Time
+		end
+		keyframe.UI.Position = UD(0, nameSize + marginSize + (time * timeScale), 0, -lineSize - marginSize)
+		keyframeList[time] = keyframe
+		updateCursorPosition()
+		wait()
+	end
+end
+
+function nudgeView()
+	local mainPart = rootPart.Item
+	mainPart.CFrame = mainPart.CFrame*CFrame.new(0, 1, 0)
+	mainPart.CFrame = mainPart.CFrame*CFrame.new(0, -1, 0)
+end
+
+local function findTime(X)
+	local time = X / timeScale
+
+	return keyframeTimeClamp(time)
+end
+
+function getKeyframe(time)
+	time = keyframeTimeClamp(time)
+	return keyframeList[time]
+end
+
+function getKeyframeData(part, time, createKeyframeIfNil, createPoseIfNil)
+	local keyframe = getKeyframe(time)
+	if (keyframe == nil and createKeyframeIfNil) then
+		keyframe = createKeyframe(cursorTime)
+	end
+
+	if (keyframe ~= nil and partToItemMap[part] ~= nil and partToItemMap[part].Motor6D ~= nil) then
+		if (keyframe.Poses[part] == nil and createPoseIfNil) then
+			initializePose(keyframe, part)
+		end
+		return keyframe.Poses[part]
+	else
+		return nil
+	end	
+end
+
+function getCurrentKeyframeData(part, createIfNil, createPoseIfNil)
+	return getKeyframeData(part, cursorTime, createIfNil, createPoseIfNil)
+end
+
+function getClosestPose(time, part)
+	local closestPose = nil
+	
+	for keyframeTime,  keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+		if keyframeTime > time then
+			break
+		end
+		
+		if keyframe.Poses[part] then
+			closestPose = keyframe.Poses[part]
+		end
+	end
+
+	return closestPose
+end
+
+function getClosestNextPose(time, part)
+	local closestPose = nil
+	
+	for keyframeTime,  keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time > t[b].Time end) do
+		if keyframeTime <= time then
+			break
+		end
+		
+		if keyframe.Poses[part] then
+			closestPose = keyframe.Poses[part]
+		end
+	end
+
+	return closestPose
+end
+
+function resetKeyframes()
+	resetCopyPoseList()
+	
+	for time, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+		deleteKeyframe(time)
+	end
+
+	keyframeList = {}
+end
+
+function undo()
+	--undoMemory is table name
+	--Yes this is a WIP. Alex (Rukiryo) is still working on it :) ChangeHistoryService will be implemented.
+	if true then return end
+	if #undoMemory <= 0 then return end
+	local success = true
+	local undoStep = undoMemory[#undoMemory]
+	if undoStep.action == "editTransform" or undoStep.action == "editRotate" then
+		undoStep.keyframe.CFrame = undoStep.oldKeyframeCFrame
+		undoStep.item.Motor6D.C1 = 	undoStep.oldC1
+		nudgeView()
+		updateProxyPart()
+	elseif undoStep.action == "keyframeMove" then
+		if keyframeList[undoStep.oldTime] == nil then
+			moveKeyframe(undoStep.keyframe, undoStep.oldTime)
+			keyframeList[undoStep.oldTime] = undoStep.keyframe
+			updateCursorPosition()
+		else
+			success = false
+		end
+	end
+	if success then
+		table.remove(undoMemory, #undoMemory)
+	end
+	return success
+end
+
+function registerUndo(a)
+	--Action Types
+	----limbTransform
+	if #undoMemory > 0 then
+		--Because handle dragging and whatnot fire multiple times per action, we ignore repeated or similar actions.
+		local lastAction = undoMemory[#undoMemory]
+		if a.action == "editTransform" or a.action == "editRotate" or a.action == "keyframeMove" then
+			if not (lastAction.action == a.action and lastAction.item == a.item) or (lastAction.locked == true) then
+				table.insert(undoMemory, a)
+			end
+		else
+			table.insert(undoMemory, a)
+		end
+	else
+		table.insert(undoMemory, a)		
+	end
+end
+
+--Basically, when you drag a keyframe or handle, you want to mark that as a "save". Locking the last undo step makes it not skip the next undo change even if the action is the same
+
+function lockUndoStep(doublecheck)
+	--print("Locking "..doublecheck)
+	if #undoMemory > 0 then
+		if undoMemory[#undoMemory].action == doublecheck then
+			undoMemory[#undoMemory].locked = true
+		end
+	end
+end
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- C U R S O R    C O D E
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+doNotUpdateCursor = false
+
+local ShowingInEditorInterpolation = false
+
+function toggleInEditorInterpolation()
+	ShowingInEditorInterpolation = not ShowingInEditorInterpolation
+	
+	if ShowingInEditorInterpolation then
+		menuUI.RootFrame.ToggleInterpolationButton.Text = "Lerp (on)"
+	else
+		menuUI.RootFrame.ToggleInterpolationButton.Text = "Lerp (off)"
+	end
+	
+	updateCursorPosition()
+end
+
+function isJustTranslation(c1, c2)
+	local x1, y1, z1, a1, b1, c1, d1, e1, f1, g1, h1, i1 = c1:components()
+	local x2, y2, z2, a2, b2, c2, d2, e2, f2, g2, h2, i2 = c2:components()
+	local dx = x2 - x1
+	local dy = y2 - y1
+	local dz = z2 - z1
+	local da = a2 - a1
+	local db = b2 - b1
+	local dc = c2 - c1
+	local dd = d2 - d1
+	local de = e2 - e1
+	local df = f2 - f1
+	local dg = g2 - g1
+	local dh = h2 - h1
+	local di = i2 - i1
+	
+	local returnValue = true
+	for _, delta in pairs{da, db, dc, dd, de, df, dg, dh, di} do
+		if math.abs(delta) > 0.001 then
+			returnValue = false
+		end
+	end
+	
+	return returnValue
+end
+
+function getMotorC1(data, time)
+	time = keyframeTimeClamp(time)
+	
+	if data.Motor6D and data.Item then
+		local part = data.Item
+		local active = partInclude[part.Name]
+		if active then
+			local lastPose = getClosestPose(time, part)
+			local nextPose = getClosestNextPose(time, part)
+			
+			if lastPose then
+				if ShowingInEditorInterpolation and nextPose and (lastPose.CFrame ~= nextPose.CFrame) and (time ~= lastPose.Time) then
+					local timeChunk = nextPose.Time - lastPose.Time
+					local timeIn = time - lastPose.Time
+					local weight = timeIn / timeChunk
+					
+					local lastCFrame = repairedCFrame(lastPose.CFrame)
+					local nextCFrame = repairedCFrame(nextPose.CFrame)
+					local retVal = lastCFrame:lerp(nextCFrame, weight)
+					
+					return retVal * data.OriginC1
+				else
+					return lastPose.CFrame * data.OriginC1
+				end
+			else
+				return data.OriginC1
+			end
+		else
+			return data.OriginC1
+		end
+	end
+end
+
+function updateCursorPosition()
+	if (doNotUpdateCursor) then
+		return
+	end
+
+	-- move UI
+	timelineUI.RootFrame.Cursor.Position = UD(0, nameSize + marginSize - (lineSize / 2) + (cursorTime * timeScale), 0, (lineSize + marginSize))
+	
+	--move the model
+	for part, data in pairs(partList) do
+		local active = partInclude[part.Name]
+		if data.Motor6D then
+			data.Motor6D.C1 = getMotorC1(data, cursorTime)
+			nudgeView()
+		end
+	end
+end
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- P A R T    S E L E C T I O N     C O D E
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+function selectPartUI(part)
+	selectedLine.Parent = timelineUI.RootFrame.ScrollingFrame
+	selectedLine.Position = UD(0, marginSize, 0,  -2 + ((lineSize + marginSize) * (partToLineNumber[part] - 1)))
+end
+
+function unselectPartUI()
+	selectedLine.Parent = nil
+end
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+function repairWholeRig()
+	for part, data in pairs(partList) do
+		if data.Motor6D then
+			--data.Motor6D.C0 = repairedCFrame(data.Motor6D.C0)
+			--data.Motor6D.C1 = repairedCFrame(data.Motor6D.C1)
+		end
+	end	
+end
+
+------------------------------------------------------------
+local function MakePartSelectGui(baseItem)
+	local trueSize = Vector2.new(100, lineSize + marginSize * 3)
+	local renderSize = Vector2.new(100, lineSize + marginSize * 2)
+	
+	if (rotateMoveUI == nil) then
+		rotateMoveUI = Make('ScreenGui', 
+		{	
+			Name = "rotateMoveUI",
+			
+			--world/local space
+			Make('Frame', {
+				Name = 'SpaceFrame',
+				Style = 'Custom',
+				Position = UD(0, 15, 1.0, -15 - trueSize.Y * 3),
+				Size = UD(0, renderSize.X, 0, renderSize.Y),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextButton', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Local Space (Y)",
+					TextXAlignment = Enum.TextXAlignment.Center,
+				}),
+			}),
+			
+			--rotate/translate
+			Make('Frame', {
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0, 15, 1.0, -15 - trueSize.Y * 2),
+				Size = UD(0, renderSize.X, 0, renderSize.Y),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextButton', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Rotate (R)",
+					TextXAlignment = Enum.TextXAlignment.Center,
+				}),
+			}),
+			
+			--steps!
+			Make('Frame', {
+				Name = 'StepFrame',
+				Style = 'Custom',
+				Position = UD(0, 15, 1.0, -15 - trueSize.Y),
+				Size = UD(0, renderSize.X, 0, renderSize.Y),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextButton', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Step: Free (T)",
+					TextXAlignment = Enum.TextXAlignment.Center,
+					--[[Make('TextButton',{
+						Name = 'StepOptions',
+						Style = 'Custom',
+						Position = UD(1, 0, 0, 0),
+						Size = UD(0, renderSize.Y, 0, renderSize.Y),
+						BackgroundTransparency = 0.5,
+						BackgroundColor3 = Color3.new(0/255, 0/255, 50/255),
+						Text = '...',
+						ZIndex = 2,
+					}),]]
+				}),
+			}),
+		})
+	end
+
+	--selection boxes
+	local mHoverBox = Make('SelectionBox', {
+		Color = BrickColor.new(21),
+		Transparency = 0.5,
+		LineThickness = 0.02,
+		Parent = game.Workspace,
+		Archivable = false,
+	})
+	
+	local HoverBoxes = {}
+	local SelectionBoxes = {}
+
+	local mSelectBox = Make('SelectionBox', {
+		Color = BrickColor.new(21),
+		Transparency = 0,
+		LineThickness = 0.02,
+		Parent = game.Workspace,
+		Archivable = false,
+	})
+
+	local mDragHandles = Make('Handles', {
+		Color = BrickColor.new(23),
+--		Style = 'Resize',
+		Style = 'Movement',
+		Parent = game:GetService('CoreGui'),
+		Archivable = false,
+	})
+
+	local mProxyPart = Make('Part', {
+		FormFactor = 'Custom',
+--		Size = Vector3.new(0.8,0.8,0.8);
+		Size = Vector3.new(0.8,0.8,0.8),
+		Name = 'ProxyPart',
+		Shape = 'Ball',
+		Archivable = false,
+		Parent = game.Workspace,
+		BrickColor = BrickColor.new(23),
+		Anchored = false,
+		CanCollide = false,
+		Transparency = 1.0,
+		TopSurface = 'Smooth',
+		BottomSurface = 'Smooth',
+	})	
+
+	local mRotateHandles = Make('ArcHandles', {
+		Color = BrickColor.new(23),
+		Parent = game:GetService('CoreGui'),
+		Archivable = false,
+	})
+
+
+	local mHover = nil
+	local mCanOffset = nil
+	local mShowControls = nil
+	local mStartTransformCF = nil
+	local mProxyWeld = nil
+	
+	local InWorldSpace = false
+	local PartCFrameAtTransformStart = nil
+	-------------
+
+	function displayHandles()
+		if (partSelection ~= nil) then
+			local item = partSelection
+
+			mProxyPart.Parent = item.Item
+			mProxyPart.Size = Vector3.new(0.2, 0.2, 0.2)
+			updateProxyPart()
+
+			if (rotateMode) then
+				mRotateHandles.Adornee = mProxyPart
+				mDragHandles.Adornee = nil
+			else
+				mRotateHandles.Adornee = nil
+				mDragHandles.Adornee = mProxyPart
+			end
+		end
+	end
+	
+	function updateProxyPart()
+		if partSelection then
+			local item = partSelection
+			
+			if (mProxyWeld ~= nil) then
+				mProxyWeld:Destroy()
+			end
+			
+			local pivotCFrame = (item.Motor6D.Part0.CFrame * item.Motor6D.C0)
+			local pivotInOriginPartSpace = (item.Motor6D.Part0.CFrame * item.Motor6D.C0 * item.OriginC1:inverse()):toObjectSpace(pivotCFrame)
+			local point = item.Item.CFrame:toWorldSpace(pivotInOriginPartSpace).p
+			
+			if InWorldSpace then
+				mProxyPart.CFrame = CFrame.new(point)
+			else
+				mProxyPart.CFrame = item.Item.CFrame + (point - item.Item.CFrame.p)
+			end
+			mProxyWeld = weldBetween(item.Item, mProxyPart)
+		end
+	end
+
+	function toggleHandles()
+		if (partSelection ~= nil) then
+			rotateMode = not rotateMode
+			if (rotateMode) then
+				rotateMoveUI.RootFrame.TitleBar.Text = "Rotate (R)"
+			else
+				rotateMoveUI.RootFrame.TitleBar.Text = "Move (R)"
+			end
+			updateStepDisplay()
+			displayHandles()
+		end
+	end
+	
+	function toggleTransformSpace()
+		InWorldSpace = not InWorldSpace
+		
+		if InWorldSpace then
+			rotateMoveUI.SpaceFrame.TitleBar.Text = "World Space (Y)"
+		else
+			rotateMoveUI.SpaceFrame.TitleBar.Text = "Local Space (Y)"
+		end
+		
+		updateProxyPart()
+	end
+
+	function toggleStep()
+		if (partSelection ~= nil) then
+			if (rotateMode) then
+				if (rotateStep == 0) then
+					rotateStep = 10
+				elseif (rotateStep == 10) then
+					rotateStep = 45
+				else
+					rotateStep = 0
+				end
+			else
+				if (moveStep == 0) then
+					moveStep = 0.2
+				elseif (moveStep == 0.2) then
+					moveStep = 1
+				else
+					moveStep = 0
+				end
+			end
+			updateStepDisplay()
+			displayHandles()
+		end
+	end
+
+	function updateStepDisplay()
+		if (rotateMode) then
+			if (rotateStep == 0) then
+				rotateMoveUI.StepFrame.TitleBar.Text = "Step: Free (T)"
+			elseif (rotateStep == 10) then
+				rotateMoveUI.StepFrame.TitleBar.Text = "Step: 10 (T)"
+			else
+				rotateMoveUI.StepFrame.TitleBar.Text = "Step: 45 (T)"
+			end
+		else
+			if (moveStep == 0) then
+				rotateMoveUI.StepFrame.TitleBar.Text = "Step: Free (T)"
+			elseif (moveStep == 0.2) then
+				rotateMoveUI.StepFrame.TitleBar.Text = "Step: 0.2 (T)"
+			else
+				rotateMoveUI.StepFrame.TitleBar.Text = "Step: 1 (T)"
+			end
+		end
+	end
+
+
+	local function setSelection(item, showControls, canoffset)
+		partSelection = item
+		if item then
+			mSelectBox.Adornee = item.Item
+			selectPartUI(item.Item)
+		else
+			mSelectBox.Adornee = nil
+			unselectPartUI()
+		end
+		mDragHandles.Adornee = nil
+		mRotateHandles.Adornee = nil
+		mProxyPart.Parent = nil
+		mCanOffset = canoffset
+		mShowControls = showControls
+		if showControls then
+			if canoffset then
+				displayHandles()
+			else
+				mSelectBox.Adornee = nil
+				mRotateHandles.Adornee = mProxyPart
+				mProxyPart.Parent = game.Workspace
+				if item then
+					mProxyPart.CFrame = item.Item.CFrame * item.OriginC1
+				end
+			end
+			rotateMoveUI.Parent = game:GetService("CoreGui")
+		else
+			if rotateMoveUI then
+				rotateMoveUI.Parent = nil
+			end
+		end
+	end
+
+	local function getSelection()
+		return partSelection
+	end
+	
+	function getHandleSelection()
+		return partSelection
+	end
+	
+	function resetHandleSelection()
+		setSelection(nil, false, false)
+	end
+
+	function setHandleSelection(item)
+		setSelection(item, true, true)
+	end
+
+	-------------
+	-- used for keyframe settings
+	local  mKeyframeData = { 
+		CanOffset = true,
+	}
+
+	mRotateHandles.MouseDrag:connect(function(axisRaw, relAngle, delRadius)
+		if (not modal) then
+			local rotateStepRad = (rotateStep / 180 ) * math.pi
+			if rotateStepRad > 0 then
+				relAngle =  math.floor((relAngle / rotateStepRad) + 0.5) * rotateStepRad
+			end
+
+			local item = getSelection()
+			local part = item.Item
+			local kfd = getCurrentKeyframeData(part, true, true)
+
+			local transform = CFrame.fromAxisAngle(Vector3.FromAxis(axisRaw), -relAngle)
+			
+			registerUndo( {
+				action = "editRotate",
+				keyframe = kfd,
+				oldKeyframeCFrame = kfd.CFrame,
+				item = item,
+				oldC1 = item.Motor6D.C1
+			})
+			
+			if InWorldSpace then
+				transform = CFrame.fromAxisAngle(Vector3.FromAxis(axisRaw), relAngle)
+				
+				local pivotCFrame = item.Motor6D.Part0.CFrame * item.Motor6D.C0
+				local pivotPosition = (PartCFrameAtTransformStart * item.OriginC1).p
+				local delta = pivotPosition - pivotCFrame.p
+				pivotCFrame = pivotCFrame + delta
+				
+				local relativeToPivot = pivotCFrame:toObjectSpace(PartCFrameAtTransformStart)
+				local newPartCFrame = (transform * (pivotCFrame - pivotCFrame.p) + pivotCFrame.p):toWorldSpace(relativeToPivot)
+				
+				local newMotorC1 = repairedCFrame(newPartCFrame:inverse() * (pivotCFrame - delta))
+				kfd.CFrame = newMotorC1 * item.OriginC1:inverse()
+				item.Motor6D.C1 = newMotorC1
+			else
+				local partcf = item.Motor6D.Part0.CFrame * item.Motor6D.C0 * 
+							   mStartTransformCF * transform:inverse() *
+							   item.OriginC1:inverse()
+				local cf = partcf:inverse() * 
+						   item.Motor6D.Part0.CFrame * item.Motor6D.C0 
+						   * item.OriginC1:inverse()
+
+				local A = item.Motor6D.Part0.CFrame
+				local B = item.Motor6D.C0 
+				local C = transform
+				local D = mStartTransformCF
+				local E = item.OriginC1
+				local F = part.CFrame
+
+				local ARot = item.Motor6D.Part0.CFrame - item.Motor6D.Part0.CFrame.p
+				local BRot = item.Motor6D.C0 - item.Motor6D.C0.p
+				local ERot = E - E.p
+				local ETrans = CFrame.new(E.p)
+
+				kfd.CFrame = (ETrans * C * ETrans:inverse() * D)
+				item.Motor6D.C1 = (kfd.CFrame*item.OriginC1)
+			end
+			
+			nudgeView()
+			updateProxyPart()
+		end
+
+	end)
+
+
+	mRotateHandles.MouseButton1Down:connect(function() 
+		if (not modal) then
+			local item = getSelection()
+			local part = item.Item
+			local kfd = getCurrentKeyframeData(part, true, true)
+			if mKeyframeData.CanOffset then
+				mStartTransformCF = kfd.CFrame
+			else
+				mStartTransformCF = item.Motor6D.C0:inverse() * item.Motor6D.Part0.CFrame:inverse() *
+				                    part.CFrame * item.OriginC1
+			end
+			
+			PartCFrameAtTransformStart = part.CFrame
+		end
+	end)
+	
+	mRotateHandles.MouseButton1Up:connect(function()
+		lockUndoStep("editRotate")
+	end)
+
+
+	mDragHandles.MouseDrag:connect(function(face, dist)
+		if (not modal) then
+			if moveStep > 0 then
+				dist = math.floor(dist / moveStep) * moveStep
+			end
+			
+			local item = getSelection()
+			local part = item.Item
+			local kfd = getCurrentKeyframeData(part, true, true)
+			
+			registerUndo( {
+				action = "editTransform",
+				keyframe = kfd,
+				oldKeyframeCFrame = kfd.CFrame,
+				item = item,
+				oldC1 = item.Motor6D.C1
+			})
+			
+			if InWorldSpace then
+				local translation = Vector3.FromNormalId(face) * dist -- good
+				
+				local newPartCFrame = PartCFrameAtTransformStart + translation -- good
+				
+				
+				local pivotCFrame = item.Motor6D.Part0.CFrame * item.Motor6D.C0
+				
+				local newMotorC1 = repairedCFrame(newPartCFrame:inverse() * pivotCFrame)
+				kfd.CFrame = (newMotorC1 * item.OriginC1:inverse())
+				item.Motor6D.C1 = (newMotorC1)
+			else
+				axis = Vector3.FromNormalId(face)
+
+				kfd.CFrame = (CFrame.new(-axis*dist)*mStartTransformCF)
+				item.Motor6D.C1 = (kfd.CFrame*item.OriginC1)
+			end
+			
+			nudgeView()
+			updateProxyPart()
+		end
+	end)
+
+	mDragHandles.MouseButton1Down:connect(function() 
+		if (not modal) then
+			local item = getSelection()
+			local part = item.Item
+			local kfd = getCurrentKeyframeData(part, true, true)
+			mStartTransformCF = kfd.CFrame
+			
+			PartCFrameAtTransformStart = part.CFrame
+		end
+	end)
+	
+	mDragHandles.MouseButton1Up:connect(function()
+		lockUndoStep("editTransform")
+	end)
+
+	local mouse = Plugin:GetMouse()
+
+	MouseTargeterHalt = Repeat(function()
+		local part = mouseRaycast{}
+		if part then
+			part = findAnimatedPart(part)
+			if part then
+				part = part.Item
+			end
+		end
+		
+		if part ~= mHover  and _G["AnimationEdit"] == true then
+			mHover = part
+			
+			--clear old hover boxes
+			for _, hoverBox in pairs(HoverBoxes) do
+				hoverBox:Destroy()
+			end
+			
+			--make new hover boxes
+			local model = Instance.new("Model")
+			for _, chunkPart in pairs(getAnimatedChunk(part)) do
+				local newPart = chunkPart:Clone()
+				if newPart then
+					newPart.Parent = model
+					
+					if partToItemMap[chunkPart] then
+						model.PrimaryPart = newPart
+					end
+				end
+			end
+			local selectionPart = Make("Part", {
+				Name = 'SelectionPart',
+				Transparency = 1,
+				Anchored = true,
+				CanCollide = false,
+				Archivable = false,
+				CFrame = model:GetModelCFrame(),
+				FormFactor = "Custom",
+				Parent = workspace,
+			})
+			--this can't be in the table since form factor must be set first
+			selectionPart.Size = model:GetExtentsSize(),
+			
+			table.insert(HoverBoxes, selectionPart)
+			
+			local hoverBox = Make("SelectionBox", {
+				LineThickness = 0.02,
+				Archivable = false,
+				Adornee = selectionPart,
+				Parent = game:GetService("CoreGui"),
+			})
+			table.insert(HoverBoxes, hoverBox)
+		end
+	end)
+
+	function destroySelectionBoxes()
+		if (mSelectBox) then
+			mSelectBox.Adornee = nil
+			mSelectBox.Parent = nil
+		end
+		if (mHoverBox) then
+			mHoverBox.Adornee = nil
+			mHoverBox.Parent = nil
+		end
+		if (mDragHandles) then
+			mDragHandles.Adornee = nil
+			mDragHandles.Parent = nil
+		end
+		if (mRotateHandles) then
+			mRotateHandles.Adornee = nil
+			mRotateHandles.Parent = nil
+		end
+		if (mProxyPart) then
+			mProxyPart:Destroy()
+		end
+		
+		for _, hoverBox in pairs(HoverBoxes) do
+			hoverBox:Destroy()
+		end
+		
+		for i, v in pairs(cleanup) do
+			v:Destroy()
+		end
+	end
+	
+	function tableHasValue(t, v)
+		for _, val in pairs(t) do
+			if val == v then
+				return true
+			end
+		end
+		return false
+	end
+	
+	function getAnimatedChunk(part)
+		local parts = {part}
+		
+		local function recurse(parent)
+			if not parent then return end
+			
+			for _, child in pairs(parent:GetConnectedParts()) do
+				if (not partToItemMap[child]) and (not tableHasValue(parts, child)) then
+					table.insert(parts, child)
+					recurse(child)
+				end
+			end
+		end
+		recurse(part)
+		
+		return parts
+	end
+	
+	function findAnimatedPart(clickedPart, partsChecked)
+		partsChecked = partsChecked or {}
+		
+		if tableHasValue(partsChecked, clickedPart) then return end
+		table.insert(partsChecked, clickedPart)
+		
+		if partToItemMap[clickedPart] then
+			return partToItemMap[clickedPart]
+		end
+		
+		for _, part in pairs(clickedPart:GetConnectedParts()) do
+			local animatedPart = findAnimatedPart(part, partsChecked)
+			if animatedPart then
+				return animatedPart
+			end
+		end
+		
+		return nil
+	end
+
+	registerOn(mouseOnLClick, nil, function()
+		if not rootPart then return end
+		
+		if (not modal) then
+			local part, point, normal = mouseRaycast{mProxyPart, rootPart.Item}
+			
+			if (part ~= nil) then
+				local item = findAnimatedPart(part)
+				local active = false
+				if item then
+					active = partInclude[item.Item.Name]
+				end
+
+				if (active and item ~= rootPart) then
+					if (item ~= nil) then
+						setSelection(item, true, true) --select it, (true = with movement controls)
+					else
+						setSelection(nil, false, false) --select it, (true = with movement controls)
+					end
+				else
+					setSelection(nil, false, false)
+				end
+			else
+				setSelection(nil, false, false) --select it, (true = with movement controls)
+			end
+		end
+		return false
+	end)
+
+	rotateMoveUI.RootFrame.TitleBar.MouseButton1Click:connect(function()
+		toggleHandles()
+	end)
+
+	rotateMoveUI.StepFrame.TitleBar.MouseButton1Click:connect(function()
+		toggleStep()
+	end)
+	
+	rotateMoveUI.SpaceFrame.TitleBar.MouseButton1Click:connect(function()
+		toggleTransformSpace()
+	end)
+
+	
+
+--[[
+	registerOn(registerOn(mouseOnLClick, nil, function()
+		local part = mouse.Target
+
+		--clamp the selection to a single 
+--		local sel = mKeyframeStrip.getSelection()
+
+		--do selection
+		local item = mPartToItemMap[part]
+		if item and mKeyframeData.Enabled[item] then
+			--ne selection? Pretend we're at frame 1
+			if sel.x == 0 then sel.x = 1 end
+
+			--clamp the selection to one x value for editing
+			mKeyframeStrip.setSlider(sel.x)
+			local kfdata = mKeyframeData[sel.x][item]
+			mKeyframeStrip.setItemSelection(item)
+			local canoffset = mKeyframeData.CanOffset
+			if item.Motor6D and kfdata then
+				mPartSelection.setSelection(item, true, canoffset) --select it, (true = with movement controls)
+			else
+				mPartSelection.setSelection(item, false, canoffset) --it's the root, false => no controls
+			end
+		end
+	end))
+--]]
+
+end
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+-----------------------------------------------------
+
+GuiSettings = {}
+GuiSettings.TextLarge = 'Size24'
+GuiSettings.TextMed = 'Size18'
+GuiSettings.TextSmall = 'Size14'
+GuiSettings.TextColor = Color3.new(221/255, 221/255, 221/255)
+
+guiWindow = nil
+
+
+local function selectObjectToAnimate()
+	-- creating test GUI
+	if (guiWindow == nil) then
+
+		guiWindow = Make('ScreenGui', 
+		{
+			Name = "TestGUI",
+			Make('Frame', {
+				Parent = guiWindow,
+				Name = 'TestFrame',
+				Style = 'DropShadow',
+				Position = UD(0.5, -200, 0.8, -100),
+				Size = UD(0, 400, 0, 130),
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Size = UD(1, 0, 0, 20),
+					BackgroundTransparency = 1,
+					Text = "Select the root part of your rig",
+				}),
+				Make('TextLabel', {
+					Name = 'SelectionText',
+					Font = 'Arial',
+					FontSize = GuiSettings.TextSmall,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0, 100, 0, 20),
+					Size = UD(1, -100, 0, 20),
+					BackgroundTransparency = 1,
+					---------------------------
+					Text = "<none>",
+				}),
+				Make('TextButton', {
+					Name = 'OkayButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextSmall,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0, 0, 0, 40),
+					Size = UD(0.5, 0, 0, 30),
+					Style = 'RobloxRoundDefaultButton',
+					Visible = false,
+					--------------------------
+					Text = "Okay",
+				}),
+				------------------------------
+				Make('TextButton', {
+					Name = 'HelpButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextSmall,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0, 0, 0, 80),
+					Size = UD(1, 0, 0, 30),
+					Style = 'RobloxRoundButton',
+					--------------------------
+					Text = "Need Help? Click Here!",
+				}),
+				Make('TextButton', {
+					Name = 'CancelButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextSmall,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.5, 0, 0, 40),
+					Size = UD(0.5, 0, 0, 30),
+					Style = 'RobloxRoundButton',
+					---------------------------
+					Text = "Cancel",
+				}),
+			}),
+		})
+
+	end
+
+
+	--------------------------------
+	local mSelectionHoverBox = Make('SelectionBox', {
+		Name = 'AnimEdit_SelectionBox',
+		Color = BrickColor.new(21),
+		Transparency = 0.5,
+		Parent = game.Workspace,
+	})
+
+	local mSelectionBox = Make('SelectionBox', {
+		Name = 'AnimEdit_SelectionBox',
+		Color = BrickColor.new(23),
+		Parent = game.Workspace,
+	})
+
+	local mCurrentSelection = nil
+	local mHoverRepeater = nil
+	local mOnClickCn
+	local waitLock = true
+
+	local mouse = Plugin:GetMouse()
+
+
+
+	local halt = Repeat(function() mSelectionHoverBox.Adornee = mouse.Target end)
+
+--[[
+	Spawn(function()
+		while mFlag do
+			mSelectionHoverBox.Adornee = mouse.Target
+			wait()
+		end	
+	end)
+
+	local function halt()
+		mFlag = false
+	end
+--]]
+
+	---------------------------
+	local function delete()
+		if mOnClickCn then
+			mOnClickCn:disconnect()
+			mOnClickCn = nil
+		end
+		mSelectionBox.Adornee = nil
+		mSelectionHoverBox.Adornee = nil
+		mSelectionBox.Parent = nil
+		mSelectionHoverBox.Parent = nil
+		halt()
+	end
+	
+	local GetAbsoluteRoot = function(what)
+		local possibleRoot = what:GetRootPart()
+		local found = nil
+		local getRoot
+		getRoot = function(p)
+			for i, v in pairs(p:GetChildren()) do
+				if v:IsA("Motor6D") and v.Part1 == possibleRoot then
+					found = v.Part0
+				elseif v:IsA("BasePart") or v:IsA("Model") then
+					getRoot(v)
+				end
+			end
+		end
+		getRoot(possibleRoot.Parent)
+		if found then return found end
+		return possibleRoot
+		
+	end
+
+	local function setCurrentSelection(selection)
+
+		if (selection == nil) then
+			return
+		end
+
+		--selection = selection:GetRootPart(selection)
+		selection = GetAbsoluteRoot(selection)
+		if not selection then return end
+
+		local tempAnimControl = selection.Parent:FindFirstChild("Humanoid")
+
+		tempAnimControl = selection.Parent:FindFirstChild("Humanoid")
+		if (not tempAnimControl) then
+			tempAnimControl = selection.Parent:FindFirstChild("AnimationController")
+			if (not tempAnimControl) then
+				warn("Animation Editor was unable to find a Humanoid or AnimationController in the selected model.")
+				return
+			end
+		end
+
+		animationController = tempAnimControl
+
+		mCurrentSelection = selection	
+		mSelectionBox.Adornee = selection
+
+		if selection then
+			guiWindow.TestFrame.OkayButton.Visible = true
+			guiWindow.TestFrame.SelectionText.Text = selection.Name
+			if not selection.Anchored then
+				local issuePart = selection
+				guiWindow.TestFrame.SelectionText.TextColor3 = Color3.new(1,0,0)
+				guiWindow.TestFrame.SelectionText.Text = guiWindow.TestFrame.SelectionText.Text.."  [Warning: Unanchored]"
+				repeat wait() 
+				until selection == nil or selection ~= issuePart or selection.Anchored == true
+				if selection == issuePart and issuePart.Anchored == true then
+					guiWindow.TestFrame.SelectionText.Text = issuePart.Name.."  [Resolved]"
+					guiWindow.TestFrame.SelectionText.TextColor3 = Color3.new(1,1,1)
+				elseif selection ~= issuePart and (selection == nil or selection.Anchored == false) then
+					guiWindow.TestFrame.SelectionText.TextColor3 = Color3.new(1,1,1)
+				end
+			else
+				guiWindow.TestFrame.SelectionText.TextColor3 = Color3.new(1,1,1)
+			end
+		else
+			guiWindow.TestFrame.OkayButton.Visible = false
+			guiWindow.TestFrame.SelectionText.Text = "<none>"
+			guiWindow.TestFrame.SelectionText.TextColor3 = Color3.new(1,1,1)
+		end
+
+	end
+
+	local function getSelection()
+		return mCurrentSelection
+	end
+
+	mOnClickCn = mouse.Button1Down:connect(function()
+		setCurrentSelection(mouse.Target)
+	end)
+
+
+	guiWindow.TestFrame.OkayButton.MouseButton1Click:connect(function()
+		delete()
+		waitLock = false
+	end)
+	guiWindow.TestFrame.CancelButton.MouseButton1Click:connect(function()
+		mCurrentSelection = nil
+		delete()
+		waitLock = false
+		exitPlugin()
+	end)
+	guiWindow.TestFrame.HelpButton.MouseButton1Click:connect(function()
+		local success, msg = pcall(function()
+			Plugin:OpenWikiPage("Animations")
+		end)
+		if not success then
+			guiWindow.TestFrame.HelpButton.Text = "Coming Very Soon!"
+		end
+	end)
+
+	-- reset GUI from previous incarnations
+	guiWindow.TestFrame.OkayButton.Visible = false
+	guiWindow.TestFrame.SelectionText.Text = "<none>"
+
+	guiWindow.Parent = game:GetService("CoreGui")
+
+	while (waitLock) do
+		wait()
+	end
+
+	-- clean up selection stuff
+	delete()
+	guiWindow.Parent = nil
+	return mCurrentSelection
+end
+
+
+
+loadButtonList = {}
+
+function showLoadGame()
+	if (loadUI == nil) then
+		loadUI = Make('ScreenGui', 
+		{	
+			Name = "LoadUI",
+			Make('Frame', {
+				Parent = timelineUI,
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0.5, -200, 0.5, 0),
+				Size = UD(0, 200, 0, marginSize + (lineSize + marginSize) * 5),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Load:",
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+			}),
+		})
+	end
+
+	-- clean up old buttons
+	for _, part in pairs(loadButtonList) do
+		part.Parent = nil
+	end
+
+	local humanoid = rootPart.Item.Parent
+	local AnimationBlock = humanoid:FindFirstChild("AnimSaves")
+	local fileCount = 0
+
+	if (AnimationBlock ~= nil) then
+		-- add button for saved games
+		for _, childPart in pairs(AnimationBlock:GetChildren()) do
+			if (childPart:IsA("KeyframeSequence")) then
+				local newButton = Make('TextButton', {
+					Parent = loadUI.RootFrame,
+					Name = childPart.Name,
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * (1 + fileCount * 2)),
+					Size = UD(0.9, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = childPart.Name,
+				})
+				fileCount = fileCount + 1	
+				loadButtonList[fileCount] = newButton
+
+
+				newButton.MouseButton1Click:connect(function()
+					loadUI.Parent = nil
+					loadCurrentAnimation(childPart.Name)
+					modal = false
+				end)
+
+			end
+		end
+	end
+
+	if (fileCount > 0) then
+		local newButton = Make('TextButton', {
+			Parent = loadUI.RootFrame,
+			Name = 'CancelButton',
+			Font = 'ArialBold',
+			FontSize = GuiSettings.TextMed,
+			TextColor3 = GuiSettings.TextColor,
+			Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * (1 + fileCount * 2)),
+			Size = UD(0.9, 0, 0, lineSize * 2),
+			BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+			BackgroundTransparency = 0,
+			Text = 'Cancel',
+		})
+		fileCount = fileCount + 1	
+		loadButtonList[fileCount] = newButton
+
+		newButton.MouseButton1Click:connect(function()
+			loadUI.Parent = nil
+			modal = false
+		end)
+
+		loadUI.RootFrame.Size = UD(0, 200, 0, marginSize + (lineSize + marginSize) * (1 + fileCount * 2))
+		loadUI.Parent = game:GetService("CoreGui")
+	else
+		modal = false
+	end
+end
+
+function showExportAnim()
+	-- Update the model to start positions
+	local motorOrig = {}
+	for part,elem in pairs(partList) do
+		if (elem.Motor6D ~= nil) then
+			elem.Motor6D.C1 = elem.OriginC1
+			nudgeView()
+		end
+	end
+
+	local kfsp = game:GetService('KeyframeSequenceProvider')
+
+	local kfs = createAnimationFromCurrentData()
+	local animID = kfsp:RegisterKeyframeSequence(kfs)
+	local dummy = rootPart.Item.Parent
+
+-- EXPORT HERE
+--			print("AnimID = " .. animID)
+
+	local AnimationBlock = dummy:FindFirstChild("AnimSaves")
+	if AnimationBlock == nil then
+		AnimationBlock = Instance.new('Model')
+		AnimationBlock.Name = "AnimSaves"
+		AnimationBlock.Parent = dummy
+	end
+
+	local Animation = AnimationBlock:FindFirstChild("ExportAnim")
+	if Animation == nil then
+		Animation = Instance.new('Animation')
+		Animation.Name = "ExportAnim"
+		Animation.Parent = AnimationBlock
+	end
+	Animation.AnimationId = animID
+
+	local OldKeyframeSqeuence = Animation:FindFirstChild("Test")
+	if OldKeyframeSqeuence ~= nil then
+--		print("Found old sequence")
+		OldKeyframeSqeuence.Parent = nil
+	end
+
+	kfs.Parent = Animation
+
+	local selectionSet = {}
+	table.insert(selectionSet, kfs)
+
+	game.Selection:Set(selectionSet)
+	wait()
+	Plugin:SaveSelectedToRoblox()
+
+--[[
+	local selectionSet = {}
+	table.insert(selectionSet, Animation)
+
+	game.Selection:Set(selectionSet)
+	wait()
+	Plugin:SaveSelectedToRoblox()
+--]]
+
+	modal = false
+end
+
+
+function showImportAnimText()
+	local id = showTextExtryDialog("Enter Animation ID:", "<anim ID>")
+	if (id ~= nil and tonumber(id) ~= nil) then
+		loadImportAnim(tonumber(id))
+	end
+end
+					
+
+function showImportAnim()
+	local animPage = 1
+	local userID = Plugin:GetStudioUserId()
+	local kfsp = game:GetService('KeyframeSequenceProvider')
+	local animList = kfsp:GetAnimations(userID, animPage)
+
+	if (loadUI == nil) then
+		loadUI = Make('ScreenGui', 
+		{	
+			Name = "LoadUI",
+			Make('Frame', {
+				Parent = timelineUI,
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0.5, -200, 0.25, 0),
+				Size = UD(0, 200, 0, marginSize + (lineSize + marginSize) * 5),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Load:",
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+			}),
+		})
+	end
+
+	-- clean up old buttons
+	for _, part in pairs(loadButtonList) do
+		part.Parent = nil
+	end
+
+	local humanoid = rootPart.Item.Parent
+	local AnimationBlock = humanoid:FindFirstChild("AnimSaves")
+	local fileCount = 0
+	local rowCount = 0
+
+--[[
+	print("Anims Loaded " .. #animList)
+	for _, childPart in pairs(animList) do
+		print("File - " .. childPart.Name)
+	end
+--]]
+	if (animList ~= nil) then
+		-- add button for saved games
+		for _, childPart in pairs(animList) do
+			local newButton = Make('TextButton', {
+				Parent = loadUI.RootFrame,
+				Name = childPart.Name,
+				Font = 'ArialBold',
+				FontSize = GuiSettings.TextMed,
+				TextColor3 = GuiSettings.TextColor,
+				Position = UD(0, 10 + 200 * rowCount, 0, marginSize + (lineSize + marginSize) * (1 + fileCount * 2)),
+				Size = UD(0, 180, 0, lineSize * 2),
+				BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+				BackgroundTransparency = 0,
+				Text = childPart.Name,
+			})
+			fileCount = fileCount + 1	
+			if (fileCount > 10) then
+				fileCount = 0
+				rowCount = rowCount + 1
+			end
+			loadButtonList[fileCount] = newButton
+
+
+			newButton.MouseButton1Click:connect(function()
+				loadUI.Parent = nil
+				loadImportAnim(childPart.Id)
+				modal = false
+			end)
+		end
+	end
+
+--	print("File Count " .. fileCount)
+	if (fileCount > 0 or rowCount > 0) then
+		local newButton = Make('TextButton', {
+			Parent = loadUI.RootFrame,
+			Name = 'CancelButton',
+			Font = 'ArialBold',
+			FontSize = GuiSettings.TextMed,
+			TextColor3 = GuiSettings.TextColor,
+			Position = UD(0, 10 + 200 * rowCount, 0, marginSize + (lineSize + marginSize) * (1 + fileCount * 2)),
+			Size = UD(0, 180, 0, lineSize * 2),
+			BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+			BackgroundTransparency = 0,
+			Text = 'Cancel',
+		})
+		fileCount = fileCount + 1	
+		loadButtonList[fileCount] = newButton
+
+		newButton.MouseButton1Click:connect(function()
+			loadUI.Parent = nil
+			modal = false
+		end)
+
+		loadUI.RootFrame.Size = UD(0, 200  * (rowCount + 1), 0, marginSize + (lineSize + marginSize) * (1 + fileCount * 2))
+		loadUI.Parent = game:GetService("CoreGui")
+	else
+		modal = false
+	end
+
+end
+
+function importPose(keyframe, pose)
+	item = partListByName[pose.Name]
+
+	if (item ~= nil) then
+		LocalPose = initializePose(keyframe, item.Item)
+		if (LocalPose ~= nil) then
+			if (item.OriginC1 ~= nil) then
+				LocalPose.CFrame = item.OriginC1*pose.CFrame:inverse()*item.OriginC1:inverse()
+			else
+				LocalPose.CFrame = pose.CFrame
+			end
+			
+			if (pose.Parent:IsA('Pose')) and (pose.Weight > 0) then
+				importPartInclude[pose.Name] = true
+			end
+		end
+	end
+
+	for id, childPose in pairs(pose:GetChildren()) do
+		importPose(keyframe, childPose)
+	end
+end
+
+importPartInclude = {}
+
+function loadImportAnim(animId)
+	local isNumber = type(animId) == "number"
+	local isUserdata = type(animId) == "userdata"
+	
+	if (isNumber and animId > 0) or isUserdata then
+		doNotUpdateCursor = true
+		resetKeyframes()
+		importPartInclude = {}
+
+		local kfs
+		if isNumber then
+			local kfsp = game:GetService('KeyframeSequenceProvider')
+			kfs = kfsp:GetKeyframeSequenceById(animId, false) -- Test 2
+		else
+			kfs = animId
+		end
+		
+		--update the animation length
+		animationLength = 0
+		for _, keyframe in pairs(kfs:GetChildren()) do
+			if keyframe.Time > animationLength then
+				animationLength = keyframe.Time
+			end
+		end
+		
+		--update the framerate so that the keyframes are imported properly
+		updateAnimationFramerate()
+		updateTimeLabels()
+		
+		--import the poses
+		local LocalKeyframe = nil
+		for _, keyframe in pairs(kfs:GetChildren()) do
+			LocalKeyframe = createKeyframe(keyframe.Time)
+			LocalKeyframe.Name = keyframe.Name
+			for __, pose in pairs(keyframe:GetChildren()) do
+				importPose(LocalKeyframe, pose)
+			end
+		end
+
+		-- cull duplication poses
+		for time, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+			if (time > 0) then
+				for part, pose in pairs(keyframe.Poses) do
+					local previousPose = getClosestPose(time - animationFramerate, part)
+					local nextPose = getClosestNextPose(time + animationFramerate, part)
+
+					if (previousPose ~= nil and previousPose.CFrame == pose.CFrame and 
+						(nextPose == nil or nextPose.CFrame == pose.CFrame)) then
+						deletePose(keyframe, part)
+					end
+				end
+			end
+		end
+
+
+		loopAnimation = kfs.Loop
+		animationPriority = kfs.Priority.Name
+
+		-- set proper keyframe locations
+		for time, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+			keyframe.UI.Position = UD(0, nameSize + marginSize + (time * timeScale), 0, -lineSize - marginSize)
+		end
+
+		cursorTime = 0
+
+		for partName, setting in pairs(partInclude) do
+			if (importPartInclude[partName] ~= nil) then
+				partInclude[partName] = true
+			else
+				partInclude[partName] = false
+			end
+		end
+
+		doNotUpdateCursor = false
+
+		updatePartInclude()
+		updateCursorPosition()
+		nudgeView()
+		updateLoopButton()
+		updatePriorityLabel()
+	end
+end
+
+
+function updatePriorityLabel()
+	if (animationPriority == nil) then
+		animationPriority = "Action"
+	end
+	timelineUI.RootFrame.PriorityDisplay.Text = animationPriority
+end
+
+function updateLoopButton()
+	if (loopAnimation) then
+		timelineUI.RootFrame.LoopButton.BackgroundColor3 = buttonOnColor
+	else
+		timelineUI.RootFrame.LoopButton.BackgroundColor3 = buttonOffColor
+	end
+end
+
+animationLabelsList = {}
+
+function updateTimeLabels()
+	-- delete existing labels
+	for _, label in pairs(animationLabelsList) do
+		label.Parent = nil
+	end
+	animationLabelsList = {}
+
+	timelineLength = timelineUI.RootFrame.TimelineFrame.AbsoluteSize.X
+	minTickSeparation = 50
+	tickSpacing = 0
+	tickSeparation = 0
+	local tickScale = 0
+
+	while tickSeparation < minTickSeparation do
+		tickScale = tickScale + 1
+		ticks = math.floor(animationLength / (animationFramerate * tickScale))
+		tickSeparation = timelineLength / ticks
+		tickSpacing = animationFramerate * tickScale
+--		print (timelineLength .. " " .. ticks .. " " .. tickSpacing)
+	end
+
+	timeScale =  timelineLength / animationLength
+	
+	local totalTickSpace = (nameSize + marginSize + (ticks * tickSpacing * timeScale) ) / timelineUI.RootFrame.AbsoluteSize.X
+	if totalTickSpace > 0.97 then
+		ticks = ticks - 1
+	end
+
+	for tickNum = 0, ticks do		
+		local label = Make('TextLabel', {
+			Parent = timelineUI.RootFrame,
+			Name = 'Tick' .. tickNum,
+			Font = 'ArialBold',
+			FontSize = 'Size10',
+			TextColor3 = GuiSettings.TextColor,
+			Position = UD(0, nameSize + marginSize + (tickNum * tickSpacing * timeScale), 0, lineSize +  marginSize),
+			Size = UD(0, 10, 0, lineSize),
+			BackgroundTransparency = 1,
+			Text = string.format("%.2f", tickNum * tickSpacing),
+			TextXAlignment = Enum.TextXAlignment.Center,
+		})
+		animationLabelsList[tickNum] = label
+	end
+
+	-- end tick
+	local endMarker = Make('TextLabel', {
+		Parent = timelineUI.RootFrame,
+		Name = 'TickEnd',
+		Font = 'ArialBold',
+		FontSize = 'Size10',
+		TextColor3 = GuiSettings.TextColor,
+		Position = UD(0, nameSize + marginSize + (animationLength * timeScale), 0, lineSize +  marginSize),
+		Size = UD(0, 10, 0, lineSize),
+		BackgroundTransparency = 1,
+		Text = string.format("%.2f", animationLength),
+		TextXAlignment = Enum.TextXAlignment.Center,
+	})
+	animationLabelsList['TickEnd'] = endMarker
+
+
+	registerOn(mouseOnLClick, endMarker, function(x, y)
+		--[[if (not modal and cursorTime ~= animationLength) then
+			timeChangeUI.RootFrame.SaveNameFrame.AnimLengthBox.Text = animationLength
+			timeChangeUI.Parent = game:GetService("CoreGui")
+			modal = true
+		end]]
+		return true
+	end)
+
+end
+
+function changeKeyframePosition(keyframe, time)
+	time = keyframeTimeClamp(time)
+	
+	if (keyframeList[time] == nil) then
+		keyframeList[keyframe.Time] = nil
+		keyframe.Time = time
+		keyframe.UI.Position = UD(0, nameSize + marginSize + (time * timeScale), 0, -lineSize - marginSize)
+		keyframeList[time] = keyframe
+		
+		for _, pose in pairs(keyframe.Poses) do
+			pose.Time = time
+		end
+	end
+end
+
+function addTimeAtCursor(addedTime)
+	if (animationLength + addedTime > 30) then return end
+	if (addedTime <= 0) then return end
+	
+	animationLength = animationLength + addedTime
+	updateAnimationFramerate()
+	updateTimeLabels()
+	updateCursorPosition()
+	
+	local currentKeyframes = {}
+	for timePosition, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+		currentKeyframes[keyframe.Time] = keyframe
+	end
+	keyframeList = {}
+	
+	for timePosition, keyframe in spairs(currentKeyframes, function(t, a, b) return t[a].Time < t[b].Time end) do
+		local newTime
+		if keyframe.Time > cursorTime then
+			newTime = keyframe.Time + addedTime
+		else
+			newTime = keyframe.Time
+		end
+		
+		changeKeyframePosition(keyframe, newTime)
+	end
+end
+
+function removeTimeAtCursor(removedTime)
+	if (animationLength - removedTime < 0.1) then return end
+	if (cursorTime + removedTime > animationLength) then
+		removedTime = animationLength - cursorTime
+	end
+	if (removedTime <= 0) then return end
+	
+	local currentKeyframes = {}
+	local removedKeyframes = {}
+	local willRemoveKeyframes = false
+	for timePosition, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+		if keyframe.Time > cursorTime and keyframe.Time < cursorTime + removedTime then
+			removedKeyframes[keyframe.Time] = keyframe
+			willRemoveKeyframes = true
+		else
+			currentKeyframes[keyframe.Time] = keyframe
+		end
+	end
+	
+	if willRemoveKeyframes then
+		if not showConfirmationDialog("This will remove keyframes.\nAre you sure?") then
+			return
+		end
+	end
+	
+	for timePosition, removedKeyframe in pairs(removedKeyframes) do
+		deleteKeyframe(removedKeyframe.Time)
+	end
+	
+	animationLength = animationLength - removedTime
+	updateAnimationFramerate()
+	updateTimeLabels()
+	updateCursorPosition()
+	keyframeList = {}
+	
+	for timePosition, keyframe in spairs(currentKeyframes, function(t, a, b) return t[a].Time < t[b].Time end) do
+		local newTime
+		if keyframe.Time > cursorTime then
+			newTime = keyframe.Time - removedTime
+		else
+			newTime = keyframe.Time
+		end
+		
+		changeKeyframePosition(keyframe, newTime)
+	end
+end
+
+function updateAnimationFramerate()
+	local framesPerLength = 40
+	local framesPerSecond = 50 / animationLength
+	animationFramerate = 1 / framesPerSecond
+end
+
+local function createTimelineUI(rootNode)
+
+	if (saveUI == nil) then
+		saveUI = Make('ScreenGui', 
+		{	
+			Name = "SaveUI",
+			Make('Frame', {
+				Parent = timelineUI,
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0.5, -200, 0.5, 0),
+				Size = UD(0, 400, 0, marginSize + (lineSize + marginSize) * 5),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Save As:",
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+				Make('Frame', {
+					Parent = timelineUI,
+					Name = 'SaveNameFrame',
+					Style = 'Custom',
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 1),
+					Size = UD(0.9, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 100/255),
+					BackgroundTransparency = 0.3,
+					Make('TextBox', {
+						Name = 'SaveNameBox',
+						Font = 'ArialBold',
+						FontSize = 'Size14',
+						TextColor3 = GuiSettings.TextColor,
+						Position = UD(0.05, 0, 0, 0),
+						Size = UD(0.9, 0, 1, 0),
+						BackgroundTransparency = 1,
+						Text = "<name>",
+						TextXAlignment = Enum.TextXAlignment.Left,
+					}),
+				}),
+
+				Make('TextButton', {
+					Name = 'OKButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "OK",
+				}),
+				Make('TextButton', {
+					Name = 'CancelButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.55, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Cancel",
+				}),
+
+			}),
+		})
+
+
+		saveUI.RootFrame.OKButton.MouseButton1Click:connect(function()
+			saveUI.Parent = nil
+			saveCurrentAnimation(saveUI.RootFrame.SaveNameFrame.SaveNameBox.Text)
+			modal = false
+		end)
+
+		saveUI.RootFrame.CancelButton.MouseButton1Click:connect(function()
+			saveUI.Parent = nil
+			modal = false
+		end)
+
+	end
+
+
+
+	if (timeChangeUI == nil) then
+		timeChangeUI = Make('ScreenGui', 
+		{	
+			Name = "TimeChangeUI",
+			Make('Frame', {
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0.5, -200, 0.5, 0),
+				Size = UD(0, 400, 0, marginSize + (lineSize + marginSize) * 5),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Animation Length:",
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+				Make('Frame', {
+					Parent = timelineUI,
+					Name = 'SaveNameFrame',
+					Style = 'Custom',
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 1),
+					Size = UD(0.9, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 100/255),
+					BackgroundTransparency = 0.3,
+					Make('TextBox', {
+						Name = 'AnimLengthBox',
+						Font = 'ArialBold',
+						FontSize = 'Size14',
+						TextColor3 = GuiSettings.TextColor,
+						Position = UD(0.05, 0, 0, 0),
+						Size = UD(0.9, 0, 1, 0),
+						BackgroundTransparency = 1,
+						Text = animationLength,
+						TextXAlignment = Enum.TextXAlignment.Left,
+					}),
+				}),
+
+				Make('TextButton', {
+					Name = 'OKButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "OK",
+				}),
+				Make('TextButton', {
+					Name = 'CancelButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.55, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Cancel",
+				}),
+
+			}),
+		})
+
+
+		timeChangeUI.RootFrame.OKButton.MouseButton1Click:connect(function()
+			timeChangeUI.Parent = nil
+			--[[local scale = timeChangeUI.RootFrame.SaveNameFrame.AnimLengthBox.Text / animationLength
+			animationLength = tonumber(timeChangeUI.RootFrame.SaveNameFrame.AnimLengthBox.Text)
+
+			if (animationLength > 30) then
+				animationLength = 30
+			end
+
+			-- modify animation framerate (easier than trying to combine keyframes)
+			updateAnimationFramerate()
+
+			-- copy out all keyframes
+			local tempKeyFrameList = {}
+			for time, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+				tempKeyFrameList[keyframe.Time] = keyframe
+			end
+			keyframeList = {}
+
+			-- scale all keyframes
+			for time, keyframe in spairs(tempKeyFrameList, function(t, a, b) return t[a].Time < t[b].Time end) do
+				keyframe.Time = keyframeTimeClamp(scale * time)
+				for _, pose in pairs(keyframe.Poses) do
+					pose.Time = keyframe.Time
+				end
+				keyframeList[keyframe.Time] = keyframe
+			end
+
+			-- update animation length display
+			updateTimeLabels()
+
+			-- update cursor location
+			cursorTime = cursorTime * scale]]
+			setAnimationLength(tonumber(timeChangeUI.RootFrame.SaveNameFrame.AnimLengthBox.Text))
+			
+			modal = false
+		end)
+
+		timeChangeUI.RootFrame.CancelButton.MouseButton1Click:connect(function()
+			timeChangeUI.Parent = nil
+			modal = false
+		end)
+
+	end
+
+	if (menuUI == nil) then
+		menuUI = Make('ScreenGui', 
+		{
+			Name = "MenuUI",
+			Make('Frame', {
+				Parent = timelineUI,
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0, lineSize, 0, lineSize),
+				Size = UD(0, 100, 0, (lineSize + (2*marginSize)) + 10 * (buttonSize + marginSize)),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.3,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Menu",
+					TextXAlignment = Enum.TextXAlignment.Center,
+				}),
+				Make('TextButton', {
+					Name = 'PlayButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, lineSize + (2*marginSize)),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Play",
+				}),
+				Make('TextButton', {
+					Name = 'SaveButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2*marginSize)) + (buttonSize + marginSize)),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Save",
+				}),
+				Make('TextButton', {
+					Name = 'LoadButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2*marginSize)) + 2 * (buttonSize + marginSize)),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Load",
+				}),
+				Make('TextButton', {
+					Name = 'ImportButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2*marginSize)) + 3 * (buttonSize + marginSize)),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Import",
+				}),
+				Make('TextButton', {
+					Name = 'ExportButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2*marginSize)) + 4 * (buttonSize + marginSize)),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Export",
+				}),
+				Make('TextButton', {
+					Name = 'ResetButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2*marginSize)) + 5 * (buttonSize + marginSize)),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Reset",
+				}),
+				Make('TextButton', {
+					Name = 'DebugButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2*marginSize)) + 6 * (buttonSize + marginSize)),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Debug",
+				}),
+				Make("TextButton", {
+					Name = "AddTimeButton",
+					Font = "ArialBold",
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2 * marginSize) ) + 7 * (buttonSize + marginSize) ),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "+ Time",
+				}),
+				Make("TextButton", {
+					Name = "RemoveTimeButton",
+					Font = "ArialBold",
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2 * marginSize) ) + 8 * (buttonSize + marginSize) ),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "- Time",
+				}),
+				Make("TextButton", {
+					Name = "ToggleInterpolationButton",
+					Font = "ArialBold",
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, (lineSize + (2 * marginSize) ) + 9 * (buttonSize + marginSize) ),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Lerp (on)",
+				})
+			}),
+		})
+	end
+
+	-- creating test GUI
+	if (timelineUI == nil) then
+
+		lineCount = 0
+
+		timelineUI = Make('ScreenGui', 
+		{
+			Name = "TimelineUI",
+			Make('Frame', {
+				Parent = timelineUI,
+				Name = 'RootFrame',
+				Position = UD(0, 0, 0, 0),
+				Size = UD(1, 0, 0, lineSize * 15),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make("ScrollingFrame", {
+					Name = "ScrollingFrame",
+					Position = UD(0, 0, 0, headerSize),
+					Size = UD(1, 0, 1, -headerSize),
+					BackgroundTransparency = 1,
+					ScrollBarThickness = 4,
+				}),
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.25, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Timeline",
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+				Make('TextButton', {
+					Name = 'MoreButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0, lineSize, 0, lineSize),
+					Size = UD(0, lineSize * 1.1, 
+					          0, lineSize * 1.1),
+					BackgroundColor3 = Color3.new(50/255, 50/255, 50/255),
+					BackgroundTransparency = 0,
+					Text = "+",
+				}),
+				Make('TextButton', {
+					Name = 'CloseButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(1, -marginSize - (lineSize * 1.1), 0, marginSize),
+					Size = UD(0, lineSize * 1.1, 
+					          0, lineSize * 1.1),
+					BackgroundColor3 = Color3.new(250/255, 50/255, 50/255),
+					BackgroundTransparency = 0,
+					Text = "X",
+				}),
+				Make('TextLabel', {
+					Name = 'PriorityLabel',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.6, 0, 0, 1),
+					Size = UD(0.1, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Priority:",
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+				Make('TextLabel', {
+					Name = 'PriorityDisplay',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.6, 55, 0, 1),
+					Size = UD(0, 100, 0, lineSize),
+					BackgroundTransparency = 0.5,
+					Text = "Action",
+					TextXAlignment = Enum.TextXAlignment.Center,
+					BackgroundColor3 = dropDownColor,
+				}),
+				Make('TextLabel', {
+					Name = 'LoopLabel',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.8, 0, 0, 1),
+					Size = UD(0.1, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Loop:",
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+				Make('TextButton', {
+					Name = 'LoopButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.8, 45, 0, 0),
+					Size = UD(0, lineSize * 1.1, 
+					          0, lineSize * 1.1),
+					BackgroundColor3 = Color3.new(50/255, 50/255, 50/255),
+					BackgroundTransparency = 0,
+					Text = "",
+				}),
+				Make("TextButton", {
+					Name = "ChangeLengthButton",
+					Font = "ArialBold",
+					FontSize = "Size14",
+					TextColor3 = GuiSettings.TextColor,
+					TextScaled = true,
+					BackgroundColor3 = dropDownColor,
+					BackgroundTransparency = 0.5,
+					Position = UD(0.9, 0, 0, 1),
+					Size = UD(0.075, 0, 0, lineSize),
+					Text = "Change Length",
+				}),
+				Make('Frame', {
+					Name = 'TimeListFrame',
+					Style = 'Custom',
+					Position = UD(0, nameSize + marginSize, 0, 1 * (lineSize + marginSize)),
+					Size = UD(1, -(marginSize + nameSize + timelinemarginSize), 0, lineSize),
+					BackgroundColor3 = Color3.new(0/255, 0/255, 0/255),
+					BackgroundTransparency = 0.5,
+					BorderSizePixel = 0,
+				}),
+				Make('Frame', {
+					Name = 'TimelineFrame',
+					Style = 'Custom',
+					Position = UD(0, nameSize + marginSize, 0, 2 * (lineSize + marginSize)),
+					Size = UD(1, -(marginSize + nameSize + timelinemarginSize), 0, lineSize),
+					BackgroundColor3 = Color3.new(200/255, 200/255, 200/255),
+					BackgroundTransparency = 0.1,
+				}),				
+				Make('Frame', {
+					Name = 'Cursor',
+					Style = 'Custom',
+					Position = UD(0, nameSize + marginSize - (lineSize / 2) , 0, 1 * (lineSize + marginSize)),
+					Size = UD(0, lineSize + 2, 0, lineSize + 2),
+					BackgroundColor3 = Color3.new(250/255, 50/255, 50/255),
+					BackgroundTransparency = 0,
+					ZIndex = 1,
+					Make('Frame', {
+						Name = 'CursorLine',
+						Style = 'Custom',
+						Position = UD(0, (lineSize / 2), 0, 0),
+						Size = UD(0, 2, 0, lineSize * 14),
+						BackgroundColor3 = Color3.new(250/255, 50/255, 50/255),
+						BackgroundTransparency = 0,
+						BorderSizePixel = 0,
+						ZIndex = 0,
+					}),
+				}),
+			}),
+		})
+		
+		--for some reason, the scrolling frame captures input
+		-- timelineUI.RootFrame.ScrollingFrame.InputEnded:connect(function(input)
+			-- if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				-- mouseCallbackCheck(mouseOnLUp)
+			-- end
+		-- end)
+
+		-- adding labels
+		timelineUI.Parent = game:GetService("CoreGui")
+		wait(0.1)
+		updateTimeLabels()
+		-- M E N U 
+		-- P L A Y
+		menuUI.RootFrame.PlayButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			playCurrentAnimation()
+		end)
+
+		-- S A V E
+		menuUI.RootFrame.SaveButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			modal = true
+			saveUI.Parent = game:GetService("CoreGui")
+		end)
+
+		-- L O A D
+		menuUI.RootFrame.LoadButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			modal = true
+			showLoadGame()
+		end)
+
+		-- I M P O R T 
+		menuUI.RootFrame.ImportButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			modal = true
+--			showImportAnim()
+			showImportAnimText()
+			modal = false
+		end)
+
+		-- E X P O R T
+		menuUI.RootFrame.ExportButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			modal = true
+			showExportAnim()
+		end)
+
+		-- R E S E T 
+		menuUI.RootFrame.ResetButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			resetAnimation()
+		end)
+
+		-- D E B U G 
+		menuUI.RootFrame.DebugButton.MouseButton1Click:connect(function()
+--			listEvent(mouseOnLClick)
+			for time, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+				print("keyframe time " .. time .. " poses " .. tablelength(keyframe.Poses))
+			end
+		end)
+		
+		--add time
+		menuUI.RootFrame.AddTimeButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			
+			local timeAdded = tonumber(showTextExtryDialog("Amount of time to add?", "0.1") )
+			if timeAdded and timeAdded > 0 then
+				addTimeAtCursor(timeAdded)
+			end
+		end)
+		
+		--remove time
+		menuUI.RootFrame.RemoveTimeButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			
+			local timeRemoved = tonumber(showTextExtryDialog("Amount of time to remove?", "0.1") )
+			if timeRemoved and timeRemoved > 0 then
+				removeTimeAtCursor(timeRemoved)
+			end
+		end)
+		
+		--lerp
+		menuUI.RootFrame.ToggleInterpolationButton.MouseButton1Click:connect(function()
+			closePopupMenu()
+			toggleInEditorInterpolation()
+		end)
+
+		toggleInEditorInterpolation()
+		toggleInEditorInterpolation()
+
+
+		function closePopupMenu(x, y)
+			menuUI.Parent = nil
+			unregisterEvent(mouseOnLClick, mouseClickEater)
+			unregisterEvent(mouseOnLClick, menuClearEvent)
+			return true
+		end
+
+		timelineUI.RootFrame.MoreButton.MouseButton1Click:connect(function()
+			if (not modal) then
+				menuUI.Parent = game:GetService("CoreGui")
+				mouseClickEater = registerOn(mouseOnLClick,menuUI.RootFrame, function(x, y)	return true	end)
+				menuClearEvent = registerOn(mouseOnLClick, nil, closePopupMenu)		
+			end
+		end)
+
+		timelineUI.RootFrame.CloseButton.MouseButton1Click:connect(function()
+			if (not modal) then
+				autoSave()
+				timelineUI.Parent = nil
+				resetAnimation()
+				clearAllEvents()
+				if (MouseTargeterHalt ~= nil) then
+					MouseTargeterHalt()
+				end
+				destroySelectionBoxes()
+				exitPlugin()
+			end
+		end)
+
+		timelineUI.RootFrame.ChangeLengthButton.MouseButton1Click:connect(function()
+			if (not modal) then
+				timeChangeUI.RootFrame.SaveNameFrame.AnimLengthBox.Text = animationLength
+				timeChangeUI.Parent = game:GetService("CoreGui")
+				modal = true
+			end
+			return true
+		end)
+
+		timelineUI.RootFrame.LoopButton.MouseButton1Click:connect(function()
+			if (not modal) then
+				loopAnimation = not loopAnimation
+				updateLoopButton()
+			end
+		end)
+
+
+		registerOn(mouseOnLClick, timelineUI.RootFrame.PriorityDisplay, function(x, y)
+			if (not modal) then
+				local newPriority = displayDropDownMenu(timelineUI.RootFrame.PriorityDisplay, animationPriorityList, x, y)
+				if (newPriority ~= nil) then
+					animationPriority = newPriority
+					timelineUI.RootFrame.PriorityDisplay.Text = newPriority
+				end
+			end
+		end)
+
+		-- hooking up clicks
+
+
+		-- sliding keyframe cursor
+		registerOn(mouseOnLClick, timelineUI.RootFrame.TimelineFrame, function(x, y)
+			keyframePositionShift(x, y)
+		end)
+
+
+		-- create or delete keyframe
+		registerOn(mouseOnRClick, timelineUI.RootFrame.TimelineFrame, function(x, y)
+			return keyframeContextMenu(x, y, true)
+		end)
+
+		-- moving time cursor
+		registerOn(mouseOnLClick, timelineUI.RootFrame.TimeListFrame, function(x, y)
+			if (not modal) then
+				if (cursorTime ~= findTime(x)) then
+					cursorTime = findTime(x)
+					updateCursorPosition()
+					wait()
+					return true
+				end
+			end
+			return false
+		end)
+
+		-- sliding time cursor
+		registerOn(mouseOnLClick, timelineUI.RootFrame.Cursor, function(x, y)
+			if (not modal) then
+				local halt = Repeat(function()
+						local mouse = Plugin:GetMouse()
+						xvalue = mouse.X - timelineUI.RootFrame.TimelineFrame.AbsolutePosition.X
+						cursorTime = findTime(xvalue)
+						if (cursorTime < 0) then
+							cursorTime = 0
+						elseif (cursorTime > animationLength) then
+							cursorTime = animationLength
+						end
+						updateCursorPosition()
+						wait()
+					end)	
+				local unregisterEvent = registerOn(mouseOnLUp, nil, function(x, y)
+					unregisterEvent(mouseOnLUp, unregisterEvent)
+					halt()
+					return false
+				end)
+				return true
+			end
+			return false
+		end)
+
+	end
+
+	local function createLine(node, indentLevel)
+		if (node == nil) then
+			return
+		end
+
+		local newLine = Make('TextLabel', {
+								Name = 'Line' .. lineCount,
+								Font = 'Arial',
+								FontSize = GuiSettings.TextSmall,
+								TextColor3 = GuiSettings.TextColor,
+								TextXAlignment = Enum.TextXAlignment.Left,
+								Position = UD(0, 10, 0, ((lineSize + marginSize) * lineCount)),
+								Size = UD(0, nameSize, 0, lineSize),
+								BackgroundTransparency = 1,
+								Parent = timelineUI.RootFrame.ScrollingFrame,
+								---------------------------
+								Text = string.rep('  ', indentLevel) .. node.Name,
+							})
+
+		registerOn(mouseOnLClick, newLine, function(x, y)
+			if (not modal) then
+				if (getHandleSelection() ~= node and node ~= rootNode) then
+					setHandleSelection(node)
+				else
+					resetHandleSelection()
+				end
+				updateCursorPosition()
+				return true
+			end
+		end)
+							
+		if (node.Motor6D ~= nil) then
+			local newLineButton = Make('TextButton', {
+									Name = 'LineButton' .. node.Name,
+									Font = 'Arial',
+									FontSize = GuiSettings.TextSmall,
+									TextColor3 = GuiSettings.TextColor,
+									TextXAlignment = Enum.TextXAlignment.Left,
+									BackgroundColor3 = buttonOffColor,
+									Position = UD(0, nameSize - lineSize, 0, 1 + ((lineSize + marginSize) * lineCount)),
+									Size = UD(0, lineSize, 0, lineSize),
+									BackgroundTransparency = 0,
+									Parent = timelineUI.RootFrame.ScrollingFrame,
+									Text = ' ',
+								})
+
+			newLineButton.MouseButton1Click:connect(function()
+				partInclude[node.Name] = not partInclude[node.Name]
+				if partInclude[node.Name] then
+					newLineButton.BackgroundColor3 = buttonOnColor
+				else
+					newLineButton.BackgroundColor3 = buttonOffColor		
+				end
+				resetHandleSelection()
+				updateCursorPosition()		
+			end)
+		end
+
+		lineCount = lineCount + 1
+		for _, c in pairs(node.Children) do
+			createLine(c, indentLevel + 1)
+		end
+	end
+	createLine(rootNode, 0)
+	updatePartInclude()
+
+	selectedLine = 	Make('Frame', {
+					Name = 'SelectedLineFrame',
+					Style = 'Custom',
+					Position = UD(0, marginSize, 0, (marginSize / 2) + 1 + ((lineSize + marginSize) * (lineCount - 1))),
+					Size = UD(1, -(marginSize * 2), 0, lineSize + marginSize),
+					BackgroundColor3 = Color3.new(200/255, 200/255, 150/255),
+					BackgroundTransparency = 0.9,
+				})
+	selectedLine.Parent = timelineUI.RootFrame.ScrollingFrame
+
+
+	timelineUI.RootFrame.ScrollingFrame.CanvasSize = UD(1, 0, 0, marginSize + ((lineSize + marginSize) * lineCount))
+	timelineUI.Parent = game:GetService("CoreGui")
+
+end
+
+function setAnimationLength(length)
+	local scale = length / animationLength
+	animationLength = length
+	if (animationLength > 30) then
+		animationLength = 30
+	end
+
+	-- modify animation framerate (easier than trying to combine keyframes)
+	updateAnimationFramerate()
+
+	-- copy out all keyframes
+	local tempKeyFrameList = {}
+	for time, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+		tempKeyFrameList[keyframe.Time] = keyframe
+	end
+	keyframeList = {}
+
+	-- scale all keyframes
+	for time, keyframe in spairs(tempKeyFrameList, function(t, a, b) return t[a].Time < t[b].Time end) do
+		keyframe.Time = keyframeTimeClamp(scale * time)
+		for _, pose in pairs(keyframe.Poses) do
+			pose.Time = keyframe.Time
+		end
+		keyframeList[keyframe.Time] = keyframe
+	end
+
+	-- update animation length display
+	updateTimeLabels()
+
+	-- update cursor location
+	cursorTime = cursorTime * scale
+end
+
+function keyframeContextMenu(x, y, needsShift)
+	if (not modal and ( (not needsShift) or isKeyDown("shift") ) ) then
+		time = findTime(x)
+		--local key = getKeyframe(time)
+		local key = selectedKeyframe
+		if (key == nil) then
+			print("Creating keyframe due to null key")
+			createKeyframe(time)
+		else
+			local keyframeMenu = { "Delete", "Rename", "Copy", "Reset", }
+			local selection = displayDropDownMenu(timelineUI.RootFrame.TimelineFrame, keyframeMenu, x, y)
+			if (selection == "Delete") then
+				if (time > 0) then
+					deleteKeyframe(time)
+				end
+				
+			elseif (selection == "Rename") then
+				local newName = showTextExtryDialog("Enter Keyframe Name:", key.Name)
+				if (newName ~= nil) then
+					key.Name = newName
+				end
+			
+			elseif selection == "Copy" then
+				for part, pose in pairs(key.Poses) do
+					copyPose(part, pose)
+				end
+			
+			elseif selection == "Reset" then
+				resetKeyframeToDefaultPose(key)
+				
+			end
+		end
+	end
+	return false
+end
+
+function keyframePositionShift(x, y)
+	if (not modal) then
+		time = findTime(x)
+		--local keyframe = getKeyframe(time)
+		local keyframe = selectedKeyframe
+
+		if (keyframe ~= nil and time > 0) then
+			local halt = Repeat(function()
+					local mouse = Plugin:GetMouse()
+					xvalue = mouse.X - timelineUI.RootFrame.TimelineFrame.AbsolutePosition.X
+					mouseTime = findTime(xvalue)
+					if (mouseTime < 0) then
+						mouseTime = 0
+					elseif (mouseTime > animationLength) then
+						mouseTime = animationLength
+					end
+					local currentKeyframe = getKeyframe(mouseTime)
+					while (getKeyframe(mouseTime) ~= nil and getKeyframe(mouseTime) ~= keyframe) do
+						mouseTime = mouseTime + animationFramerate
+					end
+					if (mouseTime > animationLength) then
+						while (mouseTime > animationLength or (getKeyframe(mouseTime) ~= nil and getKeyframe(mouseTime) ~= keyframe)) do
+							mouseTime = mouseTime - animationFramerate
+						end
+					end
+					moveKeyframe(keyframe, mouseTime)
+				end)	
+			local unregisterEvent = registerOn(mouseOnLUp, nil, function(x, y)
+				unregisterEvent(mouseOnLUp, unregisterEvent)
+				halt()
+				return false
+			end)
+			return true
+		end
+	end
+	return false
+end
+
+function updatePartInclude()
+	for partName, setting in pairs(partInclude) do
+		local item = partListByName[partName]
+		local button =timelineUI.RootFrame.ScrollingFrame:FindFirstChild('LineButton' .. partName)
+		if (button ~= nil) then
+			if setting then
+				button.BackgroundColor3 = buttonOnColor		
+			else
+				button.BackgroundColor3 = buttonOffColor		
+			end
+		end
+	end
+end
+
+function resetAnimation()
+	doNotUpdateCursor = true
+	resetCopyPoseList()
+	resetKeyframes()
+	animationLength = 2
+	cursorTime = 0
+	loopAnimation = false
+	animationPriority = "Action"
+	
+	createKeyframe(0)
+	doNotUpdateCursor = false
+	updateTimeLabels()
+	updateCursorPosition()
+	resetHandleSelection()
+	updateLoopButton()
+	updatePriorityLabel()
+	
+	for partName, setting in pairs(partInclude) do
+		partInclude[partName] = true
+	end
+	updatePartInclude()
+
+end
+
+
+stopAnim = false
+function showStopAnimUI()
+	if (stopAnimUI == nil) then
+		stopAnimUI = Make('ScreenGui', 
+		{
+			Name = "StopAnimUI",
+			Make('Frame', {
+				Parent = timelineUI,
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0.1, 0, 0.5, 0),
+				Size = UD(0, 150, 0, lineSize + buttonSize + 3*marginSize),
+				BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+				BackgroundTransparency = 0.3,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Animation Playing",
+					TextXAlignment = Enum.TextXAlignment.Center,
+				}),
+				Make('TextButton', {
+					Name = 'StopButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, lineSize + (2*marginSize)),
+					Size = UD(0.9, 0, 0, buttonSize),
+					BackgroundColor3 = Color3.new(150/255, 150/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Stop",
+				}),
+			}),
+		})
+	end
+
+	stopAnim = false
+	stopAnimUI.Parent = game:GetService("CoreGui")
+	stopAnimUI.RootFrame.StopButton.MouseButton1Click:connect(function()
+		stopAnim = true
+		stopAnimUI.Parent = nil
+	end)
+
+end
+
+
+
+
+	function createPoseFromLastKeyframe(time, keyframeData, part)
+		if (part ~= nil) then
+			local poseParent = keyframeData
+
+			-- see if we can find a pose for this part
+			local pose = getClosestPose(time, part)
+
+			if (pose ~= nil) then
+				local item = pose.Item
+				poseParent = Make('Pose', {					
+					Name = part.Name,
+					Parent = keyframeData,
+					Weight = 1,
+					MaskWeight = 0,
+					CFrame =(item.OriginC1 
+						         and item.OriginC1:inverse()*pose.CFrame:inverse()*item.OriginC1
+						         or  pose.CFrame)
+				})
+			end
+
+			for _, childPart in pairs(part.Children) do
+				createPoseFromLastKeyframe(time, poseParent, childPart)
+			end
+		end
+	end
+
+	function createPosesFromKeyframeOLD(keyframe, keyframeData, part)
+		if (part ~= nil) then
+--			print("Checking " .. part.Name)
+			local poseParent = keyframeData
+			local poseMade = false
+			-- see if we can find a pose for this part
+			local active = partInclude[part.Name]
+			local pose = keyframe.Poses[part.Item]
+			local weight = 1
+			if (active and pose ~= nil) then
+				local item = pose.Item
+				poseParent = Make('Pose', {					
+					Name = part.Name,
+					Parent = keyframeData,
+					Weight = 1,
+					MaskWeight = 0,
+					CFrame =(item.OriginC1 
+						         and item.OriginC1:inverse()*pose.CFrame:inverse()*item.OriginC1
+						         or  pose.CFrame),
+					EasingStyle = Enum.PoseEasingStyle.Constant,
+				})
+				poseMade = true
+			end
+
+			for _, childPart in pairs(part.Children) do
+				if (keyframe.Poses[childPart.Item] ~= nil and not poseMade) then
+					poseParent = Make('Pose', {					
+						Name = part.Name,
+						Parent = keyframeData,
+						Weight = 1,
+						MaskWeight = 0,
+						CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(0, 0, 0),
+						EasingStyle = Enum.PoseEasingStyle.Constant,
+					})
+					poseMade = true
+--					print("Pose " .. part.Name)
+				end
+				createPosesFromKeyframe(keyframe, poseParent, childPart)
+			end
+		end
+	end
+	
+	function createPosesFromKeyframeHelper(keyframeData, poseParent, partData)
+		if not partData then return end
+		
+		local poseData = keyframeData.Poses[partData.Item]
+		local didCreatePose = false
+				
+		if poseData then
+			local posedPartData = poseData.Item
+			poseParent = Make("Pose", {
+				Name = partData.Name,
+				Parent = poseParent,
+				Weight = 1,
+				MaskWeight = 0,
+				CFrame = (posedPartData.OriginC1 and posedPartData.OriginC1:inverse() * poseData.CFrame:inverse() * posedPartData.OriginC1) or poseData.CFrame,
+			})
+			didCreatePose = true
+		end
+		
+		for _, childPartData in pairs(partData.Children) do
+			if keyframeData.Poses[childPartData.Item] and not didCreatePose then
+				poseParent = Make("Pose", {
+					Name = partData.Name,
+					Parent = poseParent,
+					Weight = 1,
+					MaskWeight = 0,
+					CFrame = CFrame.new(),
+				})
+				didCreatePose = true
+			end
+			
+			createPosesFromKeyframe(keyframeData, poseParent, childPartData)
+		end
+	end
+	
+	function removeUnincludedParts(keyframe)
+		local poses = {}
+		local function recurse(parent)
+			for _, child in pairs(parent:GetChildren()) do
+				if child:IsA("Pose") then
+					table.insert(poses, child)
+				end
+				recurse(child)
+			end
+		end
+		recurse(keyframe)
+		
+		for _, pose in pairs(poses) do
+			local poseHasIncludedChildren = false
+			local poseIncluded = partInclude[pose.Name] and (pose.Name ~= "HumanoidRootPart")
+			for _, child in pairs(pose:GetChildren()) do
+				if partInclude[child.Name] then
+					poseHasIncludedChildren = true
+					break
+				end
+			end
+			
+			if (not poseIncluded) then
+				pose.Weight = 0
+				
+				if (not poseHasIncludedChildren) then
+					for _, child in pairs(pose:GetChildren()) do
+						child.Parent = pose.Parent
+					end
+					pose:Destroy()
+				end
+			end
+		end
+	end
+	
+	function createPosesFromKeyframe(keyframeData, poseParent, partData)
+		createPosesFromKeyframeHelper(keyframeData, poseParent, partData)
+		removeUnincludedParts(poseParent)
+	end
+
+	function createAnimationFromCurrentData()
+		local kfs = Make('KeyframeSequence', {
+			Name = "Test",
+			Loop = loopAnimation,
+			Priority = animationPriority,
+		})
+
+		for time, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
+			-- print("Time " .. time)
+
+			local kfd = Make('Keyframe', {
+				Name = keyframe.Name,
+				Time = time,
+				Parent = kfs,
+			})
+
+			-- go through part heirarach
+			createPosesFromKeyframe(keyframe, kfd, rootPart)
+		end
+
+		-- check for end animation keyframe
+		local keyframe = getKeyframe(animationLength)
+		if (keyframe == nil) then
+			local kfd = Make('Keyframe', {
+				Name = "KF" .. animationLength,
+				Time = animationLength,
+				Parent = kfs,
+			})
+
+			createPoseFromLastKeyframe(animationLength, kfd, rootPart)
+		end
+		return kfs
+	end
+
+
+	
+
+	playingAnim = false
+	function playCurrentAnimation()
+		if (not playingAnim) then
+			modal = true
+
+			playingAnim = true
+			animationPlayID = animationPlayID + 1
+
+			-- Update the model to start positions
+			local motorOrig = {}
+			for part,elem in pairs(partList) do
+				if (elem.Motor6D ~= nil) then
+--					local pose = getClosestPose(0, part)
+--					elem.Motor6D.C1 = pose.CFrame * pose.Item.OriginC1
+					elem.Motor6D.C1 = elem.OriginC1
+					nudgeView()
+				end
+			end
+
+			local kfsp = game:GetService('KeyframeSequenceProvider')
+
+			local kfs = createAnimationFromCurrentData()
+			local animID = kfsp:RegisterKeyframeSequence(kfs)
+			local dummy = rootPart.Item.Parent
+
+--			print("AnimID = " .. animID)
+
+			local AnimationBlock = dummy:FindFirstChild("AnimSaves")
+			if AnimationBlock == nil then
+				AnimationBlock = Instance.new('Model')
+				AnimationBlock.Name = "AnimSaves"
+				AnimationBlock.Parent = dummy
+			end
+
+			local Animation = AnimationBlock:FindFirstChild("TestAnim")
+			if Animation == nil then
+				Animation = Instance.new('Animation')
+				Animation.Name = "TestAnim"
+				Animation.Parent = AnimationBlock
+			end
+			Animation.AnimationId = animID
+
+			wait()
+			game:GetService('RunService'):Run()
+			wait()
+
+			showStopAnimUI()
+			currentAnimTrack = animationController:LoadAnimation(Animation)
+			currentAnimTrack:Play()
+
+			if (not loopAnimation) then
+				Spawn(function()
+					local ID = animationPlayID
+					time = tick()
+					while (tick() - time < animationLength ) do
+						wait()
+					end	
+					if (ID == animationPlayID) then
+						stopAnim = true
+					end
+				end)
+			end
+
+			while (not stopAnim) do
+				wait()
+			end
+
+			currentAnimTrack:Stop(0)
+			wait()
+			
+			stopAnimUI.Parent = nil
+
+			game:GetService('RunService'):Stop()
+
+			wait()
+			playingAnim = false
+			modal = false
+			
+			for part,elem in pairs(partList) do
+				if (elem.Motor6D ~= nil) then
+					elem.Motor6D.CurrentAngle = 0
+					elem.Motor6D.C1 = elem.OriginC1
+				end
+			end
+			
+			updateCursorPosition()
+		end
+	end
+
+	function saveCurrentAnimation(animName)
+		if playingAnim then return end
+	
+		-- save to string item
+		local dummy = rootPart.Item.Parent
+		local AnimationBlock = dummy:FindFirstChild("AnimSaves")
+		if AnimationBlock == nil then
+			AnimationBlock = Instance.new('Model')
+			AnimationBlock.Name = "AnimSaves"
+			AnimationBlock.Parent = dummy
+		end
+
+		local save = AnimationBlock:FindFirstChild(animName)
+		if save then
+			save:Destroy()
+		end
+		save = createAnimationFromCurrentData()
+		save.Name = animName
+		save.Parent = AnimationBlock
+	end
+	
+	function autoSave()
+		if not rootPart then return end
+		if not _G["AnimationEdit"] then return end
+		
+		local timeSinceLastAutoSave = tick() - lastAutoSaveTime
+		
+		if timeSinceLastAutoSave > 1 then
+			saveCurrentAnimation("Automatic Save")
+			lastAutoSaveTime = tick()
+		end
+	end
+
+	function loadCurrentAnimation(animName)
+		if playingAnim then return end
+		-- get string item
+		local dummy = rootPart.Item.Parent
+		local AnimationBlock = dummy:FindFirstChild("AnimSaves")
+		if AnimationBlock == nil then
+			return
+		end
+
+		local Animation = AnimationBlock:FindFirstChild(animName)
+		if Animation == nil then
+			return
+		end
+		
+		loadImportAnim(Animation)
+	end
+
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+keysDown = {}
+keyDownListener = nil
+keyUpListener = nil
+
+
+function isKeyDown(key)
+	if ( keysDown[key] == nil ) then
+		return false
+	else
+		return keysDown[key]
+	end
+end
+
+function onKeyDown(key)
+	if ( string.byte(key) == 48 ) then
+		keysDown["shift"] = true
+	elseif  ( string.byte(key) == 50 ) then
+		keysDown["ctrl"] = true
+	elseif  ( string.byte(key) == 52 ) then
+		keysDown["alt"] = true
+	elseif  ( string.byte(key) == 118 ) then
+		keysDown["v"] = true
+		pastePoses()
+	elseif  ( string.byte(key) == 114 ) then
+		keysDown["r"] = true
+		toggleHandles()
+	elseif  ( string.byte(key) == 116 ) then
+		keysDown["t"] = true
+		toggleStep()
+	elseif ( string.byte(key) == 121 ) then
+		keysDown["y"] = true
+		toggleTransformSpace()
+	elseif key == "u" then
+		undo()
+	end
+end
+
+function onKeyUp(key)
+--  print("Key UP:", key, " Code:", string.byte(key))
+	if ( string.byte(key) == 48 ) then
+		keysDown["shift"] = false
+	elseif  ( string.byte(key) == 50 ) then
+		keysDown["ctrl"] = false
+	elseif  ( string.byte(key) == 52 ) then
+		keysDown["alt"] = false
+	elseif  ( string.byte(key) == 118 ) then
+		keysDown["v"] = false
+	elseif  ( string.byte(key) == 114 ) then
+		keysDown["r"] = false
+	elseif ( string.byte(key) == 121) then
+		keysDown["y"] = false
+	end
+end
+
+function releaseListeners()
+	if (keyUpListener ~= nil) then
+		keyUpListener:disconnect()
+	end
+	if (keyDownListener ~= nil) then
+		keyDownListener:disconnect()
+	end
+
+end
+
+function connectListeners(mouse)
+	if (mouse ~= nil) then
+		releaseListeners()
+		keysDown = {}
+		keyDownListener = mouse.KeyDown:connect(onKeyDown)
+		keyUpListener = mouse.KeyUp:connect(onKeyUp)
+	end
+end
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+function exitPlugin()
+	Plugin:Activate(false)
+	pcall(function()
+		destroySelectionBoxes()
+	end)
+	if mProxyPart ~= nil then
+		mProxyPart:Destroy()
+	end
+	_G["AnimationEdit"] = false
+	releaseListeners()
+end
+
+Plugin.Deactivation:connect(function()
+	autoSave()
+	
+	_G["AnimationEdit"] = false
+	releaseListeners()
+	if timelineUI then
+		resetAnimation()
+		timelineUI:Destroy()
+	end
+	timelineUI = nil
+	if menuUI then
+		menuUI:Destroy()
+	end
+	menuUI = nil
+	if saveUI then
+		saveUI:Destroy()
+	end
+	saveUI = nil
+	if loadUI then
+		loadUI:Destroy()
+	end
+	loadUI = nil
+	if stopAnimUI then
+		stopAnimUI:Destroy()
+	end
+	stopAnimUI = nil
+	if timeChangeUI then
+		timeChangeUI:Destroy()
+	end
+	timeChangeUI = nil
+	if (rotateMoveUI) then
+		rotateMoveUI:Destroy()
+	end
+	rotateMoveUI = nil
+	if (destroySelectionBoxes) then
+		destroySelectionBoxes()
+	end
+
+	modal = false
+	rotateMode = true
+	partSelection = nil
+	rotateStep = 0
+	moveStep = 0
+
+end)
+
+function CreateGrid(obj)
+	local center = obj.Parent:GetModelCFrame().p
+	local extents = obj.Parent:GetExtentsSize()
+	local width = math.max(extents.X, extents.Z)
+	width = width + 3
+	local floorCenter = center - Vector3.new(0, extents.Y/2, 0)
+	floorCenter = floorCenter - obj.Position
+	--Build the grid
+	for z = -math.floor(width/2), math.floor(width/2) do
+		local line = Instance.new("LineHandleAdornment")
+		line.Thickness = 2
+		line.Color = BrickColor.new"Bright red"
+		line.Length = width
+		line.Adornee = obj
+		line.CFrame = CFrame.new(floorCenter) + Vector3.new(z, 0, width / 2)
+		line.Parent = game.CoreGui
+		table.insert(cleanup, line)
+	end
+	for x = -math.floor(width/2), math.floor(width/2) do
+		local line = Instance.new("LineHandleAdornment")
+		line.Thickness = 2
+		line.Color = BrickColor.new"Bright red"
+		line.Length = width
+		line.Adornee = obj
+		line.CFrame = (CFrame.new(floorCenter) + Vector3.new(width / 2, 0, x)) * CFrame.Angles(0, math.pi/2, 0)
+		line.Parent = game.CoreGui
+		table.insert(cleanup, line)
+	end
+end
+
+
+button.Click:connect(function()
+
+	Plugin:Activate(true)
+	_G["AnimationEdit"] = true
+
+	-- reset UI
+	timelineUI = nil
+	menuUI = nil
+	saveUI = nil
+	loadUI = nil
+	stopAnimUI = nil
+	timeChangeUI = nil
+
+	-- reset the assembly information
+	partList = {}
+	partListByName = {}
+	partToItemMap = {}
+	partToLineNumber = {}
+	rootPart = nil
+
+	partInclude = {}
+	modal = false
+	rotateMode = true
+	partSelection = nil
+	rotateStep = 0
+	moveStep = 0
+
+	local selectedObject = selectObjectToAnimate()
+	if (selectedObject == nil) then
+		return
+	end
+
+	local mouse = Plugin:GetMouse()
+	connectListeners(mouse)
+
+	-- find the hierarchy
+	--first, gather the info on what's being animated
+	local mBaseItem = { --recursive structure holding hierarchy of items
+		Item = selectedObject,
+		Name = selectedObject.Name,
+		Motor6D = nil,
+		OriginC1 = CFrame.new(),
+		Children = {},
+		Parent = nil,
+	}
+
+	rootPart = mBaseItem
+
+	local partCount = 1
+	do
+		local function doCalculate(item)
+--			mAllItems[#mAllItems+1] = item
+			partList[item.Item] = item
+			partListByName[item.Name] = item
+			partToItemMap[item.Item] = item
+			partToLineNumber[item.Item] = partCount
+			partInclude[item.Name] = true
+
+			for _, p in pairs(item.Item:GetChildren()) do
+				if p:IsA('Motor6D') --[[or p:IsA('Weld')]] then
+					local joinedTo;
+					if p.Part0 == item.Item then
+						joinedTo = p.Part1
+					elseif p.Part1 == item.Item then
+						joinedTo = p.Part0
+					else
+						error("Animation Editor cannot use motors that aren't parented to either its Part0 or Part1.")
+					end
+					
+					if not (p.Part0 and p.Part1) then
+						game.Selection:Set{p}
+						error("Animation Editor has detected a motor without both a Part0 and a Part1. It has selected it for you. Please repair the motor to continue.")
+					end
+					
+					local it = {
+						Item = joinedTo,
+						Name = joinedTo.Name,
+						Motor6D = p,
+						OriginC1 = repairedCFrame(p.C1),
+						Children = {},
+						Parent = item,
+					}
+					item.Children[#item.Children+1] = it
+					partCount = partCount+1
+					doCalculate(it)
+				end
+			end
+		end
+		doCalculate(mBaseItem)
+	end
+	
+	local joints = {}
+	local function recurse(obj)
+		if obj:IsA("Motor6D") --[[or obj:IsA("Weld")]] then
+			table.insert(joints, obj)
+		end
+		
+		for _, child in pairs(obj:GetChildren()) do
+			recurse(child)
+		end
+	end
+	recurse(rootPart.Item.Parent)
+	
+
+	MakePartSelectGui(mBaseItem)
+	createTimelineUI(mBaseItem)--This is what breaks
+	resetAnimation()
+	CreateGrid(selectedObject)
+
+end)]]></ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="Script" referent="RBXC63C4B6DCB0C4E5AA654F4922F96AE29">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">JointEditor</string>
+				<ProtectedString name="Source"><![CDATA[local plugin = PluginManager():CreatePlugin()
+local toolbar = plugin:CreateToolbar("Animations")
+local createButton = toolbar:CreateButton('Create Joint', 'Create a new motor between the first two selected parts.', '')
+local editButton = toolbar:CreateButton('Edit Joint', 'Edit the selected motor', '')
+
+local editOpen = false
+local createOpen = false
+
+local screen = Instance.new('ScreenGui', game:GetService'CoreGui')
+screen.Name = 'AnimRig'
+local editf = Instance.new('Frame', screen)
+editf.BackgroundTransparency = 1
+editf.Size = UDim2.new(1, 0, 1, 0)
+local createf = editf:Clone()
+createf.Parent = screen
+
+-- for i,v in next, script.create:GetChildren() do v.Parent=createf end
+-- for i,v in next, script.edit:GetChildren() do v.Parent=editf end
+
+local vis = {}
+local handles = {mov={}, rot={}}
+local linkedballs = {}
+
+--
+--
+function connect()
+	editButton.Click:connect(function()
+		if createOpen then
+			closeCreate()
+		end
+		
+		if editOpen then
+			closeEdit()
+		else
+			openEdit()
+		end
+	end)
+	createButton.Click:connect(function()
+		if editOpen then
+			closeEdit()
+		end
+		
+		if createOpen then
+			closeCreate()
+		else
+			openCreate()
+		end
+	end)
+	
+	game:GetService'Selection'.SelectionChanged:connect(evaluateSelection)
+end
+function evaluateSelection()
+	local selection = game:GetService'Selection':Get()
+	local a, b = unpack(selection)
+	
+	if editOpen then
+		if a and a:IsA'Motor6D' then
+			closeVis()
+			closehandles()
+			unlinkballs()
+			visualize(a, true)
+		end
+	end
+end
+
+function visualize(motor, showMovementHandles)
+	if motor.Part0 and motor.Part1 then
+		local info = {
+			motor = motor,
+			vparts = {
+				a=nil,
+				line=nil,
+				b=nil
+			},
+			modtrans = {}
+		}
+		
+		local a=Instance.new'Part'
+		a.BrickColor=BrickColor.new'Bright blue'
+		a.Name='RigVisA'
+		a.Material = "SmoothPlastic"
+		a.Anchored = true
+		a.CanCollide=false
+		a.Locked=true
+		a.FormFactor='Custom'
+		a.Size=Vector3.new(0.2, 0.2, 0.2)
+		a.TopSurface=0
+		a.BottomSurface=0
+		local amesh = Instance.new'SpecialMesh'
+		amesh.Parent=a
+		amesh.MeshType=Enum.MeshType.Sphere
+		--amesh.Scale=Vector3.new(1,1,1)*0.5
+		
+		local b=a:Clone()
+		b.BrickColor=BrickColor.new'Bright red'
+		local line=a:Clone()
+		line.BrickColor=BrickColor.new'Bright yellow'
+		local linemesh=Instance.new'CylinderMesh'
+		linemesh.Scale = Vector3.new(0.5, 1, 0.5)
+		line.Mesh:Destroy()
+		linemesh.Parent=line
+		
+		a.Archivable=false
+		b.Archivable=false
+		line.Archivable=false
+		a.Name='Pivot Positioner'
+		b.Name='Part Positioner'
+		line.Name='Line (don\'t move)'
+		
+		info.vparts.a = a
+		info.vparts.b = b
+		info.vparts.line = line
+		
+		-- position
+		local base = motor.Part0.CFrame
+		a.CFrame = base*motor.C0
+		b.CFrame = base*motor.C0*motor.C1:inverse()
+		line.Size = Vector3.new(0.2, (a.Position-b.Position).magnitude, 0.2)
+		line.CFrame = CFrame.new((a.Position+b.Position)/2, a.Position)*CFrame.Angles(math.pi/2, 0, 0)
+		
+		a.Parent=motor
+		b.Parent=motor
+		line.Parent=motor
+		
+		-- visibility
+		info.modtrans[motor.Part0] = 0
+		info.modtrans[motor.Part1] = 0
+		motor.Part0.LocalTransparencyModifier = 0.5
+		motor.Part1.LocalTransparencyModifier = 0.5
+		
+		-- expose
+		vis[motor] = info
+		
+		-- link
+		linkballs(a, b, line, motor)
+	end
+end
+function linkballs(a, b, line, motor)
+	table.insert(linkedballs, {a=a, b=b, line=line, motor=motor})
+end
+function unlinkballs()
+	linkedballs = {}
+end
+function updatelinkballs()
+	for i, v in next, linkedballs do
+		v.motor.C0 = v.motor.Part0.CFrame:toObjectSpace(v.a.CFrame)
+		v.motor.C1 = (v.motor.Part0.CFrame * v.motor.C0):toObjectSpace(v.b.CFrame):inverse()
+		
+		v.line.Size = Vector3.new(0.2, (v.a.Position-v.b.Position).magnitude, 0.2)
+		v.line.CFrame = CFrame.new((v.a.Position+v.b.Position)/2, v.b.Position) * CFrame.Angles(math.pi/2, 0, 0)
+	end
+end
+function closeVis()
+	for motor, info in next, vis do
+		for role, v in next, info.vparts do
+			v:Destroy()
+		end
+		for modded, original in next, info.modtrans do
+			modded.LocalTransparencyModifier = 0
+		end
+	end
+	
+	vis = {}
+end
+function closehandles()
+	for type, l in next, handles do
+		for i, handle in next, l do
+			handle:Destroy()
+		end
+		
+		handles[type] = {}
+	end
+end
+
+function closeCreate()
+	createf.Visible = false
+	createOpen = false
+	createButton:SetActive(false)
+end
+function openCreate()
+	createf.Visible = true
+	createOpen = true
+	createButton:SetActive(true)
+	
+	local a,b = unpack(game.Selection:Get())
+	if a and a:IsA'BasePart' and b and b:IsA'BasePart' then
+		local motor = Instance.new('Motor6D', a)
+		
+		local midPoint = (a.Position+b.Position) / 2
+		local mid = b.CFrame + (midPoint - b.CFrame.p)
+		
+		motor.C0 = a.CFrame:toObjectSpace(mid)
+		motor.C1 = mid:toObjectSpace(b.CFrame):inverse()
+		motor.Part0 = a
+		motor.Part1 = b
+		motor.Parent = a
+		motor.Name = a.Name..' -> '..b.Name
+		
+		game.Selection:Set{motor}
+		openEdit()
+	end
+end
+
+function closeEdit()
+	editf.Visible = false
+	editOpen = false
+	editButton:SetActive(false)
+	for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+		if v.Name  == "JointEditor" then
+			v:Destroy()
+		end
+	end
+	
+	closeVis()
+	closehandles()
+	unlinkballs()
+end
+function openEdit()
+	editf.Visible = true
+	editOpen = true
+	editButton:SetActive(true)
+	local gui = script.JointEditor:clone()
+	gui.Parent = game:GetService("CoreGui")
+	
+	evaluateSelection()
+end
+
+function start()
+	connect()
+	
+	spawn(function()
+		while true do
+			updatelinkballs()
+			game:GetService'RunService'.RenderStepped:wait()
+		end
+	end)
+end
+
+--
+--
+closeCreate() closeEdit()
+start()]]></ProtectedString>
+			</Properties>
+			<Item class="ScreenGui" referent="RBX317184C6E1C247ABBDBC480F6ED39B61">
+				<Properties>
+					<string name="Name">JointEditor</string>
+				</Properties>
+				<Item class="Frame" referent="RBX7ACC0C62E8E64C98B2176998CC3918D9">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4294967295</Color3>
+						<float name="BackgroundTransparency">0</float>
+						<Color3 name="BorderColor3">4279970357</Color3>
+						<int name="BorderSizePixel">1</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<string name="Name">Frame</string>
+						<Ref name="NextSelectionDown">null</Ref>
+						<Ref name="NextSelectionLeft">null</Ref>
+						<Ref name="NextSelectionRight">null</Ref>
+						<Ref name="NextSelectionUp">null</Ref>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>50</XO>
+							<YS>0</YS>
+							<YO>50</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<bool name="Selectable">false</bool>
+						<Ref name="SelectionImageObject">null</Ref>
+						<UDim2 name="Size">
+							<XS>0</XS>
+							<XO>300</XO>
+							<YS>0</YS>
+							<YO>200</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">6</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">1</int>
+					</Properties>
+					<Item class="TextLabel" referent="RBXB2219D312749488DA0542C94C36616DB">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4294967295</Color3>
+							<float name="BackgroundTransparency">1</float>
+							<Color3 name="BorderColor3">4279970357</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<token name="Font">6</token>
+							<token name="FontSize">5</token>
+							<string name="Name">TextLabel</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>0</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<bool name="Selectable">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>1</XS>
+								<XO>0</XO>
+								<YS>1</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<string name="Text">Select two parts and click &quot;Create Joint&quot; to make a joint. Use &quot;Edit Joints&quot; and move the nodes (using Studio Tools) to adjust C0 and C1.</string>
+							<Color3 name="TextColor3">4294967295</Color3>
+							<bool name="TextScaled">true</bool>
+							<Color3 name="TextStrokeColor3">4278190080</Color3>
+							<float name="TextStrokeTransparency">1</float>
+							<float name="TextTransparency">0</float>
+							<bool name="TextWrapped">true</bool>
+							<token name="TextXAlignment">2</token>
+							<token name="TextYAlignment">1</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+					</Item>
+				</Item>
+			</Item>
+		</Item>
+		<Item class="Script" referent="RBXF028186979834E27B80046027857F189">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">createBlockRig</string>
+				<ProtectedString name="Source"><![CDATA[local Plugin = PluginManager():CreatePlugin()
+local toolbar = Plugin:CreateToolbar("Animations")
+local button = toolbar:CreateButton(
+	"", -- The text next to the icon. Leave this blank if the icon is sufficient.
+	"Create Block Rig", -- hover text
+	"http://www.roblox.com/asset/?id=142301446" -- The icon file's name
+)
+
+local function weldBetween(a, b)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = CFrame.new()
+    weld.C1 = b.CFrame:inverse()*a.CFrame
+    weld.Parent = a
+    return weld;
+end
+
+local function jointBetween(a, b, cfa, cfb)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = cfa
+    weld.C1 = cfb
+    weld.Parent = a
+    return weld;
+end
+
+button.Click:connect(function()
+	if (_G["AnimationEdit"] == true) then
+		print("Cannot create rig while in edit mode.")
+		return
+	end
+
+--	print("Creating rig")
+
+	-- clean up
+
+	local parent = Workspace:FindFirstChild("Dummy")
+	if (parent == nil) then
+--		print("making dummy")
+		parent = Instance.new("Model", game.Workspace)
+		parent.Name = "Dummy"		
+	end
+
+	for index, child in pairs(parent:GetChildren()) do
+		if (child.Name ~= "AnimSaves") then
+			child:Destroy()
+		end
+	end
+
+	--
+
+	Root = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Root.Name = "HumanoidRootPart"
+	Root.FormFactor = "Symmetric"
+	Root.Anchored = true
+	Root.CanCollide = true
+	Root.Transparency = 0.5
+	Root.Size = Vector3.new(2, 2, 1)
+	Root.CFrame = CFrame.new(0, 5.2, 4.5)
+	Root.Parent = parent
+	Root.BottomSurface = "Smooth"
+	Root.TopSurface = "Smooth"
+
+	Torso = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Torso.Name = "Torso"
+	Torso.FormFactor = "Symmetric"
+	Torso.Anchored = false
+	Torso.CanCollide = false
+	Torso.Size = Vector3.new(2, 2, 1)
+	Torso.CFrame = CFrame.new(0, 5.2, 4.5)
+	Torso.Parent = parent
+	Torso.BottomSurface = "Smooth"
+	Torso.TopSurface = "Smooth"
+
+	RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
+	RCB = RCA
+	RootHip = jointBetween(Root, Torso, RCA, RCB)
+	RootHip.Name = "Root Hip"
+	RootHip.MaxVelocity = 0.1
+
+
+	LeftLeg = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	LeftLeg.Name = "Left Leg"
+	LeftLeg.FormFactor = "Symmetric"
+	LeftLeg.Anchored = false
+	LeftLeg.CanCollide = false
+	LeftLeg.Size = Vector3.new(1, 2, 1)
+	LeftLeg.CFrame = CFrame.new(0.5, 3.2, 4.5)
+	LeftLeg.Parent = parent
+	LeftLeg.BottomSurface = "Smooth"
+	LeftLeg.TopSurface = "Smooth"
+
+	LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
+	LeftHip.Name = "Left Hip"
+	LeftHip.MaxVelocity = 0.1
+
+
+	RightLeg = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	RightLeg.Name = "Right Leg"
+	RightLeg.FormFactor = "Symmetric"
+	RightLeg.Anchored = false
+	RightLeg.CanCollide = false
+	RightLeg.Size = Vector3.new(1, 2, 1)
+	RightLeg.CFrame = CFrame.new(-0.5, 3.2, 4.5)
+	RightLeg.Parent = parent
+	RightLeg.BottomSurface = "Smooth"
+	RightLeg.TopSurface = "Smooth"
+
+
+	RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
+	RightHip.Name = "Right Hip"
+	RightHip.MaxVelocity = 0.1
+
+
+	LeftArm = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	LeftArm.Name = "Left Arm"
+	LeftArm.FormFactor = "Symmetric"
+	LeftArm.Anchored = false
+	LeftArm.CanCollide = false
+	LeftArm.Size = Vector3.new(1, 2, 1)
+	LeftArm.CFrame = CFrame.new(1.5, 5.2, 4.5)
+	LeftArm.Parent = parent
+	LeftArm.BottomSurface = "Smooth"
+	LeftArm.TopSurface = "Smooth"
+
+
+	LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
+	LeftShoulder.Name = "Left Shoulder"
+	LeftShoulder.MaxVelocity = 0.1
+
+
+	RightArm = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	RightArm.Name = "Right Arm"
+	RightArm.FormFactor = "Symmetric"
+	RightArm.Anchored = false
+	RightArm.CanCollide = false
+	RightArm.Size = Vector3.new(1, 2, 1)
+	RightArm.CFrame = CFrame.new(-1.5, 5.2, 4.5)
+	RightArm.Parent = parent
+	RightArm.BottomSurface = "Smooth"
+	RightArm.TopSurface = "Smooth"
+
+	RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
+	RightShoulder.Name = "Right Shoulder"
+	RightShoulder.MaxVelocity = 0.1
+
+
+	Head = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Head.Name = "Head"
+	Head.FormFactor = "Symmetric"
+	Head.Anchored = false
+	Head.CanCollide = true
+	Head.Size = Vector3.new(2, 1, 1)
+	Head.CFrame = CFrame.new(0, 6.7, 4.5)
+	Head.Parent = parent
+	Head.BottomSurface = "Smooth"
+	Head.TopSurface = "Smooth"
+
+	NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	Neck = jointBetween(Torso, Head, NCA, NCB)
+	Neck.Name = "Neck"
+	Neck.MaxVelocity = 0.1
+
+
+	Face = Instance.new("Decal", Head)
+	wait(0.1)
+	Face.Name = "Face"
+	Face.Texture = "rbxasset://textures/face.png"
+	
+	Humanoid = Instance.new("Humanoid", parent)
+
+--[[
+	LArmMesh = Instance.new("CharacterMesh", parent)
+	LArmMesh.MeshId = 32331863
+	LArmMesh.BodyPart = 2
+
+	RArmMesh = Instance.new("CharacterMesh", parent)
+	RArmMesh.MeshId = 32331968
+	RArmMesh.BodyPart = 3
+
+
+	LLegMesh = Instance.new("CharacterMesh", parent)
+	LLegMesh.MeshId = 32331927
+	LLegMesh.BodyPart = 4
+
+	RLegMesh = Instance.new("CharacterMesh", parent)
+	RLegMesh.MeshId = 32332020
+	RLegMesh.BodyPart = 5
+
+	TorsoMesh = Instance.new("CharacterMesh", parent)
+	TorsoMesh.MeshId = 32332055
+	TorsoMesh.BodyPart = 1
+
+
+	HeadMesh = Instance.new("SpecialMesh", Head)
+	HeadMesh.MeshType = 0
+	HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+--]]
+
+	parent:MoveTo(Vector3.new(0, 5.2, 0))
+end)]]></ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="Script" referent="RBXC2874FA6FEEC4480A3AE74CE76311CEC">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">createMeshBoyRig</string>
+				<ProtectedString name="Source"><![CDATA[local Plugin = PluginManager():CreatePlugin()
+local toolbar = Plugin:CreateToolbar("Animations")
+local button = toolbar:CreateButton(
+	"", -- The text next to the icon. Leave this blank if the icon is sufficient.
+	"Create Man Rig", -- hover text
+	"http://www.roblox.com/asset/?id=142301579" -- The icon file's name.
+)
+
+local function weldBetween(a, b)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = CFrame.new()
+    weld.C1 = b.CFrame:inverse()*a.CFrame
+    weld.Parent = a
+    return weld;
+end
+
+local function jointBetween(a, b, cfa, cfb)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = cfa
+    weld.C1 = cfb
+    weld.Parent = a
+    return weld;
+end
+
+button.Click:connect(function()
+	if (_G["AnimationEdit"] == true) then
+		print("Cannot create rig while in edit mode.")
+		return
+	end
+
+--	print("Creating rig")
+
+	-- clean up
+
+	local parent = Workspace:FindFirstChild("Dummy")
+	if (parent == nil) then
+--		print("making dummy")
+		parent = Instance.new("Model", game.Workspace)
+		parent.Name = "Dummy"		
+	end
+
+	for index, child in pairs(parent:GetChildren()) do
+		if (child.Name ~= "AnimSaves") then
+			child:Destroy()
+		end
+	end
+
+	--
+
+	Root = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Root.Name = "HumanoidRootPart"
+	Root.FormFactor = "Symmetric"
+	Root.Anchored = true
+	Root.CanCollide = true
+	Root.Transparency = 0.5
+	Root.Size = Vector3.new(2, 2, 1)
+	Root.CFrame = CFrame.new(0, 5.2, 4.5)
+	Root.Parent = parent
+	Root.BottomSurface = "Smooth"
+	Root.TopSurface = "Smooth"
+
+	Torso = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Torso.Name = "Torso"
+	Torso.FormFactor = "Symmetric"
+	Torso.Anchored = false
+	Torso.CanCollide = false
+	Torso.Size = Vector3.new(2, 2, 1)
+	Torso.CFrame = CFrame.new(0, 5.2, 4.5)
+	Torso.Parent = parent
+	Torso.BottomSurface = "Smooth"
+	Torso.TopSurface = "Smooth"
+
+	RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
+	RCB = RCA
+	RootHip = jointBetween(Root, Torso, RCA, RCB)
+	RootHip.Name = "Root Hip"
+	RootHip.MaxVelocity = 0.1
+
+
+	LeftLeg = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	LeftLeg.Name = "Left Leg"
+	LeftLeg.FormFactor = "Symmetric"
+	LeftLeg.Anchored = false
+	LeftLeg.CanCollide = false
+	LeftLeg.Size = Vector3.new(1, 2, 1)
+	LeftLeg.CFrame = CFrame.new(0.5, 3.2, 4.5)
+	LeftLeg.Parent = parent
+	LeftLeg.BottomSurface = "Smooth"
+	LeftLeg.TopSurface = "Smooth"
+
+	LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
+	LeftHip.Name = "Left Hip"
+	LeftHip.MaxVelocity = 0.1
+
+
+	RightLeg = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	RightLeg.Name = "Right Leg"
+	RightLeg.FormFactor = "Symmetric"
+	RightLeg.Anchored = false
+	RightLeg.CanCollide = false
+	RightLeg.Size = Vector3.new(1, 2, 1)
+	RightLeg.CFrame = CFrame.new(-0.5, 3.2, 4.5)
+	RightLeg.Parent = parent
+	RightLeg.BottomSurface = "Smooth"
+	RightLeg.TopSurface = "Smooth"
+
+
+	RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
+	RightHip.Name = "Right Hip"
+	RightHip.MaxVelocity = 0.1
+
+
+	LeftArm = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	LeftArm.Name = "Left Arm"
+	LeftArm.FormFactor = "Symmetric"
+	LeftArm.Anchored = false
+	LeftArm.CanCollide = false
+	LeftArm.Size = Vector3.new(1, 2, 1)
+	LeftArm.CFrame = CFrame.new(1.5, 5.2, 4.5)
+	LeftArm.Parent = parent
+	LeftArm.BottomSurface = "Smooth"
+	LeftArm.TopSurface = "Smooth"
+
+
+	LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
+	LeftShoulder.Name = "Left Shoulder"
+	LeftShoulder.MaxVelocity = 0.1
+
+
+	RightArm = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	RightArm.Name = "Right Arm"
+	RightArm.FormFactor = "Symmetric"
+	RightArm.Anchored = false
+	RightArm.CanCollide = false
+	RightArm.Size = Vector3.new(1, 2, 1)
+	RightArm.CFrame = CFrame.new(-1.5, 5.2, 4.5)
+	RightArm.Parent = parent
+	RightArm.BottomSurface = "Smooth"
+	RightArm.TopSurface = "Smooth"
+
+	RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
+	RightShoulder.Name = "Right Shoulder"
+	RightShoulder.MaxVelocity = 0.1
+
+
+	Head = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Head.Name = "Head"
+	Head.FormFactor = "Symmetric"
+	Head.Anchored = false
+	Head.CanCollide = true
+	Head.Size = Vector3.new(2, 1, 1)
+	Head.CFrame = CFrame.new(0, 6.7, 4.5)
+	Head.Parent = parent
+	Head.BottomSurface = "Smooth"
+	Head.TopSurface = "Smooth"
+
+	NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	Neck = jointBetween(Torso, Head, NCA, NCB)
+	Neck.Name = "Neck"
+	Neck.MaxVelocity = 0.1
+	
+	Face = Instance.new("Decal", Head)
+	wait(0.1)
+	Face.Name = "Face"
+	Face.Texture = "rbxasset://textures/face.png"
+	
+	Humanoid = Instance.new("Humanoid", parent)
+
+
+	LArmMesh = Instance.new("CharacterMesh", parent)
+	LArmMesh.MeshId = 82907977
+	LArmMesh.BodyPart = 2
+
+	RArmMesh = Instance.new("CharacterMesh", parent)
+	RArmMesh.MeshId = 82908019
+	RArmMesh.BodyPart = 3
+
+
+	LLegMesh = Instance.new("CharacterMesh", parent)
+	LLegMesh.MeshId = 81487640
+	LLegMesh.BodyPart = 4
+
+	RLegMesh = Instance.new("CharacterMesh", parent)
+	RLegMesh.MeshId = 81487710
+	RLegMesh.BodyPart = 5
+
+	TorsoMesh = Instance.new("CharacterMesh", parent)
+	TorsoMesh.MeshId = 82907945
+	TorsoMesh.BodyPart = 1
+
+
+	HeadMesh = Instance.new("SpecialMesh", Head)
+	HeadMesh.MeshType = 0
+	HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+
+
+	parent:MoveTo(Vector3.new(0, 5.2, 0))
+end)]]></ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="Script" referent="RBXF0847D39D530472483D367CE3FCBC2B5">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">createMeshGirlRig</string>
+				<ProtectedString name="Source"><![CDATA[local Plugin = PluginManager():CreatePlugin()
+local toolbar = Plugin:CreateToolbar("Animations")
+local button = toolbar:CreateButton(
+	"", -- The text next to the icon. Leave this blank if the icon is sufficient.
+	"Create Woman Rig", -- hover text
+	"http://www.roblox.com/asset/?id=142301608" -- The icon file's name. 
+)
+
+local function weldBetween(a, b)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = CFrame.new()
+    weld.C1 = b.CFrame:inverse()*a.CFrame
+    weld.Parent = a
+    return weld;
+end
+
+local function jointBetween(a, b, cfa, cfb)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = cfa
+    weld.C1 = cfb
+    weld.Parent = a
+    return weld;
+end
+
+button.Click:connect(function()
+	if (_G["AnimationEdit"] == true) then
+		print("Cannot create rig while in edit mode.")
+		return
+	end
+
+--	print("Creating rig")
+
+	-- clean up
+
+	local parent = Workspace:FindFirstChild("Dummy")
+	if (parent == nil) then
+--		print("making dummy")
+		parent = Instance.new("Model", game.Workspace)
+		parent.Name = "Dummy"		
+	end
+
+	for index, child in pairs(parent:GetChildren()) do
+		if (child.Name ~= "AnimSaves") then
+			child:Destroy()
+		end
+	end
+
+	--
+
+	Root = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Root.Name = "HumanoidRootPart"
+	Root.FormFactor = "Symmetric"
+	Root.Anchored = true
+	Root.CanCollide = true
+	Root.Transparency = 0.5
+	Root.Size = Vector3.new(2, 2, 1)
+	Root.CFrame = CFrame.new(0, 5.2, 4.5)
+	Root.Parent = parent
+	Root.BottomSurface = "Smooth"
+	Root.TopSurface = "Smooth"
+
+	Torso = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Torso.Name = "Torso"
+	Torso.FormFactor = "Symmetric"
+	Torso.Anchored = false
+	Torso.CanCollide = false
+	Torso.Size = Vector3.new(2, 2, 1)
+	Torso.CFrame = CFrame.new(0, 5.2, 4.5)
+	Torso.Parent = parent
+	Torso.BottomSurface = "Smooth"
+	Torso.TopSurface = "Smooth"
+
+	RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
+	RCB = RCA
+	RootHip = jointBetween(Root, Torso, RCA, RCB)
+	RootHip.Name = "Root Hip"
+	RootHip.MaxVelocity = 0.1
+
+
+	LeftLeg = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	LeftLeg.Name = "Left Leg"
+	LeftLeg.FormFactor = "Symmetric"
+	LeftLeg.Anchored = false
+	LeftLeg.CanCollide = false
+	LeftLeg.Size = Vector3.new(1, 2, 1)
+	LeftLeg.CFrame = CFrame.new(0.5, 3.2, 4.5)
+	LeftLeg.Parent = parent
+	LeftLeg.BottomSurface = "Smooth"
+	LeftLeg.TopSurface = "Smooth"
+
+	LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
+	LeftHip.Name = "Left Hip"
+	LeftHip.MaxVelocity = 0.1
+
+
+	RightLeg = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	RightLeg.Name = "Right Leg"
+	RightLeg.FormFactor = "Symmetric"
+	RightLeg.Anchored = false
+	RightLeg.CanCollide = false
+	RightLeg.Size = Vector3.new(1, 2, 1)
+	RightLeg.CFrame = CFrame.new(-0.5, 3.2, 4.5)
+	RightLeg.Parent = parent
+	RightLeg.BottomSurface = "Smooth"
+	RightLeg.TopSurface = "Smooth"
+
+
+	RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
+	RightHip.Name = "Right Hip"
+	RightHip.MaxVelocity = 0.1
+
+
+	LeftArm = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	LeftArm.Name = "Left Arm"
+	LeftArm.FormFactor = "Symmetric"
+	LeftArm.Anchored = false
+	LeftArm.CanCollide = false
+	LeftArm.Size = Vector3.new(1, 2, 1)
+	LeftArm.CFrame = CFrame.new(1.5, 5.2, 4.5)
+	LeftArm.Parent = parent
+	LeftArm.BottomSurface = "Smooth"
+	LeftArm.TopSurface = "Smooth"
+
+
+	LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
+	LeftShoulder.Name = "Left Shoulder"
+	LeftShoulder.MaxVelocity = 0.1
+
+
+	RightArm = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	RightArm.Name = "Right Arm"
+	RightArm.FormFactor = "Symmetric"
+	RightArm.Anchored = false
+	RightArm.CanCollide = false
+	RightArm.Size = Vector3.new(1, 2, 1)
+	RightArm.CFrame = CFrame.new(-1.5, 5.2, 4.5)
+	RightArm.Parent = parent
+	RightArm.BottomSurface = "Smooth"
+	RightArm.TopSurface = "Smooth"
+
+	RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
+	RightShoulder.Name = "Right Shoulder"
+	RightShoulder.MaxVelocity = 0.1
+
+
+	Head = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Head.Name = "Head"
+	Head.FormFactor = "Symmetric"
+	Head.Anchored = false
+	Head.CanCollide = true
+	Head.Size = Vector3.new(2, 1, 1)
+	Head.CFrame = CFrame.new(0, 6.7, 4.5)
+	Head.Parent = parent
+	Head.BottomSurface = "Smooth"
+	Head.TopSurface = "Smooth"
+
+	NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	Neck = jointBetween(Torso, Head, NCA, NCB)
+	Neck.Name = "Neck"
+	Neck.MaxVelocity = 0.1
+
+	Face = Instance.new("Decal", Head)
+	wait(0.1)
+	Face.Name = "Face"
+	Face.Texture = "rbxasset://textures/face.png"
+	
+	Humanoid = Instance.new("Humanoid", parent)
+
+
+	LArmMesh = Instance.new("CharacterMesh", parent)
+	LArmMesh.MeshId = 83001137
+	LArmMesh.BodyPart = 2
+
+	RArmMesh = Instance.new("CharacterMesh", parent)
+	RArmMesh.MeshId = 83001181
+	RArmMesh.BodyPart = 3
+
+
+	LLegMesh = Instance.new("CharacterMesh", parent)
+	LLegMesh.MeshId = 81628361
+	LLegMesh.BodyPart = 4
+
+	RLegMesh = Instance.new("CharacterMesh", parent)
+	RLegMesh.MeshId = 81628308
+	RLegMesh.BodyPart = 5
+
+	TorsoMesh = Instance.new("CharacterMesh", parent)
+	TorsoMesh.MeshId = 82987757
+	TorsoMesh.BodyPart = 1
+
+
+	HeadMesh = Instance.new("SpecialMesh", Head)
+	HeadMesh.MeshType = 0
+	HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+
+
+	parent:MoveTo(Vector3.new(0, 5.2, 0))
+end)]]></ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="Script" referent="RBX19FAB67426FE4C98A2124060FF12E3ED">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">createMeshRig</string>
+				<ProtectedString name="Source"><![CDATA[local Plugin = PluginManager():CreatePlugin()
+local toolbar = Plugin:CreateToolbar("Animations")
+local button = toolbar:CreateButton(
+	"", -- The text next to the icon. Leave this blank if the icon is sufficient.
+	"Create Mesh Rig", -- hover text
+	"http://www.roblox.com/asset/?id=142301531" -- The icon file's name.
+)
+
+local function weldBetween(a, b)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = CFrame.new()
+    weld.C1 = b.CFrame:inverse()*a.CFrame
+    weld.Parent = a
+    return weld;
+end
+
+local function jointBetween(a, b, cfa, cfb)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = cfa
+    weld.C1 = cfb
+    weld.Parent = a
+    return weld;
+end
+
+button.Click:connect(function()
+	if (_G["AnimationEdit"] == true) then
+		print("Cannot create rig while in edit mode.")
+		return
+	end
+
+--	print("Creating rig")
+
+	-- clean up
+
+	local parent = Workspace:FindFirstChild("Dummy")
+	if (parent == nil) then
+--		print("making dummy")
+		parent = Instance.new("Model", game.Workspace)
+		parent.Name = "Dummy"		
+	end
+
+	for index, child in pairs(parent:GetChildren()) do
+		if (child.Name ~= "AnimSaves") then
+			child:Destroy()
+		end
+	end
+
+	--
+
+	Root = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Root.Name = "HumanoidRootPart"
+	Root.FormFactor = "Symmetric"
+	Root.Anchored = true
+	Root.CanCollide = true
+	Root.Transparency = 0.5
+	Root.Size = Vector3.new(2, 2, 1)
+	Root.CFrame = CFrame.new(0, 5.2, 4.5)
+	Root.Parent = parent
+	Root.BottomSurface = "Smooth"
+	Root.TopSurface = "Smooth"
+
+	Torso = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Torso.Name = "Torso"
+	Torso.FormFactor = "Symmetric"
+	Torso.Anchored = false
+	Torso.CanCollide = false
+	Torso.Size = Vector3.new(2, 2, 1)
+	Torso.CFrame = CFrame.new(0, 5.2, 4.5)
+	Torso.Parent = parent
+	Torso.BottomSurface = "Smooth"
+	Torso.TopSurface = "Smooth"
+
+	RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
+	RCB = RCA 
+
+	RootHip = jointBetween(Root, Torso, RCA, RCB)
+	RootHip.Name = "Root Hip"
+	RootHip.MaxVelocity = 0.1
+
+
+	LeftLeg = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	LeftLeg.Name = "Left Leg"
+	LeftLeg.FormFactor = "Symmetric"
+	LeftLeg.Anchored = false
+	LeftLeg.CanCollide = false
+	LeftLeg.Size = Vector3.new(1, 2, 1)
+	LeftLeg.CFrame = CFrame.new(0.5, 3.2, 4.5)
+	LeftLeg.Parent = parent
+	LeftLeg.BottomSurface = "Smooth"
+	LeftLeg.TopSurface = "Smooth"
+
+	LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
+	LeftHip.Name = "Left Hip"
+	LeftHip.MaxVelocity = 0.1
+
+
+	RightLeg = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	RightLeg.Name = "Right Leg"
+	RightLeg.FormFactor = "Symmetric"
+	RightLeg.Anchored = false
+	RightLeg.CanCollide = false
+	RightLeg.Size = Vector3.new(1, 2, 1)
+	RightLeg.CFrame = CFrame.new(-0.5, 3.2, 4.5)
+	RightLeg.Parent = parent
+	RightLeg.BottomSurface = "Smooth"
+	RightLeg.TopSurface = "Smooth"
+
+
+	RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
+	RightHip.Name = "Right Hip"
+	RightHip.MaxVelocity = 0.1
+
+
+	LeftArm = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	LeftArm.Name = "Left Arm"
+	LeftArm.FormFactor = "Symmetric"
+	LeftArm.Anchored = false
+	LeftArm.CanCollide = false
+	LeftArm.Size = Vector3.new(1, 2, 1)
+	LeftArm.CFrame = CFrame.new(1.5, 5.2, 4.5)
+	LeftArm.Parent = parent
+	LeftArm.BottomSurface = "Smooth"
+	LeftArm.TopSurface = "Smooth"
+
+
+	LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
+	LeftShoulder.Name = "Left Shoulder"
+	LeftShoulder.MaxVelocity = 0.1
+
+
+	RightArm = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	RightArm.Name = "Right Arm"
+	RightArm.FormFactor = "Symmetric"
+	RightArm.Anchored = false
+	RightArm.CanCollide = false
+	RightArm.Size = Vector3.new(1, 2, 1)
+	RightArm.CFrame = CFrame.new(-1.5, 5.2, 4.5)
+	RightArm.Parent = parent
+	RightArm.BottomSurface = "Smooth"
+	RightArm.TopSurface = "Smooth"
+
+	RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
+	RightShoulder.Name = "Right Shoulder"
+	RightShoulder.MaxVelocity = 0.1
+
+
+	Head = Instance.new("Part", game.Workspace)
+	wait(0.1)
+	Head.Name = "Head"
+	Head.FormFactor = "Symmetric"
+	Head.Anchored = false
+	Head.CanCollide = true
+	Head.Size = Vector3.new(2, 1, 1)
+	Head.CFrame = CFrame.new(0, 6.7, 4.5)
+	Head.Parent = parent
+	Head.BottomSurface = "Smooth"
+	Head.TopSurface = "Smooth"
+
+	NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	Neck = jointBetween(Torso, Head, NCA, NCB)
+	Neck.Name = "Neck"
+	Neck.MaxVelocity = 0.1
+
+	Face = Instance.new("Decal", Head)
+	wait(0.1)
+	Face.Name = "Face"
+	Face.Texture = "rbxasset://textures/face.png"
+	
+	Humanoid = Instance.new("Humanoid", parent)
+
+
+	LArmMesh = Instance.new("CharacterMesh", parent)
+	LArmMesh.MeshId = 27111419
+	LArmMesh.BodyPart = 2
+
+	RArmMesh = Instance.new("CharacterMesh", parent)
+	RArmMesh.MeshId = 27111864
+	RArmMesh.BodyPart = 3
+
+
+	LLegMesh = Instance.new("CharacterMesh", parent)
+	LLegMesh.MeshId = 27111857
+	LLegMesh.BodyPart = 4
+
+	RLegMesh = Instance.new("CharacterMesh", parent)
+	RLegMesh.MeshId = 27111882
+	RLegMesh.BodyPart = 5
+
+	TorsoMesh = Instance.new("CharacterMesh", parent)
+	TorsoMesh.MeshId = 27111894
+	TorsoMesh.BodyPart = 1
+
+
+	HeadMesh = Instance.new("SpecialMesh", Head)
+	HeadMesh.MeshType = 0
+	HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+
+
+	parent:MoveTo(Vector3.new(0, 5.2, 0))
+end)]]></ProtectedString>
+			</Properties>
+		</Item>
+	</Item>
+</roblox>
