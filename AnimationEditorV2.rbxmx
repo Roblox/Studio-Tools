@@ -1,11 +1,11 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Folder" referent="RBX096F749D680049F8BC543DD2C51BF420">
+	<Item class="Folder" referent="RBXD03970D7BEB140C5A7530AF9FCD4881F">
 		<Properties>
 			<string name="Name">Plugin</string>
 		</Properties>
-		<Item class="Script" referent="RBX128D7ACBD1D1441ABCE3246CF250BFC8">
+		<Item class="Script" referent="RBXF7E3866BE485498F95AE3BFEA2D866C6">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -389,7 +389,8 @@ partSelection = nil
 selectedKeyframe = nil
 rotateStep = 0
 moveStep = 0
-screenWidth = game.Workspace.CurrentCamera.ViewportSize.X
+game.Workspace:WaitForChild("Camera")
+screenWidth = game.Workspace.Camera.ViewportSize.X
 
 buttonOnColor = Color3.new(200/255, 200/255, 200/255)
 buttonOffColor = Color3.new(50/255, 50/255, 50/255)
@@ -4293,7 +4294,7 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBXC63C4B6DCB0C4E5AA654F4922F96AE29">
+		<Item class="Script" referent="RBX3ECCD990A1CC458488AC597C253691E6">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -4541,11 +4542,11 @@ end
 closeCreate() closeEdit()
 start()]]></ProtectedString>
 			</Properties>
-			<Item class="ScreenGui" referent="RBX317184C6E1C247ABBDBC480F6ED39B61">
+			<Item class="ScreenGui" referent="RBXA03BCC440373443EAEFA137A2096B134">
 				<Properties>
 					<string name="Name">JointEditor</string>
 				</Properties>
-				<Item class="Frame" referent="RBX7ACC0C62E8E64C98B2176998CC3918D9">
+				<Item class="Frame" referent="RBX2B97DE513F80478D93111B668EE38895">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4579,7 +4580,7 @@ start()]]></ProtectedString>
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextLabel" referent="RBXB2219D312749488DA0542C94C36616DB">
+					<Item class="TextLabel" referent="RBX3470142FADAF4E51953D60950B2F659A">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -4627,7 +4628,7 @@ start()]]></ProtectedString>
 				</Item>
 			</Item>
 		</Item>
-		<Item class="Script" referent="RBXF028186979834E27B80046027857F189">
+		<Item class="Script" referent="RBX758F3C34A29E48688854BE0601892558">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -4853,7 +4854,7 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBXC2874FA6FEEC4480A3AE74CE76311CEC">
+		<Item class="Script" referent="RBX7519D896C44C406FA7CA27A1E160D976">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -5078,7 +5079,7 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBXF0847D39D530472483D367CE3FCBC2B5">
+		<Item class="Script" referent="RBX0FFFC5A5BA7F48CCAAB6E25BFE1AA4E6">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -5303,7 +5304,7 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBX19FAB67426FE4C98A2124060FF12E3ED">
+		<Item class="Script" referent="RBXE5EFF9F988924090BA4519BD49B2B623">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
