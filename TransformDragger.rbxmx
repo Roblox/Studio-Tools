@@ -1882,6 +1882,7 @@ function sanitizeCFrame(value)
 end
 
 local firstMove = true
+local partMoved = false
 
 function movePart(delta, collision)
 	Adorn.setAllAdornVisibility(false)
@@ -1893,6 +1894,8 @@ function movePart(delta, collision)
 	if not dragPart then
 		return
 	end
+	
+	partMoved = true
 		
 	adornmentUpdateNeeded = true
 	local selection = getCurrentSelectionWithChildren()
@@ -2845,10 +2848,14 @@ function releasePart()
 		end
 		lastDist = Vector3.new(0,0,0)
 		selectedPartCFrameBeforeDrag = nil
-		JoinSelection()
+		if partMoved then
+			JoinSelection()
+		end
 	elseif handleWasDragged then
 		JoinSelection()
 	end
+	
+	partMoved = false
 	
 	dragFromToolbox = false
 	
@@ -3060,7 +3067,7 @@ function selectPart(instances)
 		part = nil
 	end
 			
-	if part and not uis:IsKeyDown(Enum.KeyCode.LeftAlt) then
+	if part and not uis:IsKeyDown(Enum.KeyCode.LeftAlt) and not alreadySelected then
 		part = getTopPVInstance(part)
 	end
 	
