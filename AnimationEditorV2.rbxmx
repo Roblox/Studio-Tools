@@ -4671,10 +4671,10 @@ button.Click:connect(function()
 
 	-- clean up
 
-	local parent = Workspace:FindFirstChild("Dummy")
+	local parent = workspace:FindFirstChild("Dummy")
 	if (parent == nil) then
 --		print("making dummy")
-		parent = Instance.new("Model", game.Workspace)
+		parent = Instance.new("Model", workspace)
 		parent.Name = "Dummy"		
 	end
 
@@ -4686,8 +4686,7 @@ button.Click:connect(function()
 
 	--
 
-	Root = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Root = Instance.new("Part", workspace)
 	Root.Name = "HumanoidRootPart"
 	Root.FormFactor = "Symmetric"
 	Root.Anchored = true
@@ -4699,8 +4698,7 @@ button.Click:connect(function()
 	Root.BottomSurface = "Smooth"
 	Root.TopSurface = "Smooth"
 
-	Torso = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Torso = Instance.new("Part", workspace)
 	Torso.Name = "Torso"
 	Torso.FormFactor = "Symmetric"
 	Torso.Anchored = false
@@ -4711,15 +4709,14 @@ button.Click:connect(function()
 	Torso.BottomSurface = "Smooth"
 	Torso.TopSurface = "Smooth"
 
-	RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
-	RCB = RCA
-	RootHip = jointBetween(Root, Torso, RCA, RCB)
+	local RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
+	local RCB = RCA
+	local RootHip = jointBetween(Root, Torso, RCA, RCB)
 	RootHip.Name = "Root Hip"
 	RootHip.MaxVelocity = 0.1
 
 
-	LeftLeg = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local LeftLeg = Instance.new("Part", workspace)
 	LeftLeg.Name = "Left Leg"
 	LeftLeg.FormFactor = "Symmetric"
 	LeftLeg.Anchored = false
@@ -4730,15 +4727,14 @@ button.Click:connect(function()
 	LeftLeg.BottomSurface = "Smooth"
 	LeftLeg.TopSurface = "Smooth"
 
-	LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
+	local LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
 	LeftHip.Name = "Left Hip"
 	LeftHip.MaxVelocity = 0.1
 
 
-	RightLeg = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local RightLeg = Instance.new("Part", workspace)
 	RightLeg.Name = "Right Leg"
 	RightLeg.FormFactor = "Symmetric"
 	RightLeg.Anchored = false
@@ -4750,15 +4746,14 @@ button.Click:connect(function()
 	RightLeg.TopSurface = "Smooth"
 
 
-	RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
-	RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
-	RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
+	local RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	local RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	local RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
 	RightHip.Name = "Right Hip"
 	RightHip.MaxVelocity = 0.1
 
 
-	LeftArm = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local LeftArm = Instance.new("Part", workspace)
 	LeftArm.Name = "Left Arm"
 	LeftArm.FormFactor = "Symmetric"
 	LeftArm.Anchored = false
@@ -4770,15 +4765,14 @@ button.Click:connect(function()
 	LeftArm.TopSurface = "Smooth"
 
 
-	LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
+	local LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
 	LeftShoulder.Name = "Left Shoulder"
 	LeftShoulder.MaxVelocity = 0.1
 
 
-	RightArm = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local RightArm = Instance.new("Part", workspace)
 	RightArm.Name = "Right Arm"
 	RightArm.FormFactor = "Symmetric"
 	RightArm.Anchored = false
@@ -4789,15 +4783,14 @@ button.Click:connect(function()
 	RightArm.BottomSurface = "Smooth"
 	RightArm.TopSurface = "Smooth"
 
-	RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
-	RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
-	RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
+	local RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	local RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	local RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
 	RightShoulder.Name = "Right Shoulder"
 	RightShoulder.MaxVelocity = 0.1
 
 
-	Head = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Head = Instance.new("Part", workspace)
 	Head.Name = "Head"
 	Head.FormFactor = "Symmetric"
 	Head.Anchored = false
@@ -4808,47 +4801,18 @@ button.Click:connect(function()
 	Head.BottomSurface = "Smooth"
 	Head.TopSurface = "Smooth"
 
-	NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-	NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-	Neck = jointBetween(Torso, Head, NCA, NCB)
+	local NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	local NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	local Neck = jointBetween(Torso, Head, NCA, NCB)
 	Neck.Name = "Neck"
 	Neck.MaxVelocity = 0.1
 
 
-	Face = Instance.new("Decal", Head)
-	wait(0.1)
+	local Face = Instance.new("Decal", Head)
 	Face.Name = "Face"
 	Face.Texture = "rbxasset://textures/face.png"
 	
-	Humanoid = Instance.new("Humanoid", parent)
-
---[[
-	LArmMesh = Instance.new("CharacterMesh", parent)
-	LArmMesh.MeshId = 32331863
-	LArmMesh.BodyPart = 2
-
-	RArmMesh = Instance.new("CharacterMesh", parent)
-	RArmMesh.MeshId = 32331968
-	RArmMesh.BodyPart = 3
-
-
-	LLegMesh = Instance.new("CharacterMesh", parent)
-	LLegMesh.MeshId = 32331927
-	LLegMesh.BodyPart = 4
-
-	RLegMesh = Instance.new("CharacterMesh", parent)
-	RLegMesh.MeshId = 32332020
-	RLegMesh.BodyPart = 5
-
-	TorsoMesh = Instance.new("CharacterMesh", parent)
-	TorsoMesh.MeshId = 32332055
-	TorsoMesh.BodyPart = 1
-
-
-	HeadMesh = Instance.new("SpecialMesh", Head)
-	HeadMesh.MeshType = 0
-	HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
---]]
+	Instance.new("Humanoid", parent)
 
 	parent:MoveTo(Vector3.new(0, 5.2, 0))
 end)]]></ProtectedString>
@@ -4897,10 +4861,10 @@ button.Click:connect(function()
 
 	-- clean up
 
-	local parent = Workspace:FindFirstChild("Dummy")
+	local parent = workspace:FindFirstChild("Dummy")
 	if (parent == nil) then
 --		print("making dummy")
-		parent = Instance.new("Model", game.Workspace)
+		parent = Instance.new("Model", workspace)
 		parent.Name = "Dummy"		
 	end
 
@@ -4912,8 +4876,7 @@ button.Click:connect(function()
 
 	--
 
-	Root = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Root = Instance.new("Part", workspace)
 	Root.Name = "HumanoidRootPart"
 	Root.FormFactor = "Symmetric"
 	Root.Anchored = true
@@ -4925,8 +4888,7 @@ button.Click:connect(function()
 	Root.BottomSurface = "Smooth"
 	Root.TopSurface = "Smooth"
 
-	Torso = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Torso = Instance.new("Part", workspace)
 	Torso.Name = "Torso"
 	Torso.FormFactor = "Symmetric"
 	Torso.Anchored = false
@@ -4937,15 +4899,14 @@ button.Click:connect(function()
 	Torso.BottomSurface = "Smooth"
 	Torso.TopSurface = "Smooth"
 
-	RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
-	RCB = RCA
-	RootHip = jointBetween(Root, Torso, RCA, RCB)
+	local RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
+	local RCB = RCA
+	local RootHip = jointBetween(Root, Torso, RCA, RCB)
 	RootHip.Name = "Root Hip"
 	RootHip.MaxVelocity = 0.1
 
 
-	LeftLeg = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local LeftLeg = Instance.new("Part", workspace)
 	LeftLeg.Name = "Left Leg"
 	LeftLeg.FormFactor = "Symmetric"
 	LeftLeg.Anchored = false
@@ -4956,15 +4917,14 @@ button.Click:connect(function()
 	LeftLeg.BottomSurface = "Smooth"
 	LeftLeg.TopSurface = "Smooth"
 
-	LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
+	local LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
 	LeftHip.Name = "Left Hip"
 	LeftHip.MaxVelocity = 0.1
 
 
-	RightLeg = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local RightLeg = Instance.new("Part", workspace)
 	RightLeg.Name = "Right Leg"
 	RightLeg.FormFactor = "Symmetric"
 	RightLeg.Anchored = false
@@ -4976,15 +4936,14 @@ button.Click:connect(function()
 	RightLeg.TopSurface = "Smooth"
 
 
-	RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
-	RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
-	RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
+	local RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	local RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	local RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
 	RightHip.Name = "Right Hip"
 	RightHip.MaxVelocity = 0.1
 
 
-	LeftArm = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local LeftArm = Instance.new("Part", workspace)
 	LeftArm.Name = "Left Arm"
 	LeftArm.FormFactor = "Symmetric"
 	LeftArm.Anchored = false
@@ -4996,15 +4955,14 @@ button.Click:connect(function()
 	LeftArm.TopSurface = "Smooth"
 
 
-	LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
+	local LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
 	LeftShoulder.Name = "Left Shoulder"
 	LeftShoulder.MaxVelocity = 0.1
 
 
-	RightArm = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local RightArm = Instance.new("Part", workspace)
 	RightArm.Name = "Right Arm"
 	RightArm.FormFactor = "Symmetric"
 	RightArm.Anchored = false
@@ -5015,15 +4973,14 @@ button.Click:connect(function()
 	RightArm.BottomSurface = "Smooth"
 	RightArm.TopSurface = "Smooth"
 
-	RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
-	RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
-	RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
+	local RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	local RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	local RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
 	RightShoulder.Name = "Right Shoulder"
 	RightShoulder.MaxVelocity = 0.1
 
 
-	Head = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Head = Instance.new("Part", workspace)
 	Head.Name = "Head"
 	Head.FormFactor = "Symmetric"
 	Head.Anchored = false
@@ -5034,43 +4991,42 @@ button.Click:connect(function()
 	Head.BottomSurface = "Smooth"
 	Head.TopSurface = "Smooth"
 
-	NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-	NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-	Neck = jointBetween(Torso, Head, NCA, NCB)
+	local NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	local NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	local Neck = jointBetween(Torso, Head, NCA, NCB)
 	Neck.Name = "Neck"
 	Neck.MaxVelocity = 0.1
 	
-	Face = Instance.new("Decal", Head)
-	wait(0.1)
+	local Face = Instance.new("Decal", Head)
 	Face.Name = "Face"
 	Face.Texture = "rbxasset://textures/face.png"
 	
-	Humanoid = Instance.new("Humanoid", parent)
+	Instance.new("Humanoid", parent)
 
 
-	LArmMesh = Instance.new("CharacterMesh", parent)
+	local LArmMesh = Instance.new("CharacterMesh", parent)
 	LArmMesh.MeshId = 82907977
 	LArmMesh.BodyPart = 2
 
-	RArmMesh = Instance.new("CharacterMesh", parent)
+	local RArmMesh = Instance.new("CharacterMesh", parent)
 	RArmMesh.MeshId = 82908019
 	RArmMesh.BodyPart = 3
 
 
-	LLegMesh = Instance.new("CharacterMesh", parent)
+	local LLegMesh = Instance.new("CharacterMesh", parent)
 	LLegMesh.MeshId = 81487640
 	LLegMesh.BodyPart = 4
 
-	RLegMesh = Instance.new("CharacterMesh", parent)
+	local RLegMesh = Instance.new("CharacterMesh", parent)
 	RLegMesh.MeshId = 81487710
 	RLegMesh.BodyPart = 5
 
-	TorsoMesh = Instance.new("CharacterMesh", parent)
+	local TorsoMesh = Instance.new("CharacterMesh", parent)
 	TorsoMesh.MeshId = 82907945
 	TorsoMesh.BodyPart = 1
 
 
-	HeadMesh = Instance.new("SpecialMesh", Head)
+	local HeadMesh = Instance.new("SpecialMesh", Head)
 	HeadMesh.MeshType = 0
 	HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
 
@@ -5122,10 +5078,10 @@ button.Click:connect(function()
 
 	-- clean up
 
-	local parent = Workspace:FindFirstChild("Dummy")
+	local parent = workspace:FindFirstChild("Dummy")
 	if (parent == nil) then
 --		print("making dummy")
-		parent = Instance.new("Model", game.Workspace)
+		parent = Instance.new("Model", workspace)
 		parent.Name = "Dummy"		
 	end
 
@@ -5137,8 +5093,7 @@ button.Click:connect(function()
 
 	--
 
-	Root = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Root = Instance.new("Part", workspace)
 	Root.Name = "HumanoidRootPart"
 	Root.FormFactor = "Symmetric"
 	Root.Anchored = true
@@ -5150,8 +5105,7 @@ button.Click:connect(function()
 	Root.BottomSurface = "Smooth"
 	Root.TopSurface = "Smooth"
 
-	Torso = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Torso = Instance.new("Part", workspace)
 	Torso.Name = "Torso"
 	Torso.FormFactor = "Symmetric"
 	Torso.Anchored = false
@@ -5162,15 +5116,14 @@ button.Click:connect(function()
 	Torso.BottomSurface = "Smooth"
 	Torso.TopSurface = "Smooth"
 
-	RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
-	RCB = RCA
-	RootHip = jointBetween(Root, Torso, RCA, RCB)
+	local RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
+	local RCB = RCA
+	local RootHip = jointBetween(Root, Torso, RCA, RCB)
 	RootHip.Name = "Root Hip"
 	RootHip.MaxVelocity = 0.1
 
 
-	LeftLeg = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local LeftLeg = Instance.new("Part", workspace)
 	LeftLeg.Name = "Left Leg"
 	LeftLeg.FormFactor = "Symmetric"
 	LeftLeg.Anchored = false
@@ -5181,15 +5134,14 @@ button.Click:connect(function()
 	LeftLeg.BottomSurface = "Smooth"
 	LeftLeg.TopSurface = "Smooth"
 
-	LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
+	local LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
 	LeftHip.Name = "Left Hip"
 	LeftHip.MaxVelocity = 0.1
 
 
-	RightLeg = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local RightLeg = Instance.new("Part", workspace)
 	RightLeg.Name = "Right Leg"
 	RightLeg.FormFactor = "Symmetric"
 	RightLeg.Anchored = false
@@ -5201,15 +5153,14 @@ button.Click:connect(function()
 	RightLeg.TopSurface = "Smooth"
 
 
-	RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
-	RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
-	RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
+	local RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	local RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	local RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
 	RightHip.Name = "Right Hip"
 	RightHip.MaxVelocity = 0.1
 
 
-	LeftArm = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local LeftArm = Instance.new("Part", workspace)
 	LeftArm.Name = "Left Arm"
 	LeftArm.FormFactor = "Symmetric"
 	LeftArm.Anchored = false
@@ -5221,15 +5172,14 @@ button.Click:connect(function()
 	LeftArm.TopSurface = "Smooth"
 
 
-	LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
+	local LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
 	LeftShoulder.Name = "Left Shoulder"
 	LeftShoulder.MaxVelocity = 0.1
 
 
-	RightArm = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local RightArm = Instance.new("Part", workspace)
 	RightArm.Name = "Right Arm"
 	RightArm.FormFactor = "Symmetric"
 	RightArm.Anchored = false
@@ -5240,15 +5190,14 @@ button.Click:connect(function()
 	RightArm.BottomSurface = "Smooth"
 	RightArm.TopSurface = "Smooth"
 
-	RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
-	RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
-	RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
+	local RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	local RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	local RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
 	RightShoulder.Name = "Right Shoulder"
 	RightShoulder.MaxVelocity = 0.1
 
 
-	Head = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Head = Instance.new("Part", workspace)
 	Head.Name = "Head"
 	Head.FormFactor = "Symmetric"
 	Head.Anchored = false
@@ -5259,43 +5208,42 @@ button.Click:connect(function()
 	Head.BottomSurface = "Smooth"
 	Head.TopSurface = "Smooth"
 
-	NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-	NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-	Neck = jointBetween(Torso, Head, NCA, NCB)
+	local NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	local NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	local Neck = jointBetween(Torso, Head, NCA, NCB)
 	Neck.Name = "Neck"
 	Neck.MaxVelocity = 0.1
 
-	Face = Instance.new("Decal", Head)
-	wait(0.1)
+	local Face = Instance.new("Decal", Head)
 	Face.Name = "Face"
 	Face.Texture = "rbxasset://textures/face.png"
 	
-	Humanoid = Instance.new("Humanoid", parent)
+	Instance.new("Humanoid", parent)
 
 
-	LArmMesh = Instance.new("CharacterMesh", parent)
+	local LArmMesh = Instance.new("CharacterMesh", parent)
 	LArmMesh.MeshId = 83001137
 	LArmMesh.BodyPart = 2
 
-	RArmMesh = Instance.new("CharacterMesh", parent)
+	local RArmMesh = Instance.new("CharacterMesh", parent)
 	RArmMesh.MeshId = 83001181
 	RArmMesh.BodyPart = 3
 
 
-	LLegMesh = Instance.new("CharacterMesh", parent)
+	local LLegMesh = Instance.new("CharacterMesh", parent)
 	LLegMesh.MeshId = 81628361
 	LLegMesh.BodyPart = 4
 
-	RLegMesh = Instance.new("CharacterMesh", parent)
+	local RLegMesh = Instance.new("CharacterMesh", parent)
 	RLegMesh.MeshId = 81628308
 	RLegMesh.BodyPart = 5
 
-	TorsoMesh = Instance.new("CharacterMesh", parent)
+	local TorsoMesh = Instance.new("CharacterMesh", parent)
 	TorsoMesh.MeshId = 82987757
 	TorsoMesh.BodyPart = 1
 
 
-	HeadMesh = Instance.new("SpecialMesh", Head)
+	local HeadMesh = Instance.new("SpecialMesh", Head)
 	HeadMesh.MeshType = 0
 	HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
 
@@ -5347,10 +5295,10 @@ button.Click:connect(function()
 
 	-- clean up
 
-	local parent = Workspace:FindFirstChild("Dummy")
+	local parent = workspace:FindFirstChild("Dummy")
 	if (parent == nil) then
 --		print("making dummy")
-		parent = Instance.new("Model", game.Workspace)
+		parent = Instance.new("Model", workspace)
 		parent.Name = "Dummy"		
 	end
 
@@ -5362,8 +5310,7 @@ button.Click:connect(function()
 
 	--
 
-	Root = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Root = Instance.new("Part", workspace)
 	Root.Name = "HumanoidRootPart"
 	Root.FormFactor = "Symmetric"
 	Root.Anchored = true
@@ -5375,8 +5322,7 @@ button.Click:connect(function()
 	Root.BottomSurface = "Smooth"
 	Root.TopSurface = "Smooth"
 
-	Torso = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Torso = Instance.new("Part", workspace)
 	Torso.Name = "Torso"
 	Torso.FormFactor = "Symmetric"
 	Torso.Anchored = false
@@ -5387,16 +5333,15 @@ button.Click:connect(function()
 	Torso.BottomSurface = "Smooth"
 	Torso.TopSurface = "Smooth"
 
-	RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
-	RCB = RCA 
+	local RCA = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0 )
+	local RCB = RCA 
 
-	RootHip = jointBetween(Root, Torso, RCA, RCB)
+	local RootHip = jointBetween(Root, Torso, RCA, RCB)
 	RootHip.Name = "Root Hip"
 	RootHip.MaxVelocity = 0.1
 
 
-	LeftLeg = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local LeftLeg = Instance.new("Part", workspace)
 	LeftLeg.Name = "Left Leg"
 	LeftLeg.FormFactor = "Symmetric"
 	LeftLeg.Anchored = false
@@ -5407,15 +5352,14 @@ button.Click:connect(function()
 	LeftLeg.BottomSurface = "Smooth"
 	LeftLeg.TopSurface = "Smooth"
 
-	LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
+	local LHCA = CFrame.new(-1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LHCB = CFrame.new(-0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LeftHip = jointBetween(Torso, LeftLeg, LHCA, LHCB)
 	LeftHip.Name = "Left Hip"
 	LeftHip.MaxVelocity = 0.1
 
 
-	RightLeg = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local RightLeg = Instance.new("Part", workspace)
 	RightLeg.Name = "Right Leg"
 	RightLeg.FormFactor = "Symmetric"
 	RightLeg.Anchored = false
@@ -5427,15 +5371,14 @@ button.Click:connect(function()
 	RightLeg.TopSurface = "Smooth"
 
 
-	RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
-	RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
-	RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
+	local RHCA = CFrame.new(1, -1, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	local RHCB = CFrame.new(0.5, 1, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	local RightHip = jointBetween(Torso, RightLeg, RHCA, RHCB)
 	RightHip.Name = "Right Hip"
 	RightHip.MaxVelocity = 0.1
 
 
-	LeftArm = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local LeftArm = Instance.new("Part", workspace)
 	LeftArm.Name = "Left Arm"
 	LeftArm.FormFactor = "Symmetric"
 	LeftArm.Anchored = false
@@ -5447,15 +5390,14 @@ button.Click:connect(function()
 	LeftArm.TopSurface = "Smooth"
 
 
-	LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
-	LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
+	local LSCA = CFrame.new(-1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LSCB = CFrame.new(0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -math.pi/2)
+	local LeftShoulder = jointBetween(Torso, LeftArm, LSCA, LSCB)
 	LeftShoulder.Name = "Left Shoulder"
 	LeftShoulder.MaxVelocity = 0.1
 
 
-	RightArm = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local RightArm = Instance.new("Part", workspace)
 	RightArm.Name = "Right Arm"
 	RightArm.FormFactor = "Symmetric"
 	RightArm.Anchored = false
@@ -5466,15 +5408,14 @@ button.Click:connect(function()
 	RightArm.BottomSurface = "Smooth"
 	RightArm.TopSurface = "Smooth"
 
-	RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
-	RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
-	RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
+	local RSCA = CFrame.new(1.0, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, -1, 0), -math.pi/2)
+	local RSCB = CFrame.new(-0.5, 0.5, 0) * CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.pi/2)
+	local RightShoulder = jointBetween(Torso, RightArm, RSCA, RSCB)
 	RightShoulder.Name = "Right Shoulder"
 	RightShoulder.MaxVelocity = 0.1
 
 
-	Head = Instance.new("Part", game.Workspace)
-	wait(0.1)
+	local Head = Instance.new("Part", workspace)
 	Head.Name = "Head"
 	Head.FormFactor = "Symmetric"
 	Head.Anchored = false
@@ -5485,43 +5426,42 @@ button.Click:connect(function()
 	Head.BottomSurface = "Smooth"
 	Head.TopSurface = "Smooth"
 
-	NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-	NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-	Neck = jointBetween(Torso, Head, NCA, NCB)
+	local NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	local NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+	local Neck = jointBetween(Torso, Head, NCA, NCB)
 	Neck.Name = "Neck"
 	Neck.MaxVelocity = 0.1
 
-	Face = Instance.new("Decal", Head)
-	wait(0.1)
+	local Face = Instance.new("Decal", Head)
 	Face.Name = "Face"
 	Face.Texture = "rbxasset://textures/face.png"
 	
-	Humanoid = Instance.new("Humanoid", parent)
+	Instance.new("Humanoid", parent)
 
 
-	LArmMesh = Instance.new("CharacterMesh", parent)
+	local LArmMesh = Instance.new("CharacterMesh", parent)
 	LArmMesh.MeshId = 27111419
 	LArmMesh.BodyPart = 2
 
-	RArmMesh = Instance.new("CharacterMesh", parent)
+	local RArmMesh = Instance.new("CharacterMesh", parent)
 	RArmMesh.MeshId = 27111864
 	RArmMesh.BodyPart = 3
 
 
-	LLegMesh = Instance.new("CharacterMesh", parent)
+	local LLegMesh = Instance.new("CharacterMesh", parent)
 	LLegMesh.MeshId = 27111857
 	LLegMesh.BodyPart = 4
 
-	RLegMesh = Instance.new("CharacterMesh", parent)
+	local RLegMesh = Instance.new("CharacterMesh", parent)
 	RLegMesh.MeshId = 27111882
 	RLegMesh.BodyPart = 5
 
-	TorsoMesh = Instance.new("CharacterMesh", parent)
+	local TorsoMesh = Instance.new("CharacterMesh", parent)
 	TorsoMesh.MeshId = 27111894
 	TorsoMesh.BodyPart = 1
 
 
-	HeadMesh = Instance.new("SpecialMesh", Head)
+	local HeadMesh = Instance.new("SpecialMesh", Head)
 	HeadMesh.MeshType = 0
 	HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
 
