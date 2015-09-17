@@ -1,11 +1,11 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Folder" referent="RBXD03970D7BEB140C5A7530AF9FCD4881F">
+	<Item class="Folder" referent="RBXC8D433F2A86C446784F2B4191653E9ED">
 		<Properties>
 			<string name="Name">Plugin</string>
 		</Properties>
-		<Item class="Script" referent="RBXF7E3866BE485498F95AE3BFEA2D866C6">
+		<Item class="Script" referent="RBX1E3A49BC2DCA409BA9830B0621CAE79C">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -16,12 +16,25 @@ local Plugin = PluginManager():CreatePlugin()
 local toolbar = Plugin:CreateToolbar("Animations")
 local button = toolbar:CreateButton(
 	"", -- The text next to the icon. Leave Othis blank if the icon is sufficient.
-	"Animation Editor 2.0", -- hover text
+	"Animation Editor 2.1", -- hover text
 	"http://www.roblox.com/asset/?id=142301226" -- The icon file's name
 )
 
 local rootPart
 local cleanup = {}--Parts to be cleaned up on close
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+-- PREFERENCES
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+local preferences = {
+	["TweenCursor"] = true,
+	["Snapping"] = true,
+}
 
 ----------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------
@@ -44,12 +57,20 @@ local function Repeat(func)
 end
 
 --the arcane and indelible work of Dominik the volcano
-function repairedCFrame(cf)
+function repairedCFrameSnailVersion(cf)
 	local sq=math.sqrt
 	local x,y,z,a,b,c,d,e,f,g,h,i=cf:components()
 	local j,k,l=f*g-d*i,a*i-c*g,c*d-a*f
 	local m,n,o=d*l-k*g,j*g-l*a,a*k-j*d
 	local l1,l2,l3=sq(a^2+d^2+g^2),sq(j^2+k^2+l^2),sq(m^2+n^2+o^2)
+	return CFrame.new(x,y,z,a/l1,j/l2,m/l3,d/l1,k/l2,n/l3,g/l1,l/l2,o/l3)
+end
+
+function repairedCFrame(cf)
+	local x,y,z,a,b,c,d,e,f,g,h,i=cf:components()
+	local j,k,l=f*g-d*i,a*i-c*g,c*d-a*f
+	local m,n,o=d*l-k*g,j*g-l*a,a*k-j*d
+	local l1,l2,l3=(a^2+d^2+g^2)^0.5,(j^2+k^2+l^2)^0.5,(m^2+n^2+o^2)^0.5
 	return CFrame.new(x,y,z,a/l1,j/l2,m/l3,d/l1,k/l2,n/l3,g/l1,l/l2,o/l3)
 end
 
@@ -371,6 +392,10 @@ local tickSpacing = 0.25
 local lineCount = 0
 local cursorTime = 0
 local timeScale = 0.05 -- Pixels per second of animation
+--New Timeline
+local tickIncrements = 0.1
+local timelineWidth = 0
+local dragSnapIncrements = 0.05
 
 partList = {}
 ghostingModel = {}
@@ -419,10 +444,10 @@ function displayDropDownMenu(parent, choiceList, x, y)
 
 	-- create frame
 	local dropDownUI = Make('Frame', {
-			Parent = parent,
+			Parent = timelineUI.RootFrame,
 			Name = 'RootFrame',
 			Style = 'Custom',
-			Position = UD(0, x, 0, y),
+			Position = UD(0, x - 100, 0, y),
 			Size = UD(0, 100, 0, (marginSize) + numButtons * (buttonSize + marginSize)),
 			BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
 			BackgroundTransparency = 0.3,
@@ -738,9 +763,14 @@ function pastePoses()
 end
 
 function keyframeTimeClamp(time)
-	-- clamp to 20 fps
-	time = round(time / animationFramerate)
-	time = time * animationFramerate
+	-- clamp to their desired snapping property
+	if preferences["Snapping"] then
+		--time = round(time / (tickIncrements / 2))
+		--time = time * animationFramerate
+		time = time + (dragSnapIncrements / 2)
+		local t = time - (time % dragSnapIncrements)
+		return t
+	end
 
 	return time	
 end
@@ -787,7 +817,7 @@ function initializePose(keyframe, part)
 		end
 		
 		local data = partToItemMap[part]
-		pose.CFrame = getMotorC1(data, keyframe.Time) * data.OriginC1:inverse()
+		pose.CFrame = getMotorC1(data, keyframe.Time) * data.OriginC1:inverse() -- seen it
 		
 		pose.Item = partToItemMap[part]
 		pose.Time = keyframe.Time
@@ -797,12 +827,17 @@ function initializePose(keyframe, part)
 			Parent = keyframe.UI,
 			Name = 'Pose' .. part.Name,
 			Style = 'Custom',
-			Position = UD(0, -lineSize / 4 + 1, 0, (partToLineNumber[part]) * (lineSize + marginSize) + lineSize / 3),
+			Position = UD(0, -lineSize / 4 + 1, 0, ((partToLineNumber[part]) * (lineSize + marginSize) + lineSize / 3) - 6 - timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y),
 			Size = UD(0, lineSize / 2, 0, lineSize / 2),
 			BackgroundColor3 = poseColor,
 			BackgroundTransparency = 0,
 		})
 		pose.UI = newPoseUI
+		
+		pose.updateNodePosition = function()
+			local shift = timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y
+			pose.UI.Position = UD(0, -lineSize / 4 + 1, 0, ((partToLineNumber[part]) * (lineSize + marginSize) + lineSize / 3) - 6 - shift)
+		end
 
 		registerOn(mouseOnRClick, newPoseUI, function(x, y)
 			if (isKeyDown("shift") and keyframe.Time > 0) then
@@ -832,8 +867,6 @@ function deleteKeyframe(time)
 			deletePose(keyframe, pose.Item.Item)
 		end
 		keyframe.UI.Parent = nil
-		keyframe.OptionsButton.Parent = nil
-		keyframe.OptionsButton = nil
 		keyframe.UI = nil
 		keyframeList[time] = nil
 	end
@@ -843,64 +876,73 @@ function createKeyframe(time)
 	time = keyframeTimeClamp(time)
 	local newKeyframe = keyframeList[time]
 	if (newKeyframe == nil) then
-
 		newKeyframe = {
 			Time = time,
 			Poses = {},		
 			Name = "Keyframe",
 			UI = Make('Frame', {
-				Parent = timelineUI.RootFrame.ScrollingFrame,
+				Parent = timelineUI.RootFrame.KeyframeContainer.TimelineFrame,
 				Name = 'Keyframe' .. time,
 				Style = 'Custom',
-				Position = UD(0, nameSize + marginSize + (time * timeScale), 0, -lineSize - marginSize),
+				Position = UD(0, --[[nameSize + marginSize + ]](time * timeScale), 0--[[ -lineSize - marginSize]]),
 				Size = UD(0, 2, 0, (lineSize + marginSize) * (lineCount + 1)),
 				BackgroundColor3 = Color3.new(200/255, 50/255, 150/255),
 				BackgroundTransparency = 0,
+				Make("TextButton", {
+					Parent = timelineUI.RootFrame,
+					Name = "OptionsButton",
+					Size = UD(0, 12, 0, 12),
+					Position = UD(0.5, -6, 0, 0),
+					BackgroundColor3 = Color3.new(200/255, 50/255, 150/255),
+					TextScaled = true,
+					TextColor3 = GuiSettings.TextColor,
+					Text = "...",
+					ZIndex = 3,
+				})
 			}),
-			OptionsButton = Make("TextButton", {
-				Parent = timelineUI.RootFrame,
-				Name = "OptionsButton",
-				Size = UD(0, 12, 0, 12),
-				Position = UD(0, 0, 0, lineSize * 3),
-				BackgroundColor3 = Color3.new(200/255, 50/255, 150/255),
-				TextScaled = true,
-				TextColor3 = GuiSettings.TextColor,
-				Text = "...",
-			})
 		}
-		
+		local OptionsButton	= newKeyframe.UI.OptionsButton	
 		local function getXY()
 			if not timelineUI:FindFirstChild("RootFrame") then
 				return 0, 0
 			end
 			
-			local x = newKeyframe.UI.AbsolutePosition.X - timelineUI.RootFrame.TimelineFrame.AbsolutePosition.X
+			local x = newKeyframe.UI.AbsolutePosition.X - timelineUI.RootFrame.KeyframeContainer.TimelineFrame.AbsolutePosition.X
 			local y = 0
 			return x, y
 		end
+		
+		newKeyframe.adjust = function()
+			local moveTo = newKeyframe.Time * timeScale
+			if newKeyframe.Time == animationLength then
+				moveTo = moveTo - 10
+			end
+			newKeyframe.UI.Position = UD(0, moveTo, 0, 0)
+		end
+		newKeyframe.adjust()
 	
 		local function moveOptionsButton()
 			if not timelineUI:FindFirstChild("RootFrame") then return end
 			
-			local x, y = getXY()
-			x = x + timelineUI.RootFrame.TimelineFrame.AbsolutePosition.X
+			--[[local x, y = getXY()
+			x = x + timelineUI.RootFrame.KeyframeContainer.TimelineFrame.AbsolutePosition.X
 			local desiredX = (x - 6)
-			local deltaX = desiredX - newKeyframe.OptionsButton.AbsolutePosition.X
-			newKeyframe.OptionsButton.Position = newKeyframe.OptionsButton.Position + UDim2.new(0, deltaX, 0, 0)
+			local deltaX = desiredX - newKeyframe.UI.OptionsButton.AbsolutePosition.X
+			OptionsButton.Position = newKeyframe.UI.OptionsButton.Position + UDim2.new(0, deltaX, 0, 0)]]
 		end
 		
 		
 		local mouseDownTime = 0
 		local pos
 		
-		newKeyframe.OptionsButton.MouseButton1Down:connect(function()
+		OptionsButton.MouseButton1Down:connect(function()
 			lockUndoStep("keyframeMove")
 			mouseDownTime = tick()
 			pos = newKeyframe.Position
 			selectedKeyframe = newKeyframe
 		end)
 		
-		newKeyframe.OptionsButton.MouseButton1Click:connect(function()
+		OptionsButton.MouseButton1Click:connect(function()
 			mouseCallbackCheck(mouseOnLUp)
 			--print("Clickup")
 			local timeSinceMouseDown = tick() - mouseDownTime
@@ -913,7 +955,7 @@ function createKeyframe(time)
 			keyframeContextMenu(x, y, false)
 		end)
 		
-		newKeyframe.OptionsButton.MouseButton1Down:connect(function()
+		OptionsButton.MouseButton1Down:connect(function()
 			--print("Options clicked")
 			selectedKeyframe = newKeyframe
 			local x, y = getXY()
@@ -935,6 +977,15 @@ function createKeyframe(time)
 		keyframeList[time] = newKeyframe
 	end
 	return newKeyframe
+end
+
+function adjustKeyframes()
+	for i, v in pairs(keyframeList) do
+		v.adjust()
+		for z, x in pairs(v.Poses) do
+			x.updateNodePosition()
+		end
+	end
 end
 
 function resetKeyframeToDefaultPose(keyframe)
@@ -960,7 +1011,11 @@ function moveKeyframe(keyframe, time)
 		for _, pose in pairs(keyframe.Poses) do
 			pose.Time = keyframe.Time
 		end
-		keyframe.UI.Position = UD(0, nameSize + marginSize + (time * timeScale), 0, -lineSize - marginSize)
+		local moveTo = time * timeScale
+		if time == animationLength then
+			moveTo = moveTo - 10
+		end
+		keyframe.UI.Position = UD(0, --[[nameSize + marginSize + ]]moveTo, 0,0 --[[-lineSize - marginSize]])
 		keyframeList[time] = keyframe
 		updateCursorPosition()
 		wait()
@@ -973,10 +1028,14 @@ function nudgeView()
 	mainPart.CFrame = mainPart.CFrame*CFrame.new(0, -1, 0)
 end
 
-local function findTime(X)
+local function findTime(x)
+	timelineLength = timelineUI.RootFrame.KeyframeContainer.CanvasSize.X.Offset
+	timeScale =  timelineLength / animationLength
+	local X = x-- - timelineUI.RootFrame.KeyframeContainer.CanvasPosition.X
+	--print("finding time at "..tostring(X))
 	local time = X / timeScale
-
-	return keyframeTimeClamp(time)
+	local clamped = keyframeTimeClamp(time)
+	return clamped
 end
 
 function getKeyframe(time)
@@ -1167,11 +1226,12 @@ function getMotorC1(data, time)
 					local timeIn = time - lastPose.Time
 					local weight = timeIn / timeChunk
 					
-					local lastCFrame = repairedCFrame(lastPose.CFrame)
-					local nextCFrame = repairedCFrame(nextPose.CFrame)
-					local retVal = lastCFrame:lerp(nextCFrame, weight)
+					local lastCFrame = repairedCFrame(lastPose.CFrame) * data.OriginC1
+					local nextCFrame = repairedCFrame(nextPose.CFrame) * data.OriginC1
 					
-					return retVal * data.OriginC1
+					local retVal = lastCFrame:lerp(nextCFrame, weight)
+					retVal = repairedCFrame(retVal)
+					return retVal
 				else
 					return lastPose.CFrame * data.OriginC1
 				end
@@ -1190,13 +1250,26 @@ function updateCursorPosition()
 	end
 
 	-- move UI
-	timelineUI.RootFrame.Cursor.Position = UD(0, nameSize + marginSize - (lineSize / 2) + (cursorTime * timeScale), 0, (lineSize + marginSize))
+	local scroll = timelineUI.RootFrame.KeyframeContainer.CanvasPosition.X
+	--timelineUI.RootFrame.Cursor.Position = UD(0, nameSize + marginSize - (lineSize / 2) + (cursorTime * timeScale), 0, (lineSize + marginSize))
+	--Timeline 2.0
+	local tweenPos = (cursorTime * timeScale) - (lineSize / 2)
+	if cursorTime == animationLength then
+		tweenPos = tweenPos - 10
+	end
+	if preferences["TweenCursor"] then
+		if timelineUI.Parent ~= nil then
+			timelineUI.RootFrame.KeyframeContainer.Cursor:TweenPosition(UD(0, tweenPos, 0, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y),"Out","Quad", 0.3, true)
+		end	
+	else
+		timelineUI.RootFrame.KeyframeContainer.Cursor.Position = UD(0, tweenPos, 0, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y)
+	end
 	
 	--move the model
 	for part, data in pairs(partList) do
 		local active = partInclude[part.Name]
 		if data.Motor6D then
-			data.Motor6D.C1 = getMotorC1(data, cursorTime)
+			data.Motor6D.C1 = getMotorC1(data, cursorTime) --seen it
 			nudgeView()
 		end
 	end
@@ -1211,11 +1284,14 @@ end
 ----------------------------------------------------------------------------------------------------------------------------
 function selectPartUI(part)
 	selectedLine.Parent = timelineUI.RootFrame.ScrollingFrame
-	selectedLine.Position = UD(0, marginSize, 0,  -2 + ((lineSize + marginSize) * (partToLineNumber[part] - 1)))
+	selectedLine.Position = UD(0, marginSize, 0,  23 + ((lineSize + marginSize) * (partToLineNumber[part] - 1)))
+	selectedLine2.Parent = timelineUI.RootFrame.KeyframeContainer
+	selectedLine2.Position = UD(0, marginSize, 0,  23 + ((lineSize + marginSize) * (partToLineNumber[part] - 1)))
 end
 
 function unselectPartUI()
 	selectedLine.Parent = nil
+	selectedLine2.Parent = nil
 end
 ----------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------
@@ -2528,6 +2604,7 @@ function loadImportAnim(animId)
 		nudgeView()
 		updateLoopButton()
 		updatePriorityLabel()
+		adjustKeyframes()
 	end
 end
 
@@ -2556,7 +2633,7 @@ function updateTimeLabels()
 	end
 	animationLabelsList = {}
 
-	timelineLength = timelineUI.RootFrame.TimelineFrame.AbsoluteSize.X
+	timelineLength = timelineUI.RootFrame.KeyframeContainer.CanvasSize.X.Offset
 	minTickSeparation = 50
 	tickSpacing = 0
 	tickSeparation = 0
@@ -2576,35 +2653,61 @@ function updateTimeLabels()
 	if totalTickSpace > 0.97 then
 		ticks = ticks - 1
 	end
-
-	for tickNum = 0, ticks do		
+	
+	local numberOfTicks = math.floor(animationLength / tickIncrements)
+	for tickNum = 0, numberOfTicks do		
+		local tickTime = math.floor((animationLength * (tickNum / numberOfTicks))*100)/100
+		--print(tickTime)
 		local label = Make('TextLabel', {
-			Parent = timelineUI.RootFrame,
+			Parent = timelineUI.RootFrame.KeyframeContainer.TimeListFrame,
 			Name = 'Tick' .. tickNum,
 			Font = 'ArialBold',
 			FontSize = 'Size10',
 			TextColor3 = GuiSettings.TextColor,
-			Position = UD(0, nameSize + marginSize + (tickNum * tickSpacing * timeScale), 0, lineSize +  marginSize),
+			ZIndex = 5,
+			--Position = UD(0, nameSize + marginSize + (tickNum * tickSpacing * timeScale), 0, lineSize +  marginSize),
+			--Timeline 2.0
+			Position = UD((tickNum/numberOfTicks), 0, 0, 0), 
 			Size = UD(0, 10, 0, lineSize),
 			BackgroundTransparency = 1,
-			Text = string.format("%.2f", tickNum * tickSpacing),
-			TextXAlignment = Enum.TextXAlignment.Center,
+			--Text = string.format("%.2f", tickNum * tickSpacing),
+			--Timeline 2.0
+			Text = tostring(tickTime),
+			TextXAlignment = Enum.TextXAlignment.Right,
+			Make('TextLabel',{
+				Name = 'TickIndicator',
+				Size = UD(0,2,0,lineSize * 15 - headerSize + 30),
+				Text = "",
+				BackgroundColor3 = Color3.new(1,1,1),
+				BackgroundTransparency = 0.9,
+				BorderSizePixel = 0,
+				
+			})
 		})
 		animationLabelsList[tickNum] = label
 	end
 
 	-- end tick
 	local endMarker = Make('TextLabel', {
-		Parent = timelineUI.RootFrame,
+		Parent = timelineUI.RootFrame.KeyframeContainer.TimeListFrame,
 		Name = 'TickEnd',
 		Font = 'ArialBold',
 		FontSize = 'Size10',
 		TextColor3 = GuiSettings.TextColor,
-		Position = UD(0, nameSize + marginSize + (animationLength * timeScale), 0, lineSize +  marginSize),
+		Position = UD(1, -10, 0, 0),
 		Size = UD(0, 10, 0, lineSize),
 		BackgroundTransparency = 1,
+		ZIndex = 5,
 		Text = string.format("%.2f", animationLength),
-		TextXAlignment = Enum.TextXAlignment.Center,
+		TextXAlignment = Enum.TextXAlignment.Right,
+			Make('TextLabel',{
+				Name = 'TickIndicator',
+				Size = UD(0,2,0,lineSize * 15 - headerSize + 30),
+				Text = "",
+				BackgroundColor3 = Color3.new(1,1,1),
+				BackgroundTransparency = 0.9,
+				BorderSizePixel = 0,
+			})
 	})
 	animationLabelsList['TickEnd'] = endMarker
 
@@ -2617,7 +2720,6 @@ function updateTimeLabels()
 		end]]
 		return true
 	end)
-
 end
 
 function changeKeyframePosition(keyframe, time)
@@ -2875,39 +2977,7 @@ local function createTimelineUI(rootNode)
 
 		timeChangeUI.RootFrame.OKButton.MouseButton1Click:connect(function()
 			timeChangeUI.Parent = nil
-			--[[local scale = timeChangeUI.RootFrame.SaveNameFrame.AnimLengthBox.Text / animationLength
-			animationLength = tonumber(timeChangeUI.RootFrame.SaveNameFrame.AnimLengthBox.Text)
-
-			if (animationLength > 30) then
-				animationLength = 30
-			end
-
-			-- modify animation framerate (easier than trying to combine keyframes)
-			updateAnimationFramerate()
-
-			-- copy out all keyframes
-			local tempKeyFrameList = {}
-			for time, keyframe in spairs(keyframeList, function(t, a, b) return t[a].Time < t[b].Time end) do
-				tempKeyFrameList[keyframe.Time] = keyframe
-			end
-			keyframeList = {}
-
-			-- scale all keyframes
-			for time, keyframe in spairs(tempKeyFrameList, function(t, a, b) return t[a].Time < t[b].Time end) do
-				keyframe.Time = keyframeTimeClamp(scale * time)
-				for _, pose in pairs(keyframe.Poses) do
-					pose.Time = keyframe.Time
-				end
-				keyframeList[keyframe.Time] = keyframe
-			end
-
-			-- update animation length display
-			updateTimeLabels()
-
-			-- update cursor location
-			cursorTime = cursorTime * scale]]
 			setAnimationLength(tonumber(timeChangeUI.RootFrame.SaveNameFrame.AnimLengthBox.Text))
-			
 			modal = false
 		end)
 
@@ -2916,6 +2986,90 @@ local function createTimelineUI(rootNode)
 			modal = false
 		end)
 
+	end
+	
+	if (snapChangeUI == nil) then
+		snapChangeUI = Make('ScreenGui', 
+		{	
+			Name = "SnapChangeUI",
+			Make('Frame', {
+				Name = 'RootFrame',
+				Style = 'Custom',
+				Position = UD(0.5, -200, 0.5, 0),
+				Size = UD(0, 400, 0, marginSize + (lineSize + marginSize) * 5),
+				BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+				BackgroundTransparency = 0.5,
+				Make('TextLabel', {
+					Name = 'TitleBar',
+					Font = 'ArialBold',
+					FontSize = 'Size14',
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize),
+					Size = UD(0.9, 0, 0, lineSize),
+					BackgroundTransparency = 1,
+					Text = "Snap At Increment (Min 0.02):",
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}),
+				Make('Frame', {
+					Parent = timelineUI,
+					Name = 'SaveNameFrame',
+					Style = 'Custom',
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 1),
+					Size = UD(0.9, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 100/255),
+					BackgroundTransparency = 0.3,
+					Make('TextBox', {
+						Name = 'SnapIncrementBox',
+						Font = 'ArialBold',
+						FontSize = 'Size14',
+						TextColor3 = GuiSettings.TextColor,
+						Position = UD(0.05, 0, 0, 0),
+						Size = UD(0.9, 0, 1, 0),
+						BackgroundTransparency = 1,
+						Text = animationLength,
+						TextXAlignment = Enum.TextXAlignment.Left,
+					}),
+				}),
+
+				Make('TextButton', {
+					Name = 'OKButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.05, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "OK",
+				}),
+				Make('TextButton', {
+					Name = 'CancelButton',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(0.55, 0, 0, marginSize + (lineSize + marginSize) * 3),
+					Size = UD(0.4, 0, 0, lineSize * 2),
+					BackgroundColor3 = Color3.new(100/255, 100/255, 150/255),
+					BackgroundTransparency = 0,
+					Text = "Cancel",
+				}),
+
+			}),
+		})
+		
+		snapChangeUI.RootFrame.OKButton.MouseButton1Click:connect(function()
+			local newSnap = tonumber(snapChangeUI.RootFrame.SaveNameFrame.SnapIncrementBox.Text)
+			if newSnap ~= nil and newSnap >= 0.02 then
+				dragSnapIncrements = newSnap
+			end
+			snapChangeUI.Parent = nil
+			modal = false
+		end)
+		
+		snapChangeUI.RootFrame.CancelButton.MouseButton1Click:connect(function()
+			snapChangeUI.Parent = nil
+			modal = false
+		end)
 	end
 
 	if (menuUI == nil) then
@@ -3054,7 +3208,7 @@ local function createTimelineUI(rootNode)
 			}),
 		})
 	end
-
+	--TimelineUIStart
 	-- creating test GUI
 	if (timelineUI == nil) then
 
@@ -3072,11 +3226,89 @@ local function createTimelineUI(rootNode)
 				BackgroundTransparency = 0.5,
 				Make("ScrollingFrame", {
 					Name = "ScrollingFrame",
-					Position = UD(0, 0, 0, headerSize),
-					Size = UD(1, 0, 1, -headerSize),
-					BackgroundTransparency = 1,
-					ScrollBarThickness = 4,
+					Position = UD(0, 0, 0, (lineSize + marginSize)),
+					Size = UD(0, nameSize + marginSize, 1, -headerSize + 30),
+					BackgroundTransparency = 0.8,
+					BorderSizePixel = 0,
+					ScrollBarThickness = 0,
 				}),
+				--Timeline Scrollingframe
+				Make("ScrollingFrame",{
+					Name = 'KeyframeContainer',
+					Position = UD(0, lineSize + (marginSize*2) + nameSize - 15, 0, (lineSize + marginSize)),
+					Size = UD(1, -(nameSize + marginSize) - 35, 1, -headerSize + 30),
+					BackgroundColor3 = Color3.new(21/255, 21/255, 21/255),
+					BackgroundTransparency = 0.5,
+					BorderSizePixel = 0,
+					CanvasSize = UD(0, 2000, 1, 0),
+					ScrollBarThickness = 0,
+					Make('Frame', {
+						Name = 'TimeListFrame',
+						Style = 'Custom',
+						Position = UD(0, 0, 0, 0),
+						--Size = UD(1, -(marginSize + nameSize + timelinemarginSize), 0, lineSize),
+						--Timeline 2.0
+						Size = UD(1, 0, 0, lineSize),
+						BackgroundColor3 = Color3.new(0/255, 0/255, 0/255),
+						BackgroundTransparency = 0.5,
+						BorderSizePixel = 0,
+						ZIndex = 3,
+					}),
+					Make('TextButton', {
+						Name = 'TimelineFrame',
+						Style = 'Custom',
+						Text = "",
+						Active = false,
+						AutoButtonColor = false,
+						Position = UD(0, 0, 0, (lineSize + marginSize)),
+						--Size = UD(1, -(marginSize + nameSize + timelinemarginSize), 0, lineSize),
+						--Timeline 2.0
+						Size = UD(1, 0, 0, lineSize),
+						BackgroundColor3 = Color3.new(200/255, 200/255, 200/255),
+						BackgroundTransparency = 0.1,
+					}),
+					--Create Cursor
+					Make('Frame', {
+						Name = 'Cursor',
+						Style = 'Custom',
+						Position = UD(0, nameSize + marginSize - (lineSize / 2) , 0, 1 * (lineSize + marginSize)),
+						Size = UD(0, lineSize + 2, 0, lineSize + 2),
+						BackgroundColor3 = Color3.new(250/255, 50/255, 50/255),
+						BackgroundTransparency = 0,
+						BorderColor3 = Color3.new(250/255, 50/255, 50/255),
+						ZIndex = 4,
+						Make('Frame', {
+							Name = 'CursorLine',
+							Style = 'Custom',
+							Position = UD(0, (lineSize / 2), 0, 0),
+							Size = UD(0, 2, 0, lineSize * 14),
+							BackgroundColor3 = Color3.new(250/255, 50/255, 50/255),
+							BackgroundTransparency = 0,
+							BorderSizePixel = 0,
+							ZIndex = 0,
+						}),
+					}),	
+				}),
+				--
+				--Vertical scroll proxy
+				Make("ScrollingFrame", {
+					Name = "VerticalProxy",
+					Position = UD(1, -35, 0, (lineSize + marginSize)),
+					Size = UD(0, 15, 1, -headerSize + 30),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					ScrollBarThickness = 12,
+				}),
+				--Horizontal scroll proxy
+				Make("ScrollingFrame", {
+					Name = "HorizontalProxy",
+					Position = UD(0, lineSize + (marginSize*2) + nameSize - 15, 1, -headerSize + 35),
+					Size = UD(1, -(nameSize + marginSize) - 35, 0, 10),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0.5,
+					ScrollBarThickness = 10,
+				}),
+				-----------------------
 				Make('TextLabel', {
 					Name = 'TitleBar',
 					Font = 'ArialBold',
@@ -3111,6 +3343,32 @@ local function createTimelineUI(rootNode)
 					BackgroundColor3 = Color3.new(250/255, 50/255, 50/255),
 					BackgroundTransparency = 0,
 					Text = "X",
+				}),
+				Make('TextButton', {
+					Name = 'TimelineZoomIn',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(1, -14, 0, lineSize * 6),
+					Size = UD(0, 14, 
+					          0, 28),
+					BackgroundColor3 = Color3.new(50/255, 50/255, 50/255),
+					BackgroundTransparency = 0,
+					BorderSizePixel = 0.5,
+					Text = "+",
+				}),
+				Make('TextButton', {
+					Name = 'TimelineZoomOut',
+					Font = 'ArialBold',
+					FontSize = GuiSettings.TextMed,
+					TextColor3 = GuiSettings.TextColor,
+					Position = UD(1, -14, 0, lineSize * 6 + 28),
+					Size = UD(0, 14, 
+					          0, 28),
+					BackgroundColor3 = Color3.new(50/255, 50/255, 50/255),
+					BackgroundTransparency = 0.5,
+					BorderSizePixel = 0,
+					Text = "-",
 				}),
 				Make('TextLabel', {
 					Name = 'PriorityLabel',
@@ -3166,46 +3424,22 @@ local function createTimelineUI(rootNode)
 					TextScaled = true,
 					BackgroundColor3 = dropDownColor,
 					BackgroundTransparency = 0.5,
-					Position = UD(0.9, 0, 0, 1),
+					Position = UD(0.9, 0, 0, 3),
 					Size = UD(0.075, 0, 0, lineSize),
 					Text = "Change Length",
 				}),
-				Make('Frame', {
-					Name = 'TimeListFrame',
-					Style = 'Custom',
-					Position = UD(0, nameSize + marginSize, 0, 1 * (lineSize + marginSize)),
-					Size = UD(1, -(marginSize + nameSize + timelinemarginSize), 0, lineSize),
-					BackgroundColor3 = Color3.new(0/255, 0/255, 0/255),
+				Make("TextButton", {
+					Name = "ChangeSnapButton",
+					Font = "ArialBold",
+					FontSize = "Size14",
+					TextColor3 = GuiSettings.TextColor,
+					TextScaled = true,
+					BackgroundColor3 = dropDownColor,
 					BackgroundTransparency = 0.5,
-					BorderSizePixel = 0,
-				}),
-				Make('Frame', {
-					Name = 'TimelineFrame',
-					Style = 'Custom',
-					Position = UD(0, nameSize + marginSize, 0, 2 * (lineSize + marginSize)),
-					Size = UD(1, -(marginSize + nameSize + timelinemarginSize), 0, lineSize),
-					BackgroundColor3 = Color3.new(200/255, 200/255, 200/255),
-					BackgroundTransparency = 0.1,
+					Position = UD(0.5, 0, 0, 3),
+					Size = UD(0.075, 0, 0, lineSize),
+					Text = "Change Snap",
 				}),				
-				Make('Frame', {
-					Name = 'Cursor',
-					Style = 'Custom',
-					Position = UD(0, nameSize + marginSize - (lineSize / 2) , 0, 1 * (lineSize + marginSize)),
-					Size = UD(0, lineSize + 2, 0, lineSize + 2),
-					BackgroundColor3 = Color3.new(250/255, 50/255, 50/255),
-					BackgroundTransparency = 0,
-					ZIndex = 1,
-					Make('Frame', {
-						Name = 'CursorLine',
-						Style = 'Custom',
-						Position = UD(0, (lineSize / 2), 0, 0),
-						Size = UD(0, 2, 0, lineSize * 14),
-						BackgroundColor3 = Color3.new(250/255, 50/255, 50/255),
-						BackgroundTransparency = 0,
-						BorderSizePixel = 0,
-						ZIndex = 0,
-					}),
-				}),
 			}),
 		})
 		
@@ -3279,6 +3513,8 @@ local function createTimelineUI(rootNode)
 			if timeAdded and timeAdded > 0 then
 				addTimeAtCursor(timeAdded)
 			end
+			timelineLength = timelineUI.RootFrame.KeyframeContainer.CanvasSize.X.Offset
+			timeScale =  timelineLength / animationLength
 		end)
 		
 		--remove time
@@ -3289,12 +3525,44 @@ local function createTimelineUI(rootNode)
 			if timeRemoved and timeRemoved > 0 then
 				removeTimeAtCursor(timeRemoved)
 			end
+			timelineLength = timelineUI.RootFrame.KeyframeContainer.CanvasSize.X.Offset
+			timeScale =  timelineLength / animationLength
 		end)
 		
 		--lerp
 		menuUI.RootFrame.ToggleInterpolationButton.MouseButton1Click:connect(function()
 			closePopupMenu()
 			toggleInEditorInterpolation()
+		end)
+		
+		--zoom timeline
+		timelineUI.RootFrame.TimelineZoomIn.MouseButton1Click:connect(function()
+			local currentSize = timelineUI.RootFrame.KeyframeContainer.AbsoluteSize.X	
+			local frameSize = timelineUI.RootFrame.KeyframeContainer.CanvasSize.X.Offset	
+			local newSize = frameSize + 100	
+			timelineUI.RootFrame.KeyframeContainer.CanvasSize = UD(0, newSize, 0, timelineUI.RootFrame.KeyframeContainer.CanvasSize.Y.Offset)		
+			timelineUI.RootFrame.HorizontalProxy.CanvasSize = UD(0, newSize, 0, timelineUI.RootFrame.HorizontalProxy.CanvasSize.Y.Offset)		
+			timelineLength = newSize
+			timeScale =  timelineLength / animationLength
+			adjustKeyframes()
+			updateCursorPosition()
+			--setAnimationLength(animationLength)
+		end)
+		
+		timelineUI.RootFrame.TimelineZoomOut.MouseButton1Click:connect(function()
+			local currentSize = timelineUI.RootFrame.KeyframeContainer.AbsoluteSize.X
+			local frameSize = timelineUI.RootFrame.KeyframeContainer.CanvasSize.X.Offset
+			local newSize = frameSize - 100
+			if newSize < currentSize then
+				newSize = currentSize
+			end
+			timelineUI.RootFrame.KeyframeContainer.CanvasSize = UD(0, newSize, 0, timelineUI.RootFrame.KeyframeContainer.CanvasSize.Y.Offset)
+			timelineUI.RootFrame.HorizontalProxy.CanvasSize = UD(0, newSize, 0, timelineUI.RootFrame.HorizontalProxy.CanvasSize.Y.Offset)
+			timelineLength = newSize
+			timeScale =  timelineLength / animationLength
+			adjustKeyframes()
+			updateCursorPosition()
+			--setAnimationLength(animationLength)
 		end)
 
 		toggleInEditorInterpolation()
@@ -3316,7 +3584,7 @@ local function createTimelineUI(rootNode)
 			end
 		end)
 
-		timelineUI.RootFrame.CloseButton.MouseButton1Click:connect(function()
+		timelineUI.RootFrame.CloseButton.MouseButton1Down:connect(function()
 			if (not modal) then
 				autoSave()
 				timelineUI.Parent = nil
@@ -3338,6 +3606,14 @@ local function createTimelineUI(rootNode)
 			end
 			return true
 		end)
+		
+		timelineUI.RootFrame.ChangeSnapButton.MouseButton1Click:connect(function()
+			if (not modal) then
+				modal = true
+				snapChangeUI.RootFrame.SaveNameFrame.SnapIncrementBox.Text = tostring(dragSnapIncrements)
+				snapChangeUI.Parent = game:GetService("CoreGui")
+			end
+		end)
 
 		timelineUI.RootFrame.LoopButton.MouseButton1Click:connect(function()
 			if (not modal) then
@@ -3345,11 +3621,16 @@ local function createTimelineUI(rootNode)
 				updateLoopButton()
 			end
 		end)
+		
+		timelineUI.RootFrame.KeyframeContainer.TimelineFrame.MouseButton1Click:connect(function()
+			selectedKeyframe = nil
+		end)
 
 
 		registerOn(mouseOnLClick, timelineUI.RootFrame.PriorityDisplay, function(x, y)
 			if (not modal) then
-				local newPriority = displayDropDownMenu(timelineUI.RootFrame.PriorityDisplay, animationPriorityList, x, y)
+				local mouse = Plugin:GetMouse()
+				local newPriority = displayDropDownMenu(timelineUI.RootFrame.PriorityDisplay, animationPriorityList, mouse.X, mouse.Y + 10)
 				if (newPriority ~= nil) then
 					animationPriority = newPriority
 					timelineUI.RootFrame.PriorityDisplay.Text = newPriority
@@ -3361,18 +3642,18 @@ local function createTimelineUI(rootNode)
 
 
 		-- sliding keyframe cursor
-		registerOn(mouseOnLClick, timelineUI.RootFrame.TimelineFrame, function(x, y)
+		registerOn(mouseOnLClick, timelineUI.RootFrame.KeyframeContainer.TimelineFrame, function(x, y)
 			keyframePositionShift(x, y)
 		end)
 
 
 		-- create or delete keyframe
-		registerOn(mouseOnRClick, timelineUI.RootFrame.TimelineFrame, function(x, y)
+		registerOn(mouseOnRClick, timelineUI.RootFrame.KeyframeContainer.TimelineFrame, function(x, y)
 			return keyframeContextMenu(x, y, true)
 		end)
 
 		-- moving time cursor
-		registerOn(mouseOnLClick, timelineUI.RootFrame.TimeListFrame, function(x, y)
+		registerOn(mouseOnLClick, timelineUI.RootFrame.KeyframeContainer.TimeListFrame, function(x, y)
 			if (not modal) then
 				if (cursorTime ~= findTime(x)) then
 					cursorTime = findTime(x)
@@ -3385,11 +3666,11 @@ local function createTimelineUI(rootNode)
 		end)
 
 		-- sliding time cursor
-		registerOn(mouseOnLClick, timelineUI.RootFrame.Cursor, function(x, y)
+		registerOn(mouseOnLClick, timelineUI.RootFrame.KeyframeContainer.Cursor, function(x, y)
 			if (not modal) then
 				local halt = Repeat(function()
 						local mouse = Plugin:GetMouse()
-						xvalue = mouse.X - timelineUI.RootFrame.TimelineFrame.AbsolutePosition.X
+						xvalue = mouse.X - timelineUI.RootFrame.KeyframeContainer.TimelineFrame.AbsolutePosition.X
 						cursorTime = findTime(xvalue)
 						if (cursorTime < 0) then
 							cursorTime = 0
@@ -3422,7 +3703,7 @@ local function createTimelineUI(rootNode)
 								FontSize = GuiSettings.TextSmall,
 								TextColor3 = GuiSettings.TextColor,
 								TextXAlignment = Enum.TextXAlignment.Left,
-								Position = UD(0, 10, 0, ((lineSize + marginSize) * lineCount)),
+								Position = UD(0, 10, 0, (25 + (lineSize + marginSize) * lineCount)),
 								Size = UD(0, nameSize, 0, lineSize),
 								BackgroundTransparency = 1,
 								Parent = timelineUI.RootFrame.ScrollingFrame,
@@ -3450,7 +3731,7 @@ local function createTimelineUI(rootNode)
 									TextColor3 = GuiSettings.TextColor,
 									TextXAlignment = Enum.TextXAlignment.Left,
 									BackgroundColor3 = buttonOffColor,
-									Position = UD(0, nameSize - lineSize, 0, 1 + ((lineSize + marginSize) * lineCount)),
+									Position = UD(0, nameSize - lineSize, 0, 25 + ((lineSize + marginSize) * lineCount)),
 									Size = UD(0, lineSize, 0, lineSize),
 									BackgroundTransparency = 0,
 									Parent = timelineUI.RootFrame.ScrollingFrame,
@@ -3484,11 +3765,60 @@ local function createTimelineUI(rootNode)
 					Size = UD(1, -(marginSize * 2), 0, lineSize + marginSize),
 					BackgroundColor3 = Color3.new(200/255, 200/255, 150/255),
 					BackgroundTransparency = 0.9,
-				})
-	selectedLine.Parent = timelineUI.RootFrame.ScrollingFrame
+	})
+	selectedLine.Parent = timelineUI.RootFrame
+	
+	selectedLine2 = 	Make('Frame', {
+					Name = 'SelectedLineFrame2',
+					Style = 'Custom',
+					Position = UD(0, marginSize, 0, (marginSize / 2) + 1 + ((lineSize + marginSize) * (lineCount - 1))),
+					Size = UD(1, -(marginSize * 2), 0, lineSize + marginSize),
+					BackgroundColor3 = Color3.new(200/255, 200/255, 150/255),
+					BackgroundTransparency = 0.9,
+	})
+	selectedLine2.Parent = timelineUI.RootFrame.KeyframeContainer
 
 
-	timelineUI.RootFrame.ScrollingFrame.CanvasSize = UD(1, 0, 0, marginSize + ((lineSize + marginSize) * lineCount))
+	timelineUI.RootFrame.ScrollingFrame.CanvasSize = UD(1, 0, 0, 30 + marginSize + ((lineSize + marginSize) * lineCount --[[+ 8]]))
+	timelineUI.RootFrame.KeyframeContainer.CanvasSize = UD(0, 2000, 0, 30 + marginSize + ((lineSize + marginSize) * lineCount))
+	timelineUI.RootFrame.VerticalProxy.CanvasSize = UD(0, 0, 0, 30 + marginSize + ((lineSize + marginSize) * lineCount --[[+ 8]]))
+	timelineUI.RootFrame.HorizontalProxy.CanvasSize = UD(0, 2000, 0, 0)
+	
+	local function moveTimelineBars()
+		timelineUI.RootFrame.KeyframeContainer.TimeListFrame.Position = UD(0, 0, 0, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y)
+		timelineUI.RootFrame.KeyframeContainer.TimelineFrame.Position = UD(0, 0, 0, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y + (lineSize + marginSize))
+		adjustKeyframes()
+		timelineUI.RootFrame.KeyframeContainer.Cursor.Position = UD(0, (cursorTime * timeScale) - (lineSize / 2), 0, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y)
+	end	
+	
+	--Match scrollingframe positions
+	timelineUI.RootFrame.KeyframeContainer.Changed:connect(function()
+		if timelineUI:findFirstChild("RootFrame") then
+			timelineUI.RootFrame.ScrollingFrame.CanvasPosition = Vector2.new(0, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y)
+			timelineUI.RootFrame.VerticalProxy.CanvasPosition = Vector2.new(0, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y)
+			moveTimelineBars()
+		end
+	end)
+	timelineUI.RootFrame.ScrollingFrame.Changed:connect(function()
+		if timelineUI:findFirstChild("RootFrame") then
+			timelineUI.RootFrame.KeyframeContainer.CanvasPosition = Vector2.new(timelineUI.RootFrame.KeyframeContainer.CanvasPosition.X, timelineUI.RootFrame.ScrollingFrame.CanvasPosition.Y)
+			timelineUI.RootFrame.VerticalProxy.CanvasPosition = Vector2.new(0, timelineUI.RootFrame.ScrollingFrame.CanvasPosition.Y)
+		end
+	end)
+	timelineUI.RootFrame.VerticalProxy.Changed:connect(function()
+		if timelineUI:findFirstChild("RootFrame") then
+			timelineUI.RootFrame.KeyframeContainer.CanvasPosition = Vector2.new(timelineUI.RootFrame.KeyframeContainer.CanvasPosition.X, timelineUI.RootFrame.VerticalProxy.CanvasPosition.Y)
+			timelineUI.RootFrame.ScrollingFrame.CanvasPosition = Vector2.new(0, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y)
+		end
+	end)
+	
+	timelineUI.RootFrame.HorizontalProxy.Changed:connect(function()
+		if timelineUI:findFirstChild("RootFrame") ~= nil then
+			timelineUI.RootFrame.KeyframeContainer.CanvasPosition = Vector2.new(timelineUI.RootFrame.HorizontalProxy.CanvasPosition.X, timelineUI.RootFrame.KeyframeContainer.CanvasPosition.Y)
+		end
+	end)	
+	
+	
 	timelineUI.Parent = game:GetService("CoreGui")
 
 end
@@ -3524,6 +3854,14 @@ function setAnimationLength(length)
 
 	-- update cursor location
 	cursorTime = cursorTime * scale
+	
+	
+	--timelineLength = timelineUI.RootFrame.KeyframeContainer.CanvasSize.X.Offset
+	--timeScale =  timelineLength / animationLength
+	--updateCursorPosition()
+	wait(2)
+	--adjustKeyframes()
+	updateCursorPosition()
 end
 
 function keyframeContextMenu(x, y, needsShift)
@@ -3532,11 +3870,11 @@ function keyframeContextMenu(x, y, needsShift)
 		--local key = getKeyframe(time)
 		local key = selectedKeyframe
 		if (key == nil) then
-			print("Creating keyframe due to null key")
 			createKeyframe(time)
 		else
 			local keyframeMenu = { "Delete", "Rename", "Copy", "Reset", }
-			local selection = displayDropDownMenu(timelineUI.RootFrame.TimelineFrame, keyframeMenu, x, y)
+			local mouse = Plugin:GetMouse()
+			local selection = displayDropDownMenu(timelineUI.RootFrame.KeyframeContainer.TimelineFrame, keyframeMenu, mouse.X, mouse.Y)
 			if (selection == "Delete") then
 				if (time > 0) then
 					deleteKeyframe(time)
@@ -3571,7 +3909,7 @@ function keyframePositionShift(x, y)
 		if (keyframe ~= nil and time > 0) then
 			local halt = Repeat(function()
 					local mouse = Plugin:GetMouse()
-					xvalue = mouse.X - timelineUI.RootFrame.TimelineFrame.AbsolutePosition.X
+					xvalue = mouse.X - timelineUI.RootFrame.KeyframeContainer.TimelineFrame.AbsolutePosition.X
 					mouseTime = findTime(xvalue)
 					if (mouseTime < 0) then
 						mouseTime = 0
@@ -4134,6 +4472,10 @@ Plugin.Deactivation:connect(function()
 	if timeChangeUI then
 		timeChangeUI:Destroy()
 	end
+	if snapChangeUI then
+		snapChangeUI:Destroy()
+		
+	end
 	timeChangeUI = nil
 	if (rotateMoveUI) then
 		rotateMoveUI:Destroy()
@@ -4194,6 +4536,7 @@ button.Click:connect(function()
 	loadUI = nil
 	stopAnimUI = nil
 	timeChangeUI = nil
+	snapChangeUI = nil
 
 	-- reset the assembly information
 	partList = {}
@@ -4287,346 +4630,12 @@ button.Click:connect(function()
 	
 
 	MakePartSelectGui(mBaseItem)
-	createTimelineUI(mBaseItem)--This is what breaks
+	createTimelineUI(mBaseItem)
 	resetAnimation()
 	CreateGrid(selectedObject)
 
 end)]]></ProtectedString>
 			</Properties>
-		</Item>
-		<Item class="Script" referent="RBX3ECCD990A1CC458488AC597C253691E6">
-			<Properties>
-				<bool name="Disabled">false</bool>
-				<Content name="LinkedSource"><null></null></Content>
-				<string name="Name">JointEditor</string>
-				<ProtectedString name="Source"><![CDATA[local plugin = PluginManager():CreatePlugin()
-local toolbar = plugin:CreateToolbar("Animations")
-local createButton = toolbar:CreateButton('Create Joint', 'Create a new motor between the first two selected parts.', '')
-local editButton = toolbar:CreateButton('Edit Joint', 'Edit the selected motor', '')
-
-local editOpen = false
-local createOpen = false
-
-local screen = Instance.new('ScreenGui', game:GetService'CoreGui')
-screen.Name = 'AnimRig'
-local editf = Instance.new('Frame', screen)
-editf.BackgroundTransparency = 1
-editf.Size = UDim2.new(1, 0, 1, 0)
-local createf = editf:Clone()
-createf.Parent = screen
-
--- for i,v in next, script.create:GetChildren() do v.Parent=createf end
--- for i,v in next, script.edit:GetChildren() do v.Parent=editf end
-
-local vis = {}
-local handles = {mov={}, rot={}}
-local linkedballs = {}
-
---
---
-function connect()
-	editButton.Click:connect(function()
-		if createOpen then
-			closeCreate()
-		end
-		
-		if editOpen then
-			closeEdit()
-		else
-			openEdit()
-		end
-	end)
-	createButton.Click:connect(function()
-		if editOpen then
-			closeEdit()
-		end
-		
-		if createOpen then
-			closeCreate()
-		else
-			openCreate()
-		end
-	end)
-	
-	game:GetService'Selection'.SelectionChanged:connect(evaluateSelection)
-end
-function evaluateSelection()
-	local selection = game:GetService'Selection':Get()
-	local a, b = unpack(selection)
-	
-	if editOpen then
-		if a and a:IsA'Motor6D' then
-			closeVis()
-			closehandles()
-			unlinkballs()
-			visualize(a, true)
-		end
-	end
-end
-
-function visualize(motor, showMovementHandles)
-	if motor.Part0 and motor.Part1 then
-		local info = {
-			motor = motor,
-			vparts = {
-				a=nil,
-				line=nil,
-				b=nil
-			},
-			modtrans = {}
-		}
-		
-		local a=Instance.new'Part'
-		a.BrickColor=BrickColor.new'Bright blue'
-		a.Name='RigVisA'
-		a.Material = "SmoothPlastic"
-		a.Anchored = true
-		a.CanCollide=false
-		a.Locked=true
-		a.FormFactor='Custom'
-		a.Size=Vector3.new(0.2, 0.2, 0.2)
-		a.TopSurface=0
-		a.BottomSurface=0
-		local amesh = Instance.new'SpecialMesh'
-		amesh.Parent=a
-		amesh.MeshType=Enum.MeshType.Sphere
-		--amesh.Scale=Vector3.new(1,1,1)*0.5
-		
-		local b=a:Clone()
-		b.BrickColor=BrickColor.new'Bright red'
-		local line=a:Clone()
-		line.BrickColor=BrickColor.new'Bright yellow'
-		local linemesh=Instance.new'CylinderMesh'
-		linemesh.Scale = Vector3.new(0.5, 1, 0.5)
-		line.Mesh:Destroy()
-		linemesh.Parent=line
-		
-		a.Archivable=false
-		b.Archivable=false
-		line.Archivable=false
-		a.Name='Pivot Positioner'
-		b.Name='Part Positioner'
-		line.Name='Line (don\'t move)'
-		
-		info.vparts.a = a
-		info.vparts.b = b
-		info.vparts.line = line
-		
-		-- position
-		local base = motor.Part0.CFrame
-		a.CFrame = base*motor.C0
-		b.CFrame = base*motor.C0*motor.C1:inverse()
-		line.Size = Vector3.new(0.2, (a.Position-b.Position).magnitude, 0.2)
-		line.CFrame = CFrame.new((a.Position+b.Position)/2, a.Position)*CFrame.Angles(math.pi/2, 0, 0)
-		
-		a.Parent=motor
-		b.Parent=motor
-		line.Parent=motor
-		
-		-- visibility
-		info.modtrans[motor.Part0] = 0
-		info.modtrans[motor.Part1] = 0
-		motor.Part0.LocalTransparencyModifier = 0.5
-		motor.Part1.LocalTransparencyModifier = 0.5
-		
-		-- expose
-		vis[motor] = info
-		
-		-- link
-		linkballs(a, b, line, motor)
-	end
-end
-function linkballs(a, b, line, motor)
-	table.insert(linkedballs, {a=a, b=b, line=line, motor=motor})
-end
-function unlinkballs()
-	linkedballs = {}
-end
-function updatelinkballs()
-	for i, v in next, linkedballs do
-		v.motor.C0 = v.motor.Part0.CFrame:toObjectSpace(v.a.CFrame)
-		v.motor.C1 = (v.motor.Part0.CFrame * v.motor.C0):toObjectSpace(v.b.CFrame):inverse()
-		
-		v.line.Size = Vector3.new(0.2, (v.a.Position-v.b.Position).magnitude, 0.2)
-		v.line.CFrame = CFrame.new((v.a.Position+v.b.Position)/2, v.b.Position) * CFrame.Angles(math.pi/2, 0, 0)
-	end
-end
-function closeVis()
-	for motor, info in next, vis do
-		for role, v in next, info.vparts do
-			v:Destroy()
-		end
-		for modded, original in next, info.modtrans do
-			modded.LocalTransparencyModifier = 0
-		end
-	end
-	
-	vis = {}
-end
-function closehandles()
-	for type, l in next, handles do
-		for i, handle in next, l do
-			handle:Destroy()
-		end
-		
-		handles[type] = {}
-	end
-end
-
-function closeCreate()
-	createf.Visible = false
-	createOpen = false
-	createButton:SetActive(false)
-end
-function openCreate()
-	createf.Visible = true
-	createOpen = true
-	createButton:SetActive(true)
-	
-	local a,b = unpack(game.Selection:Get())
-	if a and a:IsA'BasePart' and b and b:IsA'BasePart' then
-		local motor = Instance.new('Motor6D', a)
-		
-		local midPoint = (a.Position+b.Position) / 2
-		local mid = b.CFrame + (midPoint - b.CFrame.p)
-		
-		motor.C0 = a.CFrame:toObjectSpace(mid)
-		motor.C1 = mid:toObjectSpace(b.CFrame):inverse()
-		motor.Part0 = a
-		motor.Part1 = b
-		motor.Parent = a
-		motor.Name = a.Name..' -> '..b.Name
-		
-		game.Selection:Set{motor}
-		openEdit()
-	end
-end
-
-function closeEdit()
-	editf.Visible = false
-	editOpen = false
-	editButton:SetActive(false)
-	for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-		if v.Name  == "JointEditor" then
-			v:Destroy()
-		end
-	end
-	
-	closeVis()
-	closehandles()
-	unlinkballs()
-end
-function openEdit()
-	editf.Visible = true
-	editOpen = true
-	editButton:SetActive(true)
-	local gui = script.JointEditor:clone()
-	gui.Parent = game:GetService("CoreGui")
-	
-	evaluateSelection()
-end
-
-function start()
-	connect()
-	
-	spawn(function()
-		while true do
-			updatelinkballs()
-			game:GetService'RunService'.RenderStepped:wait()
-		end
-	end)
-end
-
---
---
-closeCreate() closeEdit()
-start()]]></ProtectedString>
-			</Properties>
-			<Item class="ScreenGui" referent="RBXA03BCC440373443EAEFA137A2096B134">
-				<Properties>
-					<string name="Name">JointEditor</string>
-				</Properties>
-				<Item class="Frame" referent="RBX2B97DE513F80478D93111B668EE38895">
-					<Properties>
-						<bool name="Active">false</bool>
-						<Color3 name="BackgroundColor3">4294967295</Color3>
-						<float name="BackgroundTransparency">0</float>
-						<Color3 name="BorderColor3">4279970357</Color3>
-						<int name="BorderSizePixel">1</int>
-						<bool name="ClipsDescendants">false</bool>
-						<bool name="Draggable">false</bool>
-						<string name="Name">Frame</string>
-						<Ref name="NextSelectionDown">null</Ref>
-						<Ref name="NextSelectionLeft">null</Ref>
-						<Ref name="NextSelectionRight">null</Ref>
-						<Ref name="NextSelectionUp">null</Ref>
-						<UDim2 name="Position">
-							<XS>0</XS>
-							<XO>50</XO>
-							<YS>0</YS>
-							<YO>50</YO>
-						</UDim2>
-						<float name="Rotation">0</float>
-						<bool name="Selectable">false</bool>
-						<Ref name="SelectionImageObject">null</Ref>
-						<UDim2 name="Size">
-							<XS>0</XS>
-							<XO>300</XO>
-							<YS>0</YS>
-							<YO>200</YO>
-						</UDim2>
-						<token name="SizeConstraint">0</token>
-						<token name="Style">6</token>
-						<bool name="Visible">true</bool>
-						<int name="ZIndex">1</int>
-					</Properties>
-					<Item class="TextLabel" referent="RBX3470142FADAF4E51953D60950B2F659A">
-						<Properties>
-							<bool name="Active">false</bool>
-							<Color3 name="BackgroundColor3">4294967295</Color3>
-							<float name="BackgroundTransparency">1</float>
-							<Color3 name="BorderColor3">4279970357</Color3>
-							<int name="BorderSizePixel">1</int>
-							<bool name="ClipsDescendants">false</bool>
-							<bool name="Draggable">false</bool>
-							<token name="Font">6</token>
-							<token name="FontSize">5</token>
-							<string name="Name">TextLabel</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
-							<UDim2 name="Position">
-								<XS>0</XS>
-								<XO>0</XO>
-								<YS>0</YS>
-								<YO>0</YO>
-							</UDim2>
-							<float name="Rotation">0</float>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
-							<UDim2 name="Size">
-								<XS>1</XS>
-								<XO>0</XO>
-								<YS>1</YS>
-								<YO>0</YO>
-							</UDim2>
-							<token name="SizeConstraint">0</token>
-							<string name="Text">Select two parts and click &quot;Create Joint&quot; to make a joint. Use &quot;Edit Joints&quot; and move the nodes (using Studio Tools) to adjust C0 and C1.</string>
-							<Color3 name="TextColor3">4294967295</Color3>
-							<bool name="TextScaled">true</bool>
-							<Color3 name="TextStrokeColor3">4278190080</Color3>
-							<float name="TextStrokeTransparency">1</float>
-							<float name="TextTransparency">0</float>
-							<bool name="TextWrapped">true</bool>
-							<token name="TextXAlignment">2</token>
-							<token name="TextYAlignment">1</token>
-							<bool name="Visible">true</bool>
-							<int name="ZIndex">1</int>
-						</Properties>
-					</Item>
-				</Item>
-			</Item>
 		</Item>
 		<Item class="Script" referent="RBX758F3C34A29E48688854BE0601892558">
 			<Properties>
