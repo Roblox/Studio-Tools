@@ -1036,14 +1036,14 @@ function updatePart()
 
 		if currentHandle == S_X_POS then
 			local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-			local side = (localCamera / Utility.absVector3(localCamera))
+			local side = Utility.getVector3Sign(localCamera)
 			Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
 							selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
 			
 		elseif currentHandle == S_Z_POS then
 			local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-			local side = (localCamera / Utility.absVector3(localCamera))
+			local side = Utility.getVector3Sign(localCamera)
 			Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, -1)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, 1)),
 							selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
@@ -1099,14 +1099,14 @@ function updatePart()
 		
 		if currentHandle == S_X_NEG then
 			local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-			local side = (localCamera / Utility.absVector3(localCamera))
+			local side = Utility.getVector3Sign(localCamera)
 			Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
 							selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
 			
 		elseif currentHandle == S_Z_NEG then
 			local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-			local side = (localCamera / Utility.absVector3(localCamera))
+			local side = Utility.getVector3Sign(localCamera)
 			Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, -1)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, 1)),
 							selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
@@ -1124,7 +1124,7 @@ function updatePart()
 		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2)))
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-		local side = (localCamera / Utility.absVector3(localCamera))
+		local side = Utility.getVector3Sign(localCamera)
 		
 		Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
@@ -1153,7 +1153,7 @@ function updatePart()
 		end
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-		local side = (localCamera / Utility.absVector3(localCamera))
+		local side = Utility.getVector3Sign(localCamera)
 		
 		Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
@@ -1181,7 +1181,7 @@ function updatePart()
 		end
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-		local side = (localCamera / Utility.absVector3(localCamera))
+		local side = Utility.getVector3Sign(localCamera)
 		
 		Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
@@ -1209,7 +1209,7 @@ function updatePart()
 		end
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-		local side = (localCamera / Utility.absVector3(localCamera))
+		local side = Utility.getVector3Sign(localCamera)
 		
 		Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
 							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
@@ -2406,7 +2406,7 @@ function movePart(delta, collision)
 	print("pos:", dragPart.CFrame.p)	
 	
 	local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-	local side = (localCamera / Utility.absVector3(localCamera))
+	local side = Utility.getVector3Sign(localCamera)
 	
 	Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
 						selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
@@ -3036,6 +3036,16 @@ function findPartInstance(instances)
 	return nil
 end
 
+function isAncestorSelected(part)
+	if not part.Parent then return nil end
+	
+	if List.itemExistsInList(part.Parent, game.Selection:Get()) then
+		return part.Parent
+	end
+	
+	return isAncestorSelected(part.Parent)
+end
+
 function selectPart(instances)
 	if currentlyOverHandle then return end
 		
@@ -3068,7 +3078,14 @@ function selectPart(instances)
 	end
 			
 	if part and not uis:IsKeyDown(Enum.KeyCode.LeftAlt) and not alreadySelected then
-		part = getTopPVInstance(part)
+		local ancestor = isAncestorSelected(part)
+		
+		if ancestor then
+			part = ancestor
+		else
+			part = getTopPVInstance(part)
+		end
+		
 	end
 	
 	if part then
@@ -3741,6 +3758,12 @@ local function customToSymmetric(value)
 	return Vector3.new(v,v,v)
 end
 
+local function getVector3Sign(value)
+	return Vector3.new(value.X / math.abs(value.X == 0 and 1 or value.X),
+		value.Y / math.abs(value.Y == 0 and 1 or value.Y),
+		value.Z / math.abs(value.Z == 0 and 1 or value.Z))
+end
+
 --------------------------------------------------------------
 --------------------------------------------------------------
 --------------------------------------------------------------
@@ -3754,6 +3777,7 @@ module.maxVector3 = maxVector3
 module.absVector3 = absVector3
 module.distanceVector3 = distanceVector3
 module.cleanVector3 = cleanVector3
+module.getVector3Sign = getVector3Sign
 
 module.customToSymmetric = customToSymmetric
 
