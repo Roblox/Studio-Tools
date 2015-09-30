@@ -25,7 +25,11 @@
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Precision</string>
-				<ProtectedString name="Source"><![CDATA[local plugin,settings = plugin,settings
+				<ProtectedString name="Source"><![CDATA[local plugin, settings = plugin, settings
+
+-----------------------------------
+-----------MODULE SCRIPTS----------
+-----------------------------------
 
 local Collision = require(script.Parent.Collision)
 local Utility = require(script.Parent.Utility)
@@ -37,48 +41,20 @@ local Round = require(script.Parent.Round)
 local Extent = require(script.Parent.Extent)
 local Adorn = require(script.Parent.Adornments)
 local Input = require(script.Parent.Input)
-
 local RubberBand = require(script.Parent.Rubberband)
 
-while game == nil do
-	wait(1/30)
-end
+-----------------------------------
+--------------VARIABLES------------
+-----------------------------------
 
 local loaded = false
 local on = false
 
---Plugin.initialize()
-
---local pluginManager = PluginManager()
---local plugin = pluginManager:CreatePlugin()
 local toolbar = plugin:CreateToolbar("Transform")
 local toolbarbutton = toolbar:CreateButton("Transform", "Precision Dragger", "")
 
 local mouse = plugin:GetMouse(true)
 Input.setMouse(mouse)
-
-----------------------------Selection
-
---------------------------------
-
-local function BreakJoints(part)
-	
-	if part:IsA("Wrapped") then
-		workspace:UnjoinFromOutsiders({part.Object})
-	elseif part:IsA("BasePart") then
-		workspace:UnjoinFromOutsiders({part})
-	end
-end
-
-local function JoinSelection()
-	local selection = Selection.getFilteredSelection()
-	workspace:JoinToOutsiders(selection, plugin:GetJoinMode())
-end
-
-local function UnjoinSelection()
-	local selection = Selection.getFilteredSelection()
-	workspace:UnjoinFromOutsiders(selection)
-end
 
 local allowYSnap = false
 
@@ -180,15 +156,11 @@ local RIGHT_SIDE = 3
 local FRONT_SIDE = 4
 local BACK_SIDE = 5
 
----------------------------------------
-
 local function getWorkplane()
 	return workplaneFrame, workplaneOffset
 end
 
 Adorn.setWorkplaneAccessor(getWorkplane)
-
-------------------------------------- Handle Adorns
 
 game:GetService("ContentProvider"):Preload("rbxassetid://232196030")
 game:GetService("ContentProvider"):Preload("rbxassetid://233257118")
@@ -215,6 +187,24 @@ local handlesCurrentlyOver = {}
 local setAnchoredStateForMovingParts = false
 local states = {}
 
+
+local function BreakJoints(part)
+	if part:IsA("Wrapped") then
+		workspace:UnjoinFromOutsiders({part.Object})
+	elseif part:IsA("BasePart") then
+		workspace:UnjoinFromOutsiders({part})
+	end
+end
+
+local function JoinSelection()
+	local selection = Selection.getFilteredSelection()
+	workspace:JoinToOutsiders(selection, plugin:GetJoinMode())
+end
+
+local function UnjoinSelection()
+	local selection = Selection.getFilteredSelection()
+	workspace:UnjoinFromOutsiders(selection)
+end
 
 --duplicate code, please consolidate
 local roots = {}
@@ -272,8 +262,8 @@ local function updateRotatePart()
 		end
 		
 		local filteredSelectionMetaPart = Selection.getFilteredSelectionMetapart()
-		rotateAdornPart.CFrame = filteredSelectionMetaPart.CFrame --400
-		rotateAdornPart.Size = filteredSelectionMetaPart.Size --already cached 0.5
+		rotateAdornPart.CFrame = filteredSelectionMetaPart.CFrame
+		rotateAdornPart.Size = filteredSelectionMetaPart.Size
 		Adorn.adornInstanceWithRotate(rotateAdornPart)
 		
 	end
@@ -304,8 +294,6 @@ local function onPressMouse()
 		local currentAdorn = Adorn.getCurrentAdornment()
 		if currentAdorn then
 			initialPos = Adorn.getAdornmentWorldCFrame(Adorn.getCurrentAdornment()[1]).p
-		else
-			--print("not adorn currently")
 		end
 	end
 	
@@ -313,45 +301,33 @@ local function onPressMouse()
 end
 
 local function onReleaseMouse()
-	--print("onReleaseMouse")
-	
 	initialPos = nil
-	--print("release", currentlyOverHandle, currentHandle)
+	
 	if not RubberBand.isRubberBandDragInProgress() then
 		releaseHandle()
 	end
 	releasePart()	
 	Adorn.releaseHandle()
 
---	if currentlyOverHandle and currentHandle == H_PLANE then 
---		print("over handle")
-		planeDragging = false
-		if planeObject and false then
-			--print("plane destruction")
-			planeObject:Destroy()
-			planeObject = nil
-		end
---	end
+	planeDragging = false
+	if planeObject and false then
+		planeObject:Destroy()
+		planeObject = nil
+	end
 end
 
 -------------------------------------------------
 
 toolbarbutton.Click:connect(function()
 	if on and Off then
---		plugin:Activate(false)
---		toolbarbutton:SetActive(false)
 		Off()
-		--print("deacitvating")
-		--plugin:Deactivate()
 	elseif loaded and On then
 		On()
 	end
 end)
 
 plugin.Deactivation:connect(function()
-	if on and Off then
-		Off()
-	end
+	if on and Off then Off() end
 end)
 
 --------------------MATH STUFFS-------------------
@@ -1288,11 +1264,9 @@ function updatePart()
 		local nearestChange = Round.roundToNearest(math.deg(change), isInside and 22.5 or 1)
 		
 		local expected = originalCFrame * CFrame.Angles(0, 0, math.rad(nearestChange))
-		
-		local changeFromPrevious = expected * filteredSelectionMetapart.CFrame:inverse()
 				
 		if filteredSelectionMetapart:IsA("BasePart") then
-			safeRotate(filteredSelectionMetapart, changeFromPrevious)
+			filteredSelectionMetapart.CFrame = expected
 		elseif filteredSelectionMetapart:IsA("Model") and not filteredSelectionMetapart:IsA("Workspace") then
 			local previousCFrame = filteredSelectionMetapart:GetModelCFrame()
 			setModelCFrame(filteredSelectionMetapart, expected)
@@ -1335,12 +1309,7 @@ function updatePart()
 		end
 			
 	elseif currentHandle == R_XZ then
-		
-		------------------------------------------
---local function sanitizeFloatTest(value)
---local function sanitizeCFrameTest(value)
-			---------------------------------
-	
+			
 		local halfSize = originalSize * 0.5
 		local handleSide = originalCFrame:pointToObjectSpace(initialPos)
 		handleSide = handleSide.Y / math.abs(handleSide.Y)
@@ -1353,21 +1322,11 @@ function updatePart()
 		
 		local change = math.atan2(newPosition.Z, newPosition.X) - math.atan2(localPosition.Z, localPosition.X)
 		local nearestChange = Round.roundToNearest(math.deg(change), isInside and 22.5 or 1)
-		
+				
 		local expected = originalCFrame * CFrame.Angles(0, -math.rad(nearestChange), 0)
-
-		local changeFromPrevious = expected * filteredSelectionMetapart.CFrame:inverse()
---		changeFromPrevious = changeFromPrevious
+		
 		if filteredSelectionMetapart:IsA("BasePart") then
-			safeRotate(filteredSelectionMetapart, changeFromPrevious)
---		elseif filteredSelectionMetapart:IsA("Model") and not filteredSelectionMetapart:IsA("Workspace") then
---			
---			local previousCFrame = filteredSelectionMetapart:GetModelCFrame()
---			setModelCFrame(filteredSelectionMetapart, expected)
---			if plugin.CollisionEnabled and #filteredSelectionMetapart:GetTouchingParts() > 0 then
---				setModelCFrame(filteredSelectionMetapart, previousCFrame)
---			end
---			
+			filteredSelectionMetapart.CFrame = expected
 		elseif filteredSelectionMetapart:IsA("Grouping") or (filteredSelectionMetapart:IsA("Model") and not filteredSelectionMetapart:IsA("Workspace")) then
 			local previousCFrame = filteredSelectionMetapart.CFrame
 			
@@ -1411,10 +1370,8 @@ function updatePart()
 		local nearestChange = Round.roundToNearest(math.deg(change), isInside and 22.5 or 1)
 		local expected = originalCFrame * CFrame.Angles(math.rad(nearestChange), 0, 0)
 		
-		local changeFromPrevious = expected * filteredSelectionMetapart.CFrame:inverse()
-		
 		if filteredSelectionMetapart:IsA("BasePart") then
-			safeRotate(filteredSelectionMetapart, changeFromPrevious)
+			filteredSelectionMetapart.CFrame = expected
 		elseif filteredSelectionMetapart:IsA("Model") and not filteredSelectionMetapart:IsA("Workspace") then
 			local previousCFrame = filteredSelectionMetapart:GetModelCFrame()
 			setModelCFrame(filteredSelectionMetapart, expected)
@@ -1441,9 +1398,6 @@ function updatePart()
 			
 			local out = cosineSimilarity(zVector, initialAngle) * (initialAngle.Y > 0 and 1 or -1)
 			local rotationalOffset = out + 180
-			--print(originalCFrame:pointToObjectSpace(initialPos), out)
-			
-			
 						
 			Adorn.showRotate(originalCFrame:toWorldSpace(CFrame.new(Vector3.new(halfSize.X * handleSide,0,0)))* CFrame.Angles(0,math.rad(90) ,math.rad(rotationalOffset) ), 
 				radius,
@@ -1455,12 +1409,7 @@ function updatePart()
 		Adorn.setAllAdornVisibility(false)
 		if not planeDragging then
 			if not Adorn.isPlaneSelectingModeOn() then return end
-			--print("start dragging")
 			planeDragging = true
-			
-			--construct line adorns
-			
-			--universalAdornment:SetWorkplaneVisible(false)
 			
 			if not planeObject then
 				planeObject = Instance.new("Part", cg)
@@ -1482,9 +1431,7 @@ function updatePart()
 	else
 		allowAdornUpdate = false
 	end
-	
-	--local tickOut10 = tick()
-	
+		
 	if plugin.CollisionEnabled and #game:GetService("Selection"):Get() == 1 then
 		if currentHandle == S_Y_POS or 
 		currentHandle == S_Z_POS or
@@ -1506,52 +1453,21 @@ function updatePart()
 				end
 			end
 		end
-	else
-		--print("plugin collision not on")
 	end
-	
-	--local tickOut11 = tick()
-	
-	 -- 72 milliseconds
-	
-	--local tickOut12 = tick()
-	
+		
 	if allowAdornUpdate then
 		updateDragPart()
 	end
-	
-	--local tickOut13 = tick()
-	
+		
 	if currentHandle ~= R_XY and 
 		currentHandle ~= R_XZ and
 		currentHandle ~= R_YZ then
-		--print("from updatePart")
 		updateInvisiblePart()
 	end
 	
 	if currentHandle == T_Y_POS then
 		updateRotatePart()
 	end
-		
-	--local tickOut14 = tick()
-	
---	print("tickOut1:", (tickOut2 - tickOut1) * 1000)
---	print("tickOut2:", (tickOut3 - tickOut2) * 1000)
---	print("tickOut3:", (tickOut4 - tickOut3) * 1000)
---	print("tickOut4:", (tickOut5 - tickOut4) * 1000)
---	print("tickOut5:", (tickOut6 - tickOut5) * 1000)
---	print("tickOut6:", (tickOut7 - tickOut6) * 1000)
---	print("tickOut7:", (tickOut8 - tickOut7) * 1000)
---	print("tickOut8:", (tickOut9 - tickOut8) * 1000)
---	print("tickOut9:", (tickOut10 - tickOut9) * 1000)
---	print("tickOut10:", (tickOut11 - tickOut10) * 1000)
---	print("tickOut11:", (tickOut12 - tickOut11) * 1000)
---	print("tickOut12:", (tickOut13 - tickOut12) * 1000)
---	print("tickOut13:", (tickOut14 - tickOut13) * 1000)
-	
-	--print("updatePart total:", (tickOut14 - tickOut1) * 1000)
-	
-	--print("done update part")
 	adornmentUpdateNeeded = true
 end
 
@@ -4071,40 +3987,61 @@ local function getAllChildrenFromTable(t)
 	return items
 end
 
-
-
 function forcePrimaryPart(model)
 	if not model.PrimaryPart then
-			local possiblePrimaryPart = nil
-			local children = model:GetChildren()
-			for i = 1, #children do
-				if children[i]:IsA("BasePart") then
-					possiblePrimaryPart = children[i]
-					
-					local location = possiblePrimaryPart.CFrame.p
-					
-					if FuzzyMath.visiblyIdentityCFrame(possiblePrimaryPart.CFrame, 0.00001) then					
+		local possiblePrimaryPart = nil
+		local children = model:GetChildren()
+		for i = 1, #children do
+			if children[i]:IsA("BasePart") then
+				possiblePrimaryPart = children[i]
+				
+				local location = possiblePrimaryPart.CFrame.p
+				
+				if FuzzyMath.visiblyIdentityCFrame(possiblePrimaryPart.CFrame, 0.00001) then					
+					break
+				end
+			elseif children[i]:IsA("Model") and not children[i]:IsA("Workspace") then
+				
+				local part = children[i]
+				forcePrimaryPart(children[i])
+				
+				if part.PrimaryPart then
+					possiblePrimaryPart = part.PrimaryPart
+					if FuzzyMath.visiblyIdentityCFrame(possiblePrimaryPart.CFrame, 0.00001) then
 						break
 					end
-				elseif children[i]:IsA("Model") and not children[i]:IsA("Workspace") then
-					
-					local part = children[i]
-					forcePrimaryPart(children[i])
-					
-					if part.PrimaryPart then
-						possiblePrimaryPart = part.PrimaryPart
-						if FuzzyMath.visiblyIdentityCFrame(possiblePrimaryPart.CFrame, 0.00001) then
-							break
-						end
-					end
-					
 				end
-			end
-			
-			if possiblePrimaryPart then
-				model.PrimaryPart = possiblePrimaryPart
+				
 			end
 		end
+		
+		if possiblePrimaryPart then
+			model.PrimaryPart = possiblePrimaryPart
+		end
+	end
+end
+
+local sanitizationPrecision = 1000000
+			
+local function sanitizeFloat(value)
+	return value > 0.0 and (math.ceil((value * sanitizationPrecision) - 0.5) / sanitizationPrecision) or (math.floor((value * sanitizationPrecision) + 0.5) / sanitizationPrecision)
+end
+
+local function sanitizeCFrame(value, sanitizeRotation)
+	local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = value:components()
+	return CFrame.new(
+		sanitizeFloat(x),
+		sanitizeFloat(y),
+		sanitizeFloat(z),
+		sanitizeRotation and sanitizeFloat(r00) or r00,
+		sanitizeRotation and sanitizeFloat(r01) or r01,
+		sanitizeRotation and sanitizeFloat(r02) or r02,
+		sanitizeRotation and sanitizeFloat(r10) or r10,
+		sanitizeRotation and sanitizeFloat(r11) or r11,
+		sanitizeRotation and sanitizeFloat(r12) or r12,
+		sanitizeRotation and sanitizeFloat(r20) or r20,
+		sanitizeRotation and sanitizeFloat(r21) or r21,
+		sanitizeRotation and sanitizeFloat(r22) or r22)
 end
 
 function createMetaPart(object, subscribe)
@@ -4161,30 +4098,6 @@ function createMetaPart(object, subscribe)
 		
 		local function reRoot()
 			finalObject.roots = getAllRootsFromTable(finalObject.objects)
-		end
-		
-		local sanitizationPrecision = 1000000
-			
-		local function sanitizeFloat(value)
-			return value > 0.0 and (math.ceil((value * sanitizationPrecision) - 0.5) / sanitizationPrecision) or (math.floor((value * sanitizationPrecision) + 0.5) / sanitizationPrecision)
-		end
-
-
-		local function sanitizeCFrame(value)
-			local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = value:components()
-			return CFrame.new(
-				sanitizeFloat(x),
-				sanitizeFloat(y),
-				sanitizeFloat(z),
-				r00,
-				r01,
-				r02,
-				r10,
-				r11,
-				r12,
-				r20,
-				r21,
-				r22)
 		end
 		
 		local function recalculateCFrameAndSize()
@@ -4356,7 +4269,6 @@ function createMetaPart(object, subscribe)
 		
 		local finalObject = {}
 		
-		
 		-----------------------------------------
 		finalObject.object = object
 		finalObject.mt = {}
@@ -4416,30 +4328,6 @@ function createMetaPart(object, subscribe)
 		
 		finalObject.mt.__eq = function(a, b)
 			return pcall(function() return createMetaPart(a).Object == createMetaPart(b).Object end)
-		end
-		
-		local sanitizationPrecision = 1000000
-			
-		local function sanitizeFloat(value)
-			return value > 0.0 and (math.ceil((value * sanitizationPrecision) - 0.5) / sanitizationPrecision) or (math.floor((value * sanitizationPrecision) + 0.5) / sanitizationPrecision)
-		end
-
-
-		local function sanitizeCFrame(value)
-			local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = value:components()
-			return CFrame.new(
-				sanitizeFloat(x),
-				sanitizeFloat(y),
-				sanitizeFloat(z),
-				r00,
-				r01,
-				r02,
-				r10,
-				r11,
-				r12,
-				r20,
-				r21,
-				r22)
 		end
 		
 		local function recalculateCFrameAndSize()
@@ -4520,11 +4408,9 @@ function createMetaPart(object, subscribe)
 				end
 			end
 			
-			
 			if key == "BreakImplicitJoints" then
 				return function() end
 			end
-			
 			
 			if key == "IsColliding" then
 				return function() return false end
@@ -4535,14 +4421,12 @@ function createMetaPart(object, subscribe)
 			end
 			
 			if key == "SafeRotate" then
-				return function() --[[print("SAFEROTATE not applicable for models")]] end
+				return function() end
 			end
 			
 			if key == "Children" then
 				return finalObject.children
 			end
-			
-			
 			
 			if key == "Size" then
 				if finalObject.info.oSize then return finalObject.info.oSize end
@@ -4551,29 +4435,24 @@ function createMetaPart(object, subscribe)
 			end
 			
 			if key == "CFrame" then
-				if finalObject.info.oCFrame then --[[print("CACHED CFRAME VALUE:", finalObject.info.oCFrame.p)]] return finalObject.info.oCFrame end
-				--print("cframe calc model ")
+				if finalObject.info.oCFrame then return finalObject.info.oCFrame end
 				
 				recalculateCFrameAndSize()
-				--print("CFRAME RECALC VALUE:", finalObject.info.oCFrame.p)
 				return finalObject.info.oCFrame
 			end
 			
 			if key == "PlaneAlignedSize" then
 				if finalObject.info.pSize then return finalObject.info.pSize end
-				--print("NEED TO CALL UpdatePlaneCFrame first")
 				return nil
 			end
 			
 			if key == "PlaneAlignedCFrame" then
 				if finalObject.info.pCFrame then return finalObject.info.pCFrame end
-				--print("NEED TO CALL UpdatePlaneCFrame first")
 				return nil
 			end
 			
 			if key == "Position" then
 				if finalObject.info.oCFrame then return finalObject.info.oCFrame.p end
-				--print("cframe calc")
 				
 				recalculateCFrameAndSize()
 				return finalObject.info.oCFrame.p
@@ -4596,8 +4475,7 @@ function createMetaPart(object, subscribe)
 		local function moveAllChildren(parentObject, oldCFrame, newCFrame)
 			for _,v in ipairs(parentObject:GetChildren()) do
 				moveAllChildren(v, oldCFrame, newCFrame)
-				if v:IsA("BasePart") then --v:IsA("Part") then
-				--print "t19"
+				if v:IsA("BasePart") then
 					v.CFrame = newCFrame:toWorldSpace(oldCFrame:toObjectSpace(v.CFrame))
 				end
 			end
@@ -4618,17 +4496,13 @@ function createMetaPart(object, subscribe)
 					recalculateCFrameAndSize()
 				end
 				reRoot()
-				local rotationCoord = value - value.p
-
+				value = sanitizeCFrame(value, true)
+				
 				for i = 1, #finalObject.roots do
-					local primInCenter = finalObject.info.oCFrame:toObjectSpace(finalObject.roots[i].CFrame)
-					local newPrimInCenter = rotationCoord * primInCenter
-					
-					finalObject.roots[i].CFrame  = newPrimInCenter + finalObject.info.oCFrame.p	
+					finalObject.roots[i].CFrame = value * finalObject.info.oCFrame:toObjectSpace(finalObject.roots[i].CFrame)
 				end
 				
-				if (finalObject.info.oCFrame - finalObject.info.oCFrame.p)
-					~= (value - value.p) then
+				if (finalObject.info.oCFrame - finalObject.info.oCFrame.p) ~= (value - value.p) then
 					--print("RESETTING PLANE")
 					finalObject.info.pCFrame = nil
 					finalObject.info.pSize = nil
@@ -4706,30 +4580,6 @@ function createMetaPart(object, subscribe)
 		
 		---------------------------------------------------------------
 		
-		local sanitizationPrecision = 1000000
-			
-		local function sanitizeFloat(value)
-			return value > 0.0 and (math.ceil((value * sanitizationPrecision) - 0.5) / sanitizationPrecision) or (math.floor((value * sanitizationPrecision) + 0.5) / sanitizationPrecision)
-		end
-
-
-		local function sanitizeCFrame(value)
-			local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = value:components()
-			return CFrame.new(
-				sanitizeFloat(x),
-				sanitizeFloat(y),
-				sanitizeFloat(z),
-				r00,
-				r01,
-				r02,
-				r10,
-				r11,
-				r12,
-				r20,
-				r21,
-				r22)
-		end
-		
 		local function reRoot()
 			finalObject.roots = getAllRootsFromTable({finalObject.object})
 		end
@@ -4737,7 +4587,6 @@ function createMetaPart(object, subscribe)
 		setmetatable(finalObject, finalObject.mt)
 		
 		local function getCurrentCFrame()
-		
 			return finalObject.object:GetModelCFrame()
 		end
 		
@@ -4844,8 +4693,8 @@ function createMetaPart(object, subscribe)
 			end
 			
 			if key == "CFrame" then
-				
 				value = sanitizeCFrame(value)
+				print(value)
 				finalObject.info.lastPlaneCFrame = nil
 			end
 			
