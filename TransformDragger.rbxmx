@@ -373,7 +373,6 @@ function boxSideTest(ray, normal, size, p)
 	local t = (-((-normal:Dot(origin)) + ray.Origin:Dot(normal))) / ray.Direction:Dot(normal)
 	local hit = ray.Origin + ray.Direction * t
 	
-	--if p then print("hit:", hit) print("size:", size) end
 	if (origin.x ~= 0 or hit.x <= size.x) and
 	(origin.x ~= 0 or hit.x >= -size.x) and
 	(origin.y ~= 0 or hit.y <= size.y) and
@@ -600,10 +599,7 @@ function setWaypoint()
 	
 	
 	if filteredSelectionMetapart and (filteredSelectionMetapart.CFrame ~= originalPosition or filteredSelectionMetapart.Size ~= originalSize) then
-		--print("Waypoint created:", handleType)
 		game:GetService("ChangeHistoryService"):SetWaypoint(handleType)
-	else
-		--print "waypoint not created"
 	end
 end
 
@@ -627,15 +623,9 @@ function rotateCFrame(cframe, side)
 	return cframe
 end
 
-
 function updateInvisiblePart()
-	--local initialTick = tick()
-	--print("updateInvisiblePart")
 	if not invisiblePart then return end
-	--print("update")
-	--invisiblePart.Parent = cg
 	
-	--print("filteredSelection:", #filteredSelection)
 	local selection = Selection.getFilteredSelection()
 		
 	if #selection < 1 then
@@ -648,12 +638,10 @@ function updateInvisiblePart()
 	
 	if secondaryPart then
 		if filteredSelectionMetapart then
-			--print("-----------INVISIBLE CACHED VALUES")
 			filteredSelectionMetapart.UpdatePlaneCFrame = workplaneFrame
 			invisiblePart.CFrame = filteredSelectionMetapart.PlaneAlignedCFrame
 			invisiblePart.Size = filteredSelectionMetapart.PlaneAlignedSize
 		else
-			--print("-----------------CALCULATING VALUES")
 			local tmpCFrame = secondaryPart.CFrame
 			invisiblePart.CFrame = CFrame.new(invisiblePart.CFrame.p)
 			Extent.setPartCFrameToExtents(invisiblePart, rotateCFrame(tmpCFrame, secondaryPartSideSelected))
@@ -667,8 +655,6 @@ function updateInvisiblePart()
 		workplaneOffset = -invisiblePart.CFrame:pointToObjectSpace(secondaryLocation).y
 	end
 	
-	--local finalTick = tick()
-	--print("update invisible part tick:", (finalTick - initialTick) * 1000)
 end
 
 local function resetDragger()
@@ -688,13 +674,12 @@ function preUpdatePart()
 	--calculateCurrentDistance
 	local currentHandle = Adorn.getCurrentHandle()
 	if currentHandle == H_NONE then return end
-	if not initialPos then --[[print("NO POS")--]] return end
+	if not initialPos then return end
 	
 	if currentHandle == H_PLANE then return end
 
 	local currentAdornment = Adorn.getCurrentAdornment()	
 	
-	--print("pre update part")
 	local adornee = currentAdornment[1].Adornee
 	if not adornee then return end
 	
@@ -875,7 +860,6 @@ function updatePart()
 			currentHandle ~= R_XZ and
 			currentHandle ~= R_YZ and
 			currentHandle ~= H_PLANE then
-			--print("returning early -", selectedPart, originalSize, originalCFrame, currentHandle, currentDist)
 			return
 		end
 	end
@@ -1472,9 +1456,8 @@ function updatePart()
 end
 
 function updateDragPart()
-	--print("updateDragPart")
+	
 	if not dragPart then
-		--print ("showing dragPart")
 		dragPart = Instance.new("Part", nil)
 		dragPart.Name = "DragParte1b1aec5"
 		dragPart.FormFactor = Enum.FormFactor.Custom
@@ -1487,7 +1470,6 @@ function updateDragPart()
 	end
 	
 	if not dragPartHoloBox then
-		--print("creating holobox")
 		dragPartHoloBox = Instance.new("BoxHandleAdornment", cg)
 		dragPartHoloBox.Visible = false
 		dragPartHoloBox.Color3 = Color3.new(38.0 / 255.0, 136.0 / 255.0, 240.0 / 255.0)
@@ -1496,8 +1478,7 @@ function updateDragPart()
 	end
 	
 	if dragPart then
-		if #game:GetService("Selection"):Get() == 1 then --and game:GetService("Selection"):Get()[1]:IsA("Part")then
-			--print("update drag part")
+		if #game:GetService("Selection"):Get() == 1 then
 			local mainPart = Metapart.convertToPart(game:GetService("Selection"):Get()[1])
 			dragPart.Size = mainPart.Size
 			dragPart.CFrame = mainPart.CFrame
@@ -1517,7 +1498,6 @@ function updateDragPart()
 		end
 	end
 	
-	--print("here:", selectedPart)
 	if dragPartHoloBox and selectedPart then
 		dragPartHoloBox.Adornee = dragPart
 		dragPartHoloBox.Size = dragPartHoloBox.Adornee.Size-- + Vector3.new(.01, .01, .01)
@@ -1527,7 +1507,6 @@ function updateDragPart()
 		--dragPartHoloBox.Visible = true
 
 		--dragPartHoloBox.DrawFull = true
-		--print("showing holobox")
 		--Remove for Demo - dragPartHoloBox.Visible = true
 	end
 end
@@ -1546,7 +1525,6 @@ function grabPart()
 	originalCFrame = filteredSelectionMetapart.CFrame
 		
 	previousAABBCFrame = filteredSelectionMetapart.PlaneAlignedCFrame
-	--print("grab part : setting AABBCFrame", previousAABBCFrame)
 	
 	local extent = getBestExtentRotation()
 	if not extent then return end
@@ -1561,7 +1539,7 @@ end
 
 function getAllFaceNormals(part)
 	local normals = {}
-	--print("part",part)
+	
 	table.insert(normals, (part.CFrame:pointToWorldSpace(Vector3.new(1,0,0)) - part.CFrame.p).Unit)
 	table.insert(normals, (part.CFrame:pointToWorldSpace(Vector3.new(-1,0,0)) - part.CFrame.p).Unit)
 	table.insert(normals, (part.CFrame:pointToWorldSpace(Vector3.new(0,1,0)) - part.CFrame.p).Unit)
@@ -1581,13 +1559,11 @@ function getDirectedNormalsFromPart(part, vect)
 	local perpPlaneNormal = planeNormal:Cross(vect) / planeNormal:Cross(vect).Magnitude
 	
 	for i,v in ipairs(faceNormals) do
-		--print(i,"faceNormal : ",v)
+		
 		local projection = projectVectorToPlane(v, planeNormal)
-		--print(i,"p1 : ",projection)
 		projection = projectVectorToPlane(projection, perpPlaneNormal).Unit
-		--print(i,"p2 : ",projection)
+		
 		if FuzzyMath.fuzzyCompareVector3(projection, vect) then
-			--print("Normal found:", v)
 			table.insert(closestNormals, v)
 		end
 	end
@@ -1687,8 +1663,6 @@ function getNormalOfFace(collidedPart, collidedLocation)
 	elseif FuzzyMath.fuzzyCompare(localCollisionLocation.Z, -halfSize.Z) then
 		--front
 		localNormal = Vector3.new(0, 0, -1)
-	else
-		--print("no face matches params: getNormalOfFace")
 	end
 	
 	return collidedPart.CFrame:pointToWorldSpace(localNormal) - collidedPart.CFrame.p
@@ -1842,10 +1816,7 @@ function movePart(delta, collision)
 		delta = invisiblePart.CFrame:pointToWorldSpace(deltaLocal)
 		delta = delta - invisiblePart.Position
 	end
-	
-	
-	--local tick5 = tick()
-	
+		
 	local filteredSelectionMetapart = Selection.getFilteredSelectionMetapart()
 	
 	setPartPosition(dragPart, previousAABBCFrame.p + delta)
@@ -1853,12 +1824,9 @@ function movePart(delta, collision)
 	if shouldBreakJoints then
 		UnjoinSelection()
 	end
-	
-	--local tick6 = tick()
-	
+		
 	local objectCFrame = workplaneFrame:toObjectSpace(dragPart.CFrame)
-	--local invisObjectCFrame = secondaryPartCFrame:toObjectSpace(invisiblePart.CFrame)
-	--TICK--local tickSlot4 = tick()
+
 	local verts = {}
 	
 	local halfSize = selectedPart.Size / 2
@@ -1885,10 +1853,6 @@ function movePart(delta, collision)
 	local minSnapMovementY = 0
 	local minSnapMovementZ = 0
 	
-	--TICK--local tickSlot3 = tick()
-	
---	local tick7 = tick()
-	
 	for i = 0, #verts do
 		local xDist = verts[i].x - roundToNearestGrid(verts[i].x)
 		local yDist = verts[i].y - roundToNearestGrid(verts[i].y)
@@ -1907,26 +1871,18 @@ function movePart(delta, collision)
 		end
 	end
 	
---	local tick8 = tick()
-
 	local snappedDelta = Vector3.new(minSnapMovementX, minSnapMovementY, minSnapMovementZ)
 
 	snappedDelta = snappedDelta * Vector3.new(1, 0, 1)
-	--print ("Updated Snapped:", snappedDelta)
-	
+
 	snappedDelta = sanitizeVector3(snappedDelta)
-	
-	--print(snappedDelta)
 	
 	objectCFrame = objectCFrame - snappedDelta	
 	
 	objectCFrame = sanitizeCFrame(objectCFrame)
 	
---	local tick9 = tick()
-		
 	
 	if collision and not dragFromToolbox then
-		--print("collsion")
 		
 		local planeNormal = invisiblePart.CFrame:pointToWorldSpace(Vector3.new(0,1,0)) - invisiblePart.Position
 		
@@ -1936,9 +1892,7 @@ function movePart(delta, collision)
 		setPartRotation(dragPart, #selection > 1 and workplaneFrame or originalDragPartOrientation)--originalDragPartOrientation) USE THIS FOR LOCAL SPACE DRAG
 				
 		local preSafeMove = dragPart.CFrame
-		
-		--print("preSafeMove:", preSafeMove)
-		
+				
 		 --TODO, switch to this
 		table.insert(selection, dragPart)
 		
@@ -1971,15 +1925,11 @@ function movePart(delta, collision)
 			--move back in slightly (for collision purposes
 			local i = 0
 			
-			
 			while not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) and i < 100 do
-				--print("initial collision")
 				dragPart.CFrame = dragPart.CFrame + (dragVector * .0001)
 				i = i + 1
 			end
-			
-			--print("2 - moved in:", dragPart.Position)
-							
+										
 			local collideFrame = dragPart.CFrame
 			
 			local collidingParts = List.filterOutItems(selection, dragPart:GetTouchingParts()) 
@@ -1990,7 +1940,6 @@ function movePart(delta, collision)
 			--Iterate over colliding parts to consolidate colliding normals 
 			local beginTime = tick()
 			for _,v in pairs(collidingParts) do
-				--print("collidingParts")
 				--checked = checked + 1
 				local rotation = v.CFrame - v.CFrame.p
 				--if not existsInTable(collidingPartsCFrameList, rotation) then
@@ -2006,20 +1955,14 @@ function movePart(delta, collision)
 				--round please
 				faceNormal = Vector3.new(FuzzyMath.fuzzyCompare(0,faceNormal.x) and 0 or faceNormal.x, FuzzyMath.fuzzyCompare(0,faceNormal.y) and 0 or faceNormal.y, FuzzyMath.fuzzyCompare(0,faceNormal.z) and 0 or faceNormal.z)
 				faceNormal = Round.roundVector3ToNearest(faceNormal, 0.0001)
-				
-				--print("faceNormal", faceNormal)
-				
+								
 				if not normalExistsInTable(partNormalTable, faceNormal) then
-					--print("new normal:", faceNormal)
 					table.insert(partNormalTable, {v, faceNormal})
 				end
-				--end
 			end
 			
 			local endTime = tick()
-			
-			--print("++++++++", #partNormalTable, " unique parts founds")
-			
+						
 			--for each part safe move with white list out by normal(even if not colliding)
 			local finalPositionTable = {}
 			
@@ -2028,33 +1971,25 @@ function movePart(delta, collision)
 			local tick2 --= tick()
 			local tick3 --= tick()
 			for _,v in pairs(partNormalTable) do
-				--print("partNormalTable")
 						
 				dragPart.CFrame = initialPos
 				local lowerBounds, upperBounds = Extent.getPartBounds(dragPart, v[1].CFrame)
 				lowerBounds = v[1].CFrame:pointToObjectSpace(lowerBounds)
 				upperBounds = v[1].CFrame:pointToObjectSpace(upperBounds)
-				--print("1Bounds:", lowerBounds, upperBounds)
 				dragPart.CFrame = preSafeMove
 				
 				local lowerBounds2, upperBounds2 = Extent.getPartBounds(dragPart, v[1].CFrame)
 				lowerBounds2 = v[1].CFrame:pointToObjectSpace(lowerBounds2)
 				upperBounds2 = v[1].CFrame:pointToObjectSpace(upperBounds2)
-				--print("2Bounds:", lowerBounds2, upperBounds2)
 				
 				lowerBounds, upperBounds = Extent.unionVector3NoSpaceChange(lowerBounds2, lowerBounds, upperBounds)
 				lowerBounds, upperBounds = Extent.unionVector3NoSpaceChange(upperBounds2, lowerBounds, upperBounds)
-				
-				--print("fBounds:", lowerBounds, upperBounds)
-				
+								
 				local p1 = afterInitialSafeMovePos.p 
 								
 				setPartPosition(dragPart, v[1].CFrame.p)
-				--print("safe moving dragPart: ",v[2])
 				safeMoveWhiteList(dragPart, v[2], {v[1]})
 				--dragPart:SafeMoveWhiteList(v[2], {v[1]})
-				--print("moved by ",dragPart.CFrame.p - v[1].CFrame.p)
-				--if dragPart:IsColliding(0.0002, selection) then print("P2 COLLIDING") end
 														
 				local p2 = dragPart.CFrame.p
 				
@@ -2065,7 +2000,6 @@ function movePart(delta, collision)
 									
 				if Utility.distanceVector3(preSafeMove.p, afterInitialSafeMovePos.p - p3) < 
 					Utility.distanceVector3(preSafeMove.p, afterInitialSafeMovePos.p + p3) then
-					--print("flipping")
 					p3 = p3 * -1
 				end
 				
@@ -2082,9 +2016,6 @@ function movePart(delta, collision)
 				--zero out
 				p3 = Vector3.new(FuzzyMath.fuzzyCompare(0,p3.x) and 0 or p3.x, FuzzyMath.fuzzyCompare(0,p3.y) and 0 or p3.y, FuzzyMath.fuzzyCompare(0,p3.z) and 0 or p3.z)
 				
-				--print("p3:",p3)	
-						
-				--tick1 = tick()
 				setPartPosition(dragPart, afterInitialSafeMovePos.p - v[2])
 				safeMoveWhiteList(dragPart, p3, {v[1]})
 				--dragPart:SafeMoveWhiteList(p3, {v[1]})
@@ -2092,86 +2023,55 @@ function movePart(delta, collision)
 				
 				dragPart.CFrame = preSafeMove
 				
-				--tick2 = tick()
 				safeMoveWhiteList(dragPart, v[2], {v[1]})
-				--tick3 = tick()
-				--dragPart:SafeMoveWhiteList(v[2], {v[1]})
+				
 				local secondDist = Utility.distanceVector3(dragPart.CFrame.p, afterInitialSafeMovePos)
 				
 				if secondDist < distToTest then
 					distToTest = secondDist
 				end
 				
-				--print ("distToTest", distToTest)
 				dragPart.CFrame = afterInitialSafeMovePos	
 
 				local collSel = game.Selection:Get()
 				table.insert(collSel, v[1])
-					
-				--print("COLLISION MOVING")
+				
 				if not moveUntilCollideWrapper(dragPart, 0.0002, collSel, p3, distToTest) then
-					--print("no collide-------------------")
-					--print("4 - no collision:", dragPart.Position)
 					local currentLocation = dragPart.CFrame.p
-					--print("preSafeMove", preSafeMove)
-					--print("currentLocation", currentLocation)
 					dragPart.CFrame = preSafeMove
 					local moveVector = (dragPart.CFrame.p - currentLocation).Unit
-					--print("safeMoveVector:", moveVector)
 					safeMoveWrapper(dragPart, 0.123, selection, v[2])
-					--print("newLocation:", dragPart.CFrame.p)
-					--dragPart:SafeMove(v[2], selection, 0.123)
-					--print("final", dragPart.CFrame.p)
 					
 				else
 					local distTraveled = Utility.distanceVector3(dragPart.CFrame.p, afterInitialSafeMovePos.p)
-					--print("total dist", distTraveled)
 				end
 				
 				local firstPosition = nil
 				local localPosition = v[1].CFrame:pointToObjectSpace(dragPart.CFrame.p)
-				--print("s1 local position:", localPosition)
+				
 				local loE = vector3LessThanOrEqualTo(localPosition, upperBounds)
 				local goE = vector3GreaterThanOrEqualTo(localPosition, lowerBounds)
 				
 				--dont remember what loE was for
 				--loE = true
 				
-				--print("loe:", loE, "   goe:", goE)
-				--print("localPosition:", localPosition)
-				--print("loe: upperBounds:", upperBounds)
-				--print("goe: lowerBounds:", lowerBounds)
-				--print("s1 upper:", upperBounds)
-				--print("s1 lower:", lowerBounds)
 				if loE and goE then
 					if not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
-						--print("s1 good")
 						table.insert(finalPositionTable, dragPart.CFrame.p)
 					else
 						firstPosition = dragPart.CFrame.p
-						--print("s1 intersection")
 					end
-				else
-					--print("s1, weird placement")
 				end
-				--print(dragPart.CFrame.p)
 				
 				dragPart.CFrame = preSafeMove
 				--dragPart:SafeMove(v[2], selection)
 				safeMoveWrapper(dragPart, 0.0002, selection, v[2])
 				localPosition = v[1].CFrame:pointToObjectSpace(dragPart.CFrame.p)
-				--print("s2 local position:", localPosition)
 				if vector3LessThanOrEqualTo(localPosition, upperBounds) and vector3GreaterThanOrEqualTo(localPosition, lowerBounds) then
 					if not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
-						--print("s2 good")
 						table.insert(finalPositionTable, dragPart.CFrame.p)
-					else
-						--print("s2 intersection")
 					end
-				else
-					--print("s2, weird placement")
 				end
-				--print(dragPart.CFrame.p)
 				
 				--try moving out by the closest movingPart face normal
 				
@@ -2179,46 +2079,28 @@ function movePart(delta, collision)
 				local normals = getDirectedNormalsFromPart(dragPart, v[2])
 				if firstPosition then
 					for _,vNorm in pairs(normals) do
-						--print("normals")
 						if not List.itemExistsInList(vNorm, localFaceNormalTable) then
-							--print("Checking local Normal:", vNorm)
 							table.insert(localFaceNormalTable, vNorm)
 							setPartPosition(dragPart, firstPosition)
-							--dragPart:SafeMove(vNorm, selection)
 							safeMoveWrapper(dragPart, 0.0002, selection, vNorm)
 							localPosition = v[1].CFrame:pointToObjectSpace(dragPart.CFrame.p)
-								--print("in good space")
-								if not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
-									--print("s3 good: ", dragPart.CFrame.p)
-									table.insert(finalPositionTable, dragPart.CFrame.p)
-								else
-									--print("s3 intersection")
-								end
-							--end
+							if not List.itemsHasItemNotInList(dragPart:GetTouchingParts(), selection) then
+								table.insert(finalPositionTable, dragPart.CFrame.p)
+							end
 						end
 					end
-				else
-					--print("s3, no initial placement")
 				end
 			end
 			local tick4 = tick()
-			---print("-------------")
-			--print(#finalPositionTable, "options")
 			
 			local closestPos = initialPos.p
 			local closestDist = Utility.distanceVector3(closestPos, preSafeMove.p)
-							
-			--print("originalPos", closestPos)
-			--print("original distance", closestDist)
-			
-			---print("attempting pos", preSafeMove.p)
+
 			for _,v in pairs(finalPositionTable) do
-				--print("finalPositionTable")
+
 				local testingDist = Utility.distanceVector3(v, preSafeMove.p)
-				--print("position", v)
-				--print("testing", testingDist)
+
 				if testingDist < closestDist then
-					--print("^^^^")
 					closestDist = testingDist
 					closestPos = v
 				end
@@ -2253,92 +2135,29 @@ function movePart(delta, collision)
 
 	else
 
-		--TICK--local tick1 = tick()
 		local newPosition = workplaneFrame:pointToWorldSpace(objectCFrame.p)
-		--print("newPosition", newPosition)
-		
 		newPosition = sanitizeVector3(newPosition)
-		--if not fuzzyCompareVector3(initialPos, newPosition) then
-		--print("dragPart1", dragPart.CFrame.p.y)
 		dragPart.CFrame = dragPart.CFrame - dragPart.CFrame.p + newPosition
-		--end
-		--print("dragPart2", dragPart.CFrame.p.y)
 		
 		if dragFromToolbox then
-			--print("SAFE MOVING")
 			local ini1 = dragPart.CFrame.p
 			dragPart.Parent = game.Workspace
-			--dragPart:SafeMove(planeNormal, game.Selection:Get())
-			--print("safe move")
+
 			safeMoveWrapper(dragPart, 0.0002, game.Selection:Get(), Vector3.new(0, 1, 0))
 			dragPart.Parent = nil
 			local ini2 = dragPart.CFrame.p
 			
 			dragFromToolbox = false
 		end
-		
-		--print("move Part:", dragPart.CFrame)
-		
-		--TICK--local tick2 = tick()
-		--TICK--print("Second time:", (tick2 - tick1) * 1000)
 
 	end
 	
---	local tick10 = tick()
-	-- no sanitization	
-	
-	--TICK--local initialTick = tick()
-	
---	local function moveSelection(initialCFrame, finalCFrame)
---	local rootSelection = getSelectionRoots()
---	
---	for k, v in pairs(rootSelection) do
---		k.CFrame = finalCFrame:toWorldSpace(initialCFrame:toObjectSpace(k.CFrame))
---	end
---end
 	filteredSelectionMetapart.TranslateFromTo(initialPos, dragPart.CFrame)
-	--filteredSelectionMetapart.CFrame = dragPart.CFrame:toWorldSpace(initialPos:toObjectSpace(filteredSelectionMetapart.CFrame))
-	--filteredSelectionMetapart.CFrame = dragPart.CFrame
-	
-	--moveSelection(initialPos, dragPart.CFrame)
-	
---	local tick11 = tick()
-	--TICK--local 
-	
---	print("tick 1-2:", (tick2 - tick1) * 1000)
---	print("tick 2-3:", (tick3 - tick2) * 1000)
---	print("tick 3-4:", (tick4 - tick3) * 1000)
---	print("tick 4-5:", (tick5 - tick4) * 1000)
---	print("tick 5-6:", (tick6 - tick5) * 1000)
---	print("tick 6-7:", (tick7 - tick6) * 1000)
---	print("tick 7-8:", (tick8 - tick7) * 1000)
---	print("tick 8-9:", (tick9 - tick8) * 1000)
---	print("tick 9-10:", (tick10 - tick9) * 1000)
---	print("tick 10-11:", (tick11 - tick10) * 1000)
---	
---	print("TOTAL TIME FOR MOVE PARTS:", (tick11 - tick1) * 1000)
-	--[[
-	print("initial:", previousAABBCFrame.p)
-	print("pos:", dragPart.CFrame.p)	
-	
-	local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
-	local side = Utility.getVector3Sign(localCamera)
-	
-	Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
-						selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
-						selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
-	
-	Adorn.scaleTwo(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, -1)), 
-						selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, 1)),
-	selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
-	--]]
-	--print("final position:", game.Selection:Get()[1].CFrame.p)
-	--print("done moving Part")
 end
 
 function planeDrag()
 	Adorn.setAllAdornVisibility(false)
-	--print("plane drag")
+	
 	local ray = mouse.UnitRay
 	ray = Ray.new(ray.Origin, ray.Direction * 800)
 	
@@ -2411,16 +2230,13 @@ function planeDrag()
 				
 			end
 			
---[[ CSG Changes
-			--print("location:", location)
-			
+--[[ CSG Changes			
 			planeSize = Vector3.new(5, 5, 0.2)
 			centerPoint = location
 			planeObject.CFrame = CFrame.new(Vector3.new(0,0,0), castNormal)
 --]]
 			
 			if v0 and v1 and v2 then
-				--print "creating plane"
 				local partDist = part.CFrame:pointToObjectSpace(location) - localLocation
 				local v0local = v0 + partDist
 				local v1local = v1 + partDist
@@ -2445,7 +2261,6 @@ function planeDrag()
 				
 				planeObject.Size = planeSize
 				holoBox.Size = planeSize
-				--print("setting planeSize to", planeSize)
 
 			end
 			
@@ -2458,9 +2273,6 @@ function planeDrag()
 
 --[[CSG Changes
 			planeObject.CFrame = planeObject.CFrame - planeObject.CFrame.p + location
-			
-			print("location:", location)
-			print("CFRAME:", planeObject.CFrame)
 --]]
 			
 		end
@@ -2476,18 +2288,12 @@ function freeDrag()
 	
 	if planeDragging then
 		planeDrag()
-		--print("plane drag")
 		return
 	end
 	
 	if not freeDragging then
-		--if selectionBoxStart then
-			RubberBand.updateRubberBand(Vector2.new(mouse.X, mouse.Y))
-			return
-		--end
-		
-		--onDragEnter(game.Selection:Get(), location)
-		--selectPart()
+		RubberBand.updateRubberBand(Vector2.new(mouse.X, mouse.Y))
+		return
 	end
 		
 	castPlane = nil
@@ -2541,24 +2347,13 @@ function freeDrag()
 		end
 		selectedPart = Metapart.convertToPart(filteredSelection[1])
 	end
-	--print("mP:", colPoint, startLocation, plugin.CollisionEnabled)
-	--print("pre startLocation return")
+	
 	if not startLocation then return end	
-	
-	--print("return early: 1")
-	--if true then return end
-	
-	
-	
-	--local initialTick = tick()
+		
 	movePart(colPoint - startLocation, plugin.CollisionEnabled)
-	--local finalTick = tick()
-	--print("Total time:", (finalTick - initialTick) * 1000)
 	lastDist = lastDist + (selectedPart.Position - previousPoint)
 	
-	--print("from FreeDrag")
 	updateInvisiblePart()
-	--print("finish Free Drag")
 end
 
 function selectDragPlane(selectBase)
@@ -2690,8 +2485,6 @@ function selectDragPlane(selectBase)
 			dragPlane = nil
 		end
 	end
-		
-	--print("localLocation:", localLocation)
 	
 	local pointLocation = localLocation / Utility.absVector3(localLocation) * -1
 	pointLocation = Utility.cleanVector3(pointLocation)
@@ -2721,18 +2514,15 @@ function removeDragPart()
 	local dragPartFound = false
 	local currentSelection = game:GetService("Selection"):Get()
 	for i, v in ipairs(currentSelection) do
-		--print("checking", v)
 		if v.Parent ~= cg and v.Name ~= "DragParte1b1aec5" and v.Name ~= "InvisibleParte1b1aec5" then
 			table.insert(selection, v)
 		else
-			--print ("REMOVING DRAG PART: SHOULD IT BE IN SELECTION?")
 			v.Parent = game:GetService("CoreGui")
 			dragPartFound = true
 		end
 	end
 	
 	if dragPartFound then
-		--print("removing dragPart")
 		setSelection(selection)
 	end
 end
@@ -2753,7 +2543,7 @@ function releasePart()
 	end
 	
 	RubberBand.finishRubberbandDrag()	
-	--print("release part")
+	
 	recreateAdornment() -- add inside of finishRubberbandDrag?
 	
 	
@@ -2792,7 +2582,6 @@ function releasePart()
 	end
 	
 	if planeDragging and Adorn.isPlaneSelectingModeOn() then
-		--print("selecting plane")
 		selectDragPlane()
 		planeDragging = false
 	end
@@ -2806,18 +2595,8 @@ function releasePart()
 		planeObject = nil
 	end
 	
---	if selectionBoxStart then
---		selectionBoxStart = nil
---		print("from releasePart")
---		updateRubberBand()
-		
---		updateInvisiblePart("release part")
---	end
-	
 	startLocation = nil
 	
-	--local finalTick = tick()
-	--print("releasePart Tick:", (finalTick - initialTick) * 1000)
 end
 
 function grabHandle(handle, position)
@@ -3069,7 +2848,6 @@ function waypointChanged()
 	if not on then return end
 	resetDragger()
 	--updateSelection()
-	--print("from waypoint changed")
 	updateRotatePart(Selection.getFilteredSelection())
 	updateInvisiblePart()
 end
@@ -3100,12 +2878,10 @@ function selectionChanged()
 	end
 	
 	if (#currentSelection == 1) then
-		--print("selection changed")
 		selectedPart = Metapart.convertToPart(currentSelection[1])
 		if selectedPart and selectedPart:IsA("FormFactorPart") then selectedPart.FormFactor = Enum.FormFactor.Custom end
 	end
 	
-	--print("fromselectionchanged")
 	recreateAdornment()
 	--updateInvisiblePart()
 		
@@ -3297,75 +3073,43 @@ local function movePrimitivesDelta(part, direction, movedSoFar, isMetapart)
 	else
 		part.CFrame = part.CFrame + direction
 	end
-	
-	--print("moving to ", part.CFrame.p)
+
 	return movedSoFar + direction
 end
 
---local timeTick = nil
---
---local function clockTime()
---	if not timeTick then return end
---	local currentTime = tick()
---	print("timeClock:", (currentTime - timeTick) * 1000)
---	timeTick = currentTime
---end
-
 local function searchIn(part, ignoreList, direction, moveBy, inExtent, outExtent)
 	if math.abs(moveBy) < 0.0001 then return end
---	print("searchIn:", direction, moveBy)
---	print("start:", part.CFrame.p)
---	print("searchIn")
---	clockTime()
+
 	while not List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) do
---		print("start int")
---		clockTime()
 		outExtent = part.CFrame.p
 		if (part.CFrame.p + (direction.Unit * moveBy) == inExtent) then
 			
 			searchIn(part, ignoreList, direction, moveBy * 0.5, inExtent, outExtent)
 			return
 		end
---		print("movePrimitives - in")
---		clockTime()
 		movePrimitivesDelta(part, direction.Unit * moveBy, Vector3.new(0,0,0))
 	end
-	
---	print("finish:", part.CFrame.p)	
-	
+		
 	searchOut(part, ignoreList, direction, moveBy * -0.5, inExtent, outExtent)
 end
 
 function searchOut(part, ignoreList, direction, moveBy, inExtent, outExtent)
-	--print("searchOut:", direction, moveBy)
+	
 	if math.abs(moveBy) < 0.0001 then
---		print("searchOut <<<<")
 		part.CFrame = part.CFrame - part.CFrame.p + outExtent
 		return
 	end
---	print("searchOut:", direction, moveBy)
---	print("start:", part.CFrame.p)
---	clockTime()
 	
 	while List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) do
---		print("start out")
---		clockTime()
 		inExtent = part.CFrame.p
 		if outExtent and (part.CFrame.p + (direction.Unit * moveBy) == outExtent) then
 			searchOut(part, ignoreList, direction, moveBy * 0.5, inExtent, outExtent)
 			return
 		end
---		print("movePrimitives - out")
---		clockTime()
 		movePrimitivesDelta(part, direction.Unit * moveBy, Vector3.new(0,0,0))
 	end
 	
---	local initialTick = tick()
---	print("finish:", part.CFrame.p)
-	searchIn(part, ignoreList, direction, moveBy * -0.5, inExtent, outExtent)
---	local finalTick = tick()
---		print("tickTime:", (finalTick - initialTick) * 1000)
-		
+	searchIn(part, ignoreList, direction, moveBy * -0.5, inExtent, outExtent)		
 end
 
 local function castOut(part, ray)
@@ -3437,11 +3181,6 @@ local function safeMove(part, ignoreList, direction)
 		return
 	end
 	--collision safemove
-	--print("safeMove")
-	
---	print("startSaveMove--------------")
---	print("originalPosition:", part.CFrame.p)
---	timeTick = tick()
 	local originalCollision = List.filterOutItems(ignoreList, part:GetTouchingParts())
 	
 	
@@ -3452,7 +3191,6 @@ local function safeMove(part, ignoreList, direction)
 		local keepCasting = true
 		
 		while keepCasting do
-			--print("recast:", #colliding)
 			castMove(part, threshold, ignoreList, direction)
 			local colliding = List.filterOutItems(originalCollision, List.filterOutItems(ignoreList, part:GetTouchingParts()))
 			if #colliding == 0 then
@@ -3461,15 +3199,10 @@ local function safeMove(part, ignoreList, direction)
 				originalCollision = List.combineLists(originalCollision, colliding)
 			end
 		end
-		
-		
-		--print("direction to search:", direction)
-		
+				
 		searchOut(part, ignoreList, direction * -1, 0 - math.min(part.Size.X / 2, part.Size.Y / 2, part.Size.Z / 2), part.CFrame.p, nil)
 		
 	end
-	
-	
 end
 
 local function searchDirectionFine(part, ignoreList, movedSoFar, direction, moveBy, threshold, depth, isMetapart)
@@ -3478,10 +3211,9 @@ local function searchDirectionFine(part, ignoreList, movedSoFar, direction, move
 	if moveBy <= 0.0002 then return end
 	
 	movedSoFar = movePrimitivesDelta(part, direction.Unit * moveBy, movedSoFar, isMetapart)
-	--print(depth, "searchDirectionFine:", part.CFrame.p.Z)
+	
 	if movedSoFar ~= movedSoFar then return end
 	
-	--print("searchDirectionFine touching")
 	if List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
 		movedSoFar = movePrimitivesDelta(part, direction.Unit * -moveBy, movedSoFar, isMetapart)
 		searchDirectionFine(part, ignoreList, movedSoFar, direction, moveBy * 0.5, threshold, depth + 1, isMetapart)
@@ -3493,7 +3225,7 @@ end
 local function searchDirectionGross(part, ignoreList, movedSoFar, direction, threshold, isMetapart)
 	if (movedSoFar.Magnitude > maxMove) then return end
 	movedSoFar = movePrimitivesDelta(part, direction.Unit, movedSoFar, isMetapart)
-	--print("directionGross:", part.CFrame.p.Z)
+	
 	if (movedSoFar ~= movedSoFar) then return end
 	
 	if List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
@@ -3506,20 +3238,6 @@ end
 local function safeMoveAlongLine(part, ignoreList, direction, threshold, isMetapart)
 	--Check if colliding?
 	if List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
---		searchOut(part, ignoreList, direction, 0 - math.min(part.Size.X / 2, part.Size.Y / 2, part.Size.Z / 2), part.CFrame.p, nil)
---		
---		local collisions = part:GetTouchingParts()
---		print(#collisions)
---		if #collisions > 0 then
---			for i, v in ipairs(collisions) do
---				print(i, v)
---			end
---		end
---		if #List.filterOutItems(ignoreList, part:GetTouchingParts()) > 0 then
---			print("STILL COLLIDING!")
---		else
---			print("NO LONGER COLLIDING")
---		end
 		searchDirectionGross(part, ignoreList, Vector3.new(0,0,0), direction * -1, threshold, isMetapart)
 	end
 end
@@ -3532,7 +3250,6 @@ local function searchDirectionUntilCollideGross(part, ignoreList, movedSoFar, di
 	
 	if (movedSoFar ~= movedSoFar) then return false end
 	
-	--print("searchDirectionUntilCollide touching")
 	if List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
 
 		safeMoveAlongLine(part, ignoreList, direction, threshold, isMetapart)
@@ -3544,7 +3261,6 @@ local function searchDirectionUntilCollideGross(part, ignoreList, movedSoFar, di
 end
 
 local function moveUntilCollide(part, ignoreList, direction, threshold, maxDist)
---print("moveuntilcollide touching")
 	if not List.itemsHasItemNotInList(part:GetTouchingParts(), ignoreList) then
 		return searchDirectionUntilCollideGross(part, ignoreList, Vector3.new(0,0,0), direction, threshold, maxDist)
 	end
@@ -3720,16 +3436,14 @@ end
 
 local function filterOutItems(items, list)
 	if not items then return list end
-	--print("itemsSize:", #items)
---	local tickTime = tick()
+	
 	local ret = {}
 	for i = 1, #list do
 		if not itemExistsInList(list[i], items) then
 			table.insert(ret, list[i])
 		end
 	end
---	local finalTime = tick()
---	print("filter time of", #items, "items took", (finalTime - tickTime) * 1000)
+	
 	return ret
 end
 
@@ -4171,7 +3885,7 @@ function createMetaPart(object, subscribe)
 					end
 					
 					reRoot()
-					--print("translateFromTo", from, to)
+					
 					local difference = to.p - from.p--finalObject.info.oCFrame
 					--sanitize?
 					for i = 1, #finalObject.roots do
@@ -4261,7 +3975,6 @@ function createMetaPart(object, subscribe)
 		
 	elseif object:IsA("Model") and not object:IsA("Workspace") then	
 		if (pcall(function() object:IsWrapped() end)) then
-			--print("wrapped")
 			return object
 		end
 				
@@ -4348,7 +4061,6 @@ function createMetaPart(object, subscribe)
 		
 		finalObject.mt.__index = function (table, key)
 			
-			--print("Model:", key)
 			if key == "IsWrapped" then
 				return function() return true end
 			end
@@ -4394,7 +4106,7 @@ function createMetaPart(object, subscribe)
 						recalculateCFrameAndSize()
 					end
 					reRoot()
-					--print("translateFromTo", from, to)
+					
 					local difference = to.p - from.p--finalObject.info.oCFrame
 					--sanitize?
 					
@@ -4482,8 +4194,6 @@ function createMetaPart(object, subscribe)
 		end
 		
 		finalObject.mt.__newindex = function (table, key, value)
-			--print("newindex", key)
-
 			if key == "UpdatePlaneCFrame" then
 				finalObject.info.lastPlaneCFrame = value
 				finalObject.info.pCFrame, finalObject.info.pSize = Extent.getCFrameAndSizeOfList(finalObject.children, value)
@@ -4503,7 +4213,6 @@ function createMetaPart(object, subscribe)
 				end
 				
 				if (finalObject.info.oCFrame - finalObject.info.oCFrame.p) ~= (value - value.p) then
-					--print("RESETTING PLANE")
 					finalObject.info.pCFrame = nil
 					finalObject.info.pSize = nil
 					finalObject.info.lastPlaneCFrame = nil
@@ -4511,7 +4220,6 @@ function createMetaPart(object, subscribe)
 					finalObject.info.pCFrame = finalObject.info.pCFrame - finalObject.info.oCFrame.p + value.p
 				end
 				
-				--print("CFRAME NEW VALUE:", value.p)
 				finalObject.info.oCFrame = value
 				finalObject.info.expectingChanged = false
 				return
@@ -4607,7 +4315,6 @@ function createMetaPart(object, subscribe)
 				return function(from, to) 
 					reRoot()
 					finalObject.info.expectingChanged = true
-					--print("translateFromTo", from, to)
 					local difference = to.p - from.p
 					--sanitize?
 					
@@ -4694,7 +4401,6 @@ function createMetaPart(object, subscribe)
 			
 			if key == "CFrame" then
 				value = sanitizeCFrame(value)
-				print(value)
 				finalObject.info.lastPlaneCFrame = nil
 			end
 			
@@ -4768,11 +4474,7 @@ function createMetaPart(object, subscribe)
 			if key == "UpdatePlaneCFrame" then	
 				return
 			end
-			
---			if key == "Unsubscribe" then
---				return function() print("WHAT") end
---			end
-			
+						
 			if key == "CFrame" then
 				return
 			end
@@ -5112,32 +4814,6 @@ function getExtentsRecursive(object, extentSpace)
 	return {Lower = lowerBounds, Upper = upperBounds}
 end
 
-
---[[
-local function getExtentsRecursive(object, extentSpace)
-	local lowerBounds = nil
-	local upperBounds = nil
-	
-	local children = object:GetChildren()
-	
-	for i, v in ipairs(children) do
-		local lower, upper = getExtentsRecursive(v, extentSpace)
-		lowerBounds, upperBounds = unionVector3(lower, lowerBounds, upperBounds, extentSpace)
-		lowerBounds, upperBounds = unionVector3(upper, lowerBounds, upperBounds, extentSpace)
-	end
-	
-	if object:IsA("BasePart") then
-		local lower, upper = workspace:GetExtents({object}, extentSpace)
-		print("init::", lowerBounds, ":", upperBounds)
-		lowerBounds, upperBounds = unionVector3(lower, lowerBounds, upperBounds, extentSpace)
-		print("1",lower, "::", lowerBounds, ":", upperBounds)
-		lowerBounds, upperBounds = unionVector3(upper, lowerBounds, upperBounds, extentSpace)
-		print("2",upper, "::", lowerBounds, ":", upperBounds)
-	end
-	
-	return lowerBounds, upperBounds
-end
---]]
 local function getExtentsOfSelection(extentSpace)
 	local selection = game:GetService("Selection"):Get()
 	
@@ -5190,7 +4866,7 @@ function getExtents(extentSpace)
 end
 
 function extentsToCFrameAndSize(extents, extentSpace)
-	if not extents.Lower or not extents.Upper then --[[print "ERROR: BAD EXTENTS"]] return nil, nil end
+	if not extents.Lower or not extents.Upper then return nil, nil end
 		
 	local size = Utility.absVector3(extents.Upper - extents.Lower)
 	local position = extents.Lower + (size / 2)
@@ -5633,10 +5309,8 @@ end
 
 local function planeInputEnded(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		--print(currentlyOverHandle , currentHandle == H_PLANE , initialPlaneClick)
 		if currentHandle == H_PLANE and initialPlaneClick then
 			planeSelectionActive = not planeSelectionActive
-			--print("planeSelection")
 		end
 		initialPlaneClick = false
 	end
@@ -5882,9 +5556,7 @@ local function initializeAdorns()
 		measureCone4.Parent = cg
 		
 		-- mini plane
-		
-		--print("more lines")
-		
+				
 --		miniPlaneLine1 = Instance.new("ImageHandleAdornment", cg)
 --		miniPlaneLine1.Visible = false
 --		miniPlaneLine1.Color3 = white
@@ -6064,8 +5736,6 @@ local function setRotateAdornVisibility(value)
 end
 
 local function adornInstanceWithRotate(adornee)
-	--print("rotate adornee:", adornee)
-	--print(adornee.CFrame)
 	adornInstance(R_XY, adornee)
 	adornInstance(R_XZ, adornee)
 	adornInstance(R_YZ, adornee)
@@ -6197,9 +5867,6 @@ local function updatePlanePosition()
 
 	local minPosition = ((workplaneFrame:toObjectSpace(CFrame.new(adornee.CFrame:pointToWorldSpace(-halfSize)))).p) * Vector3.new(1, 0, 1);
 	local maxPosition = ((workplaneFrame:toObjectSpace(CFrame.new(adornee.CFrame:pointToWorldSpace(halfSize)))).p) * Vector3.new(1, 0, 1);
-		
-	--print("adornee:", adornee)
-	--print("adornee size", adornee.Size)
 
 	local minX = math.floor(math.min(minPosition.x, maxPosition.x));
 	local maxX = math.ceil(math.max(minPosition.x, maxPosition.x));
@@ -6225,9 +5892,7 @@ local function updatePlanePosition()
 	local farTransparency =  (-1 / (maxFarDist - minFarDist) * distFromCamera) + (minFarDist / (maxFarDist - minFarDist)) + 1;
 	transparencyDist = math.max(math.min(transparencyDist, 0.9), 0.0)
 	farTransparency = math.max(math.min(farTransparency, 1.0), 0.0)
-	
-	--print("workplaneFrame:", workplaneFrame)
-	
+		
 	--local totalLines = 10
 	
 	if renderRotation then
@@ -6312,7 +5977,6 @@ local function updatePlanePosition()
 		-- workplaneFrame -- camera_pos
 		local distFromPlane = workplaneFrame:pointToObjectSpace(camera_pos).y
 		
-		--print("distFromPlane:", distFromPlane)
 		tmpPlane.Size = (adornee.Size * Vector3.new(1, 0, 1)) + Vector3.new(0, (distFromPlane / 20) * .005, 0)
 		local objectLocation = workplaneFrame:toObjectSpace(adornee.CFrame)
 		tmpPlane.CFrame = adornee.CFrame:toObjectSpace(workplaneFrame:toWorldSpace(objectLocation - objectLocation.p * Vector3.new(0, 1, 0)))
@@ -6405,7 +6069,6 @@ local function updateAdornmentPositions()
 			setTranslateAdornVisibility(false)
 			setScaleAdornVisibility(false)
 		else
-			--print("here")
 			--setTranslateAdornVisibility(true)
 			--setPlaneVisibility(true)
 			--setScaleAdornVisibility(not adornKeeper[R_XY][1].Adornee:IsA("Model") and selectionSize == 1)
@@ -6425,19 +6088,7 @@ local function updateAdornmentPositions()
 	octant = Vector3.new(octant.X == octant.X and octant.X or 1, octant.Y == octant.Y and octant.Y or 1, octant.Z == octant.Z and octant.Z or 1)
 	local invisLocalPos = adornKeeper[T_Y_POS][1].Adornee.CFrame:pointToObjectSpace(cameraPos).Unit
 	local inisOctant = invisLocalPos / Vector3.new(math.abs(invisLocalPos.X), math.abs(invisLocalPos.Y), math.abs(invisLocalPos.Z))
-	
-	--print("octant", octant)
-	--[[
-	case T_Y_POS:
-		answer = localExtents.center() + Vector3(0, quadrant.y, 0) * halfSize + Vector3(0, quadrant.y * 2.0f * positionChange , 0); break;
-	case R_XY:
-		answer = localExtents.center() + Vector3(quadrant.x, quadrant.y, -quadrant.z) * halfSize + Vector3(0.35f * quadrant.x, 0.35f * quadrant.y, 0) * positionChange; break;
-	case R_XZ:
-		answer = localExtents.center() + Vector3(quadrant.x, -quadrant.y, quadrant.z) * halfSize + Vector3(0.35f * quadrant.x, 0, 0.35f * quadrant.z) * positionChange; break;
-	case R_YZ:
-		answer = localExtents.center() + Vector3(-quadrant.x, quadrant.y, quadrant.z) * halfSize + Vector3(0, 0.35f * quadrant.y, 0.35f * quadrant.z) * positionChange; break;
-	--]]
-	
+		
 	local positionChange = math.max(adornee.CFrame:pointToObjectSpace(cameraPos).Magnitude / 15.0, 1.0) * 0.35
 	
 	if not mouseDown then
@@ -6711,7 +6362,6 @@ local function clearExtraAdorns()
 end
 
 local function setAllAdornVisibility(value)
-	--print("setting adorn visibility", value)
 	setRotateAdornVisibility(value)
 	setTranslateAdornVisibility(value)
 	setScaleAdornVisibility(value)
@@ -6774,10 +6424,9 @@ local function grabHandle()
 end
 
 local function releaseHandle()
-	--print("releaseHandle")
 	--called on mouse release, releases the current handle
 	clearExtraAdorns()
-	--print(not currentlyOverHandle, currentHandle ~= H_NONE)
+	
 	if not currentlyOverHandle and currentHandle ~= H_NONE then
 		if currentHandle == H_PLANE then
 			planeHoverTransition = false
@@ -6813,8 +6462,7 @@ local function isOverPlaneSelect()
 	local e = label.AbsolutePosition + label.AbsoluteSize/2
 	local mouse = Input.getMouse()
 	local x,y = mouse.X, mouse.Y
-	--print("X:",s.X,"<",x,"<",e.X)
-	--print("Y:",s.Y,"<",y,"<",e.Y)
+	
 	if x < s.X or x > e.X then return false end
 	return y > s.Y and y < e.Y
 end
@@ -7019,7 +6667,6 @@ local function isRubberBandDragInProgress()
 end
 
 function startRubberbandDrag(location)
-	--print("STARTRUBBERBAND")
 	rubberBandDragInProgress = true
 	Adorn.setPlaneVisibility(false)
 	selectionBoxStart = location
@@ -7048,11 +6695,9 @@ end
 
 function finishRubberbandDrag()
 	if not rubberBandDragInProgress then return end
-	--print("FINISHEDRUBBERBAND")
 	
 	rubberBandDragInProgress = false
 	
-	--print("Updating Selection2")
 	game:GetService("Selection"):Set(partsInRubberbandSelection)
 	selectionBoxStart = nil
 	
@@ -7064,7 +6709,6 @@ end
 
 function updateRubberBand(location)	
 	if not rubberBandDragInProgress then return end
-	--print("UPDATERUBBERBAND")
 	
 	--local initialTick = tick()
 	
@@ -7084,13 +6728,9 @@ function updateRubberBand(location)
 	partsInRubberbandSelection = findPartsInSelection(selectionBoxStart, location)
 	
 	if (#game:GetService("Selection"):Get() ~= #partsInRubberbandSelection) then
-		--print("Updating Selection1")
 		game:GetService("Selection"):Set(partsInRubberbandSelection)
 		--spawn(function() game:GetService("Selection"):Set(partsInRubberbandSelection) end)
 	end
-	
-	--local finalTick = tick()
-	--print("updateRubberBand Tick:", (finalTick - initialTick) * 1000)
 end
 
 local module = {}
