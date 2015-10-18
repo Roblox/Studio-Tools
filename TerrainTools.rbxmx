@@ -28,7 +28,7 @@
 				<ProtectedString name="Source"><![CDATA[--Made by Stickmasterluke
 
 
-while not workspace:WaitForChild('Terrain').IsSmooth do
+while not game.Workspace.Terrain.IsSmooth do
 	workspace.Terrain.Changed:wait()
 end
 
