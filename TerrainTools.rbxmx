@@ -27,9 +27,6 @@
 				<string name="Name">TerrainBrushScript</string>
 				<ProtectedString name="Source"><![CDATA[--Made by Stickmasterluke
 
-while not game.Workspace.Terrain do
-	wait()
-end
 
 while not game.Workspace.Terrain.IsSmooth do
 	workspace.Terrain.Changed:wait()
