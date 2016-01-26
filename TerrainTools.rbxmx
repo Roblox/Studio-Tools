@@ -1321,6 +1321,7 @@ function FirstTimeSetUp()
 	setup = true
 	local changeHistory = game:GetService('ChangeHistoryService')
 	local terrain = game.Workspace.Terrain
+	local utilityModule = require(script.Parent.Utility)()
 	local coreGui = utilityModule:GetUsingAsPlugin() and game:GetService('CoreGui') or game.Players.LocalPlayer:WaitForChild('PlayerGui')
 	local gui = script.Parent:WaitForChild('TerrainRegionGui')
 	local guiFrame = gui:WaitForChild('Frame')
@@ -2339,6 +2340,7 @@ local initialised = false
 
 function initialiseUtility(plugin)
 	if not initialised then
+		initialised = true
 		utility.usingAsPlugin = (plugin ~= nil)
 		utility.plugin = plugin	
 		
