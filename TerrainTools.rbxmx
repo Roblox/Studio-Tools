@@ -5910,7 +5910,7 @@ return materialsTable
 							<int name="BorderSizePixel">0</int>
 							<bool name="ClipsDescendants">false</bool>
 							<bool name="Draggable">false</bool>
-							<Content name="Image"><url>rbxassetid://170952383</url></Content>
+							<Content name="Image"><url>rbxasset://textures/ui/dropdown_arrow.png</url></Content>
 							<Color3 name="ImageColor3">4294967295</Color3>
 							<Vector2 name="ImageRectOffset">
 								<X>0</X>
@@ -5920,7 +5920,7 @@ return materialsTable
 								<X>0</X>
 								<Y>0</Y>
 							</Vector2>
-							<float name="ImageTransparency">0.699999988</float>
+							<float name="ImageTransparency">0.300000012</float>
 							<string name="Name">ArrowLabel</string>
 							<Ref name="NextSelectionDown">null</Ref>
 							<Ref name="NextSelectionLeft">null</Ref>
@@ -5928,9 +5928,9 @@ return materialsTable
 							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>1</XS>
-								<XO>-12</XO>
+								<XO>-13</XO>
 								<YS>0.5</YS>
-								<YO>-8</YO>
+								<YO>-4</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
 							<token name="ScaleType">0</token>
@@ -5940,7 +5940,7 @@ return materialsTable
 								<XS>0</XS>
 								<XO>16</XO>
 								<YS>0</YS>
-								<YO>16</YO>
+								<YO>10</YO>
 							</UDim2>
 							<token name="SizeConstraint">2</token>
 							<Rect2D name="SliceCenter">
@@ -5954,118 +5954,6 @@ return materialsTable
 								</max>
 							</Rect2D>
 							<bool name="Visible">true</bool>
-							<int name="ZIndex">3</int>
-						</Properties>
-					</Item>
-					<Item class="ImageLabel" referent="RBXBA83B2F6ED314CFBAF2258441CFEDADD">
-						<Properties>
-							<bool name="Active">false</bool>
-							<Color3 name="BackgroundColor3">4294967295</Color3>
-							<float name="BackgroundTransparency">1</float>
-							<Color3 name="BorderColor3">4279970357</Color3>
-							<int name="BorderSizePixel">0</int>
-							<bool name="ClipsDescendants">false</bool>
-							<bool name="Draggable">false</bool>
-							<Content name="Image"><url>rbxassetid://311226754</url></Content>
-							<Color3 name="ImageColor3">4294967295</Color3>
-							<Vector2 name="ImageRectOffset">
-								<X>0</X>
-								<Y>0</Y>
-							</Vector2>
-							<Vector2 name="ImageRectSize">
-								<X>0</X>
-								<Y>0</Y>
-							</Vector2>
-							<float name="ImageTransparency">0</float>
-							<string name="Name">MenuLabel</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
-							<UDim2 name="Position">
-								<XS>1</XS>
-								<XO>-17</XO>
-								<YS>0.5</YS>
-								<YO>-17</YO>
-							</UDim2>
-							<float name="Rotation">0</float>
-							<token name="ScaleType">0</token>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
-							<UDim2 name="Size">
-								<XS>0</XS>
-								<XO>26</XO>
-								<YS>0</YS>
-								<YO>34</YO>
-							</UDim2>
-							<token name="SizeConstraint">2</token>
-							<Rect2D name="SliceCenter">
-								<min>
-									<X>0</X>
-									<Y>0</Y>
-								</min>
-								<max>
-									<X>0</X>
-									<Y>0</Y>
-								</max>
-							</Rect2D>
-							<bool name="Visible">false</bool>
-							<int name="ZIndex">3</int>
-						</Properties>
-					</Item>
-					<Item class="ImageLabel" referent="RBXC11F59134F794DB4A407FC6ADC83503A">
-						<Properties>
-							<bool name="Active">false</bool>
-							<Color3 name="BackgroundColor3">4294967295</Color3>
-							<float name="BackgroundTransparency">1</float>
-							<Color3 name="BorderColor3">4279970357</Color3>
-							<int name="BorderSizePixel">0</int>
-							<bool name="ClipsDescendants">false</bool>
-							<bool name="Draggable">false</bool>
-							<Content name="Image"><url>rbxassetid://222790673</url></Content>
-							<Color3 name="ImageColor3">4294967295</Color3>
-							<Vector2 name="ImageRectOffset">
-								<X>0</X>
-								<Y>0</Y>
-							</Vector2>
-							<Vector2 name="ImageRectSize">
-								<X>0</X>
-								<Y>0</Y>
-							</Vector2>
-							<float name="ImageTransparency">0.5</float>
-							<string name="Name">MenuBlackLabel</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
-							<UDim2 name="Position">
-								<XS>1</XS>
-								<XO>-17</XO>
-								<YS>0.5</YS>
-								<YO>-15</YO>
-							</UDim2>
-							<float name="Rotation">0</float>
-							<token name="ScaleType">0</token>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
-							<UDim2 name="Size">
-								<XS>0</XS>
-								<XO>24</XO>
-								<YS>0</YS>
-								<YO>30</YO>
-							</UDim2>
-							<token name="SizeConstraint">2</token>
-							<Rect2D name="SliceCenter">
-								<min>
-									<X>0</X>
-									<Y>0</Y>
-								</min>
-								<max>
-									<X>0</X>
-									<Y>0</Y>
-								</max>
-							</Rect2D>
-							<bool name="Visible">false</bool>
 							<int name="ZIndex">3</int>
 						</Properties>
 					</Item>
