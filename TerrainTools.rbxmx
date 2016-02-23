@@ -1132,6 +1132,12 @@ function FirstTimeSetUp()
 	updatePlaneLock()
 	updateSnapToGrid()
 	updateDynamicMaterial()
+	
+	-- Reset keyboard status on lost focus as key release may never come blocked by popups etc.
+	userInput.WindowFocusReleased:connect(function()
+		downKeys = {}
+	end)
+
 end
 
 
