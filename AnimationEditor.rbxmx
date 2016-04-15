@@ -6285,50 +6285,7 @@ button.Click:connect(function()
 				Parent = nil,
 			}
 			rootPart = mBaseItem
-			
-			local partCount = 1
-			do
-				local function doCalculate(item)
-		--			mAllItems[#mAllItems+1] = item
-					partList[item.Item] = item
-					partListByName[item.Name] = item
-					partToItemMap[item.Item] = item
-					partToLineNumber[item.Item] = partCount
-					partInclude[item.Name] = true
-		
-					for _, p in pairs(item.Item:GetChildren()) do
-						if p:IsA('Motor6D') then
-							local joinedTo;
-							if p.Part0 == item.Item then
-								joinedTo = p.Part1
-							elseif p.Part1 == item.Item then
-								joinedTo = p.Part0
-							else
-								error("Animation Editor cannot use motors that aren't parented to either its Part0 or Part1.")
-							end
-							
-							if not (p.Part0 and p.Part1) then
-								game.Selection:Set{p}
-								error("Animation Editor has detected a motor without both a Part0 and a Part1. It has selected it for you. Please repair the motor to continue.")
-							end
-							
-							local it = {
-								Item = joinedTo,
-								Name = joinedTo.Name,
-								Motor6D = p,
-								OriginC1 = repairedCFrame(p.C1),
-								Children = {},
-								Parent = item,
-							}
-							item.Children[#item.Children+1] = it
-							partCount = partCount+1
-							doCalculate(it)
-						end
-					end
-				end
-				doCalculate(mBaseItem)
-			end
-			
+
 			local joints = {}
 			local function recurse(obj)
 				if obj:IsA("Motor6D") then
@@ -6341,6 +6298,54 @@ button.Click:connect(function()
 			end
 			recurse(rootPart.Item.Parent)
 			
+			local partCount = 1
+			do
+				local visitedParts = {}
+				local function findPairedJoints(parent)
+					local parentObject = parent.Item
+					local childList = {}
+					local jointList = {}
+					for _, joint in pairs(joints) do
+						if joint.Part0 == parentObject and joint.Part1 ~= nil and visitedParts[joint.Part1.Name] == nil then
+							table.insert(childList, joint.Part1)
+							table.insert(jointList, joint)
+						elseif joint.Part1 == parentObject and joint.Part0 ~= nil and visitedParts[joint.Part0.Name] == nil then
+							table.insert(childList, joint.Part0)
+							table.insert(jointList, joint)
+						end
+					end					
+					return childList, jointList
+				end
+				
+				local function doCalculate(item)
+					visitedParts[item.Name] = item
+		--			mAllItems[#mAllItems+1] = item
+					partList[item.Item] = item
+					partListByName[item.Name] = item
+					partToItemMap[item.Item] = item
+					partToLineNumber[item.Item] = partCount
+					partInclude[item.Name] = true
+		
+					local childList, jointList = findPairedJoints(item)
+					for idx, joinedTo in pairs(childList) do
+						local p = jointList[idx]
+							
+						local it = {
+							Item = joinedTo,
+							Name = joinedTo.Name,
+							Motor6D = p,
+							OriginC1 = repairedCFrame(p.C1),
+							Children = {},
+							Parent = item,
+						}
+						item.Children[#item.Children+1] = it
+						partCount = partCount+1
+						doCalculate(it)
+					end
+				end
+				doCalculate(mBaseItem)
+			end
+						
 			MakePartSelectGui(mBaseItem)
 			createTimelineUI(mBaseItem)
 			menuManager.InitializeSettings({
