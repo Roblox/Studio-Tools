@@ -956,17 +956,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 		
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new((originalSize - selectedPart.Size) * 0.5
-				* Vector3.new(currentHandle == S_X_POS and -1 or 0, -1, currentHandle == S_Z_POS and -1 or 0)))
-
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) * 0.5)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) * 0.5)))
 		
 		local totalDist = Utility.distanceVector3(preactionCFrame.p, selectedPart.CFrame.p)
 		local diff = (preactionCFrame.p - selectedPart.CFrame.p).unit
@@ -1020,16 +1011,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 	
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new((originalSize - selectedPart.Size) * 0.5
-				* Vector3.new(currentHandle == S_X_NEG and 1 or 0, -1, currentHandle == S_Z_NEG and 1 or 0)))
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(((originalSize - selectedPart.Size) * 0.5)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(((originalSize - selectedPart.Size) * 0.5)))
 				
 		local totalDist = Utility.distanceVector3(preactionCFrame.p, selectedPart.CFrame.p)
 		local diff = (preactionCFrame.p - selectedPart.CFrame.p).unit
@@ -1102,15 +1085,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 		
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 1, 1)))
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, 1)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, 1)))
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = Utility.getVector3Sign(localCamera)
@@ -1130,15 +1106,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 		
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 1, -1)))
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)			
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, -1)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)			
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, -1)))
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = Utility.getVector3Sign(localCamera)
@@ -1158,15 +1127,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 1, -1)))
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 0, -1)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 0, -1)))
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = Utility.getVector3Sign(localCamera)
@@ -1397,7 +1359,6 @@ function updatePart()
 			
 			if not planeObject then
 				planeObject = Instance.new("Part", cg)
-				planeObject.FormFactor = Enum.FormFactor.Custom
 				planeObject.Size = Vector3.new(50, 50, 0.01)
 				planeObject.Position = Vector3.new(0,0,0)
 				planeObject.Transparency = 1
@@ -1460,7 +1421,6 @@ function updateDragPart()
 	if not dragPart then
 		dragPart = Instance.new("Part", nil)
 		dragPart.Name = "DragParte1b1aec5"
-		dragPart.FormFactor = Enum.FormFactor.Custom
 		dragPart.BottomSurface = Enum.SurfaceType.Smooth
 		dragPart.TopSurface = Enum.SurfaceType.Smooth
 		dragPart.Transparency = 1
@@ -1490,7 +1450,6 @@ function updateDragPart()
 		dragPart.Name = "DragParte1b1aec5"
 		dragPart.Archivable = false
 		dragPart.Parent = nil
-		dragPart.FormFactor = Enum.FormFactor.Custom
 		dragPart.BottomSurface = Enum.SurfaceType.Smooth
 		dragPart.TopSurface = Enum.SurfaceType.Smooth
 		if shouldBreakJoints then
@@ -2373,7 +2332,6 @@ function selectDragPlane(selectBase)
 	
 	if selectBase then
 		tmpPart = Instance.new("Part", cg)
-		tmpPart.FormFactor = Enum.FormFactor.Custom
 		tmpPart.Size = Vector3.new(100, 1, 100)
 		tmpPart.CFrame = CFrame.new(0, -0.5, 0)
 		tmpLocation = Vector3.new(0,0,0)
@@ -2397,7 +2355,6 @@ function selectDragPlane(selectBase)
 	
 	--use proxy part
 	local tmpPart = Instance.new("Part", cg)
-	tmpPart.FormFactor = Enum.FormFactor.Custom
 	tmpPart.Size = secondaryPart.Size
 	tmpPart.CFrame = secondaryPart.CFrame
 	
@@ -2650,7 +2607,6 @@ function recreateAdornment()
 	if not invisiblePart then
 		invisiblePart = Instance.new("Part", nil)
 		invisiblePart.Name = "InvisibleParte1b1aec5"
-		invisiblePart.FormFactor = Enum.FormFactor.Custom
 		invisiblePart.TopSurface = Enum.SurfaceType.Smooth
 		invisiblePart.BottomSurface = Enum.SurfaceType.Smooth
 		invisiblePart.Archivable = false
@@ -2659,7 +2615,6 @@ function recreateAdornment()
 	
 	if not castPart then
 		castPart = Instance.new("Part")
-		castPart.FormFactor = Enum.FormFactor.Custom
 	end
 	
 	Adorn.adornInstanceWithTranslate(invisiblePart)
@@ -2836,8 +2791,6 @@ function selectPart(instances)
 		RubberBand.startRubberbandDrag(Vector2.new(mouse.X, mouse.Y))
 	end
 	
-	if selectedPart and selectedPart:IsA("FormFactorPart") then selectedPart.FormFactor = Enum.FormFactor.Custom end
-	
 	recreateAdornment()
 	
 end
@@ -2879,7 +2832,6 @@ function selectionChanged()
 	
 	if (#currentSelection == 1) then
 		selectedPart = Metapart.convertToPart(currentSelection[1])
-		if selectedPart and selectedPart:IsA("FormFactorPart") then selectedPart.FormFactor = Enum.FormFactor.Custom end
 	end
 	
 	recreateAdornment()
@@ -2917,7 +2869,6 @@ local function togglePlaneSelection()
 		
 		if not planeObject then
 			planeObject = Instance.new("Part", cg)
-			planeObject.FormFactor = Enum.FormFactor.Custom
 			planeObject.Size = Vector3.new(50, 50, 0.01)
 			planeObject.Position = Vector3.new(0,0,0)
 			planeObject.Transparency = 1
