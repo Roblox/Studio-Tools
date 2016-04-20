@@ -472,7 +472,6 @@ function FirstTimeSetUp()
 				linePart.BottomSurface = 'Smooth'
 				linePart.Anchored = true
 				linePart.CanCollide = false
-				linePart.formFactor = 'Custom'
 				local selectionBox = Instance.new('SelectionBox')
 				selectionBox.Color = color
 				selectionBox.Transparency = transparency
@@ -497,7 +496,6 @@ function FirstTimeSetUp()
 				linePart.BottomSurface = 'Smooth'
 				linePart.Anchored = true
 				linePart.CanCollide = false
-				linePart.formFactor = 'Custom'
 				local selectionBox = Instance.new('SelectionBox')
 				selectionBox.Color = color
 				selectionBox.Transparency = transparency
@@ -944,7 +942,6 @@ function FirstTimeSetUp()
 					selectionPart.BottomSurface = 'Smooth'
 					selectionPart.Anchored = true
 					selectionPart.CanCollide = false
-					selectionPart.formFactor = 'Custom'
 					selectionPart.Size = Vector3.new(1, 1, 1) * selectionSize * resolution + Vector3.new(.1, .1, .1)
 					selectionPart.Parent = gui
 				end
@@ -1132,7 +1129,7 @@ function FirstTimeSetUp()
 	updatePlaneLock()
 	updateSnapToGrid()
 	updateDynamicMaterial()
-	
+
 	-- Reset keyboard status on lost focus as key release may never come blocked by popups etc.
 	userInput.WindowFocusReleased:connect(function()
 		downKeys = {}
@@ -2074,7 +2071,6 @@ function FirstTimeSetUp()
 		effectPart.BottomSurface = 'Smooth'
 		effectPart.Anchored = true
 		effectPart.CanCollide = false
-		effectPart.formFactor = 'Custom'
 		effectPart.Parent = gui
 
 		local selectionEffectObject = Instance.new('SelectionBox')
@@ -2143,7 +2139,6 @@ function FirstTimeSetUp()
 			selectionPart.BottomSurface = 'Smooth'
 			selectionPart.Anchored = true
 			selectionPart.CanCollide = false
-			selectionPart.formFactor = 'Custom'
 			selectionPart.Parent = gui
 		end
 		if not selectionObject then
@@ -3473,6 +3468,13 @@ local materialsTable = {	--Interface order is defined by order here
 	{enum = Enum.Material.WoodPlanks, image = 'http://www.roblox.com/asset/?id=225315705', forceSnapToGrid = true},
 	{enum = Enum.Material.CrackedLava, image = 'http://www.roblox.com/asset/?id=254541726'},
 	{enum = Enum.Material.Basalt, image = 'http://www.roblox.com/asset/?id=254542066'},
+	{enum = Enum.Material.Ice, image = 'rbxassetid://397352205'},
+	{enum = Enum.Material.Salt, image = 'rbxassetid://397352299'},
+	{enum = Enum.Material.Cobblestone, image = 'rbxassetid://397352378'},
+	{enum = Enum.Material.Limestone, image = 'rbxassetid://397352474'},
+	{enum = Enum.Material.Asphalt, image = 'rbxassetid://397352644'},
+	{enum = Enum.Material.LeafyGrass, image = 'rbxassetid://397720681'},
+	{enum = Enum.Material.Pavement, image = 'rbxassetid://397727024'},
 }
 
 return materialsTable
