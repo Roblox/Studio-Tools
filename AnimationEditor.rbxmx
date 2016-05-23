@@ -6453,10 +6453,9 @@ button.Click:connect(function()
 					local childList = {}
 					local jointList = {}
 					for _, joint in pairs(joints) do
-<<<<<<< 993d76b6385933413e0519c32abd357cedb11197
-=======
-						if (joint.Part1 and joint.Part1.Name == "ProxyPart") or (joint.Part0 and joint.Part0.Name == "ProxyPart") then break end
->>>>>>> Easing Styles +Bug Fixes
+						if (joint.Part1 and joint.Part1.Name == "ProxyPart") or (joint.Part0 and joint.Part0.Name == "ProxyPart") then
+							break 
+						end
 						if joint.Part0 == parentObject and joint.Part1 ~= nil and visitedParts[joint.Part1.Name] == nil then
 							table.insert(childList, joint.Part1)
 							table.insert(jointList, joint)
