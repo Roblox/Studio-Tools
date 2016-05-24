@@ -6596,10 +6596,11 @@ local function findPartsInSelection(startPos, endPos)
 			else
 				pos = v:GetModelCFrame().p
 			end
-			isLocked = false
 		elseif v:IsA("Tool") then
-			pos =  findFirstCFrame(v)
-			isLocked = false
+			pos = findFirstCFrame(v)
+			if pos then
+				pos = pos.p
+			end
 		end
 		
 		if pos then
