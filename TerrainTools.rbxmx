@@ -294,7 +294,8 @@ function FirstTimeSetUp()
 		end)
 	end
 
-	local MakeToolTip do
+	local MakeToolTip 
+	do
 		local ActiveToolTip = Instance.new("StringValue")
 
 		function MakeToolTip(Gui, Text)
