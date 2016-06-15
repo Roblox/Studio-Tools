@@ -294,25 +294,50 @@ function FirstTimeSetUp()
 		end)
 	end
 
-	local function MakeToolTip(Gui, Text)
-		local TextLabel = Instance.new("TextLabel", Gui)
-		TextLabel.Size = UDim2.new(3, 0, 0.6, 0)
-		TextLabel.Position = UDim2.new(0.8, 0, 0.8, 0)
-		TextLabel.SizeConstraint = "RelativeYY"
-		TextLabel.TextScaled = true
-		TextLabel.Text = Text
-		TextLabel.BackgroundTransparency = 0.3
-		TextLabel.BackgroundColor3 = Color3.new(0, 0, 0)
-		TextLabel.BorderSizePixel = 0
-		TextLabel.TextColor3 = Color3.new(1, 1, 1)
-		TextLabel.Visible = false
+	local MakeToolTip do
+		local ActiveToolTip = Instance.new("StringValue")
 
-		Gui.MouseEnter:connect(function()
-			TextLabel.Visible = true
-		end)
-		Gui.MouseLeave:connect(function()
-			TextLabel.Visible = false
-		end)
+		function MakeToolTip(Gui, Text)
+			local Name = tostring(Gui:GetFullName() .. Text)
+
+			local Frame = Instance.new("Frame", Gui)
+			Frame.BackgroundTransparency = 0.3
+			Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+			Frame.Size = UDim2.new(0, 100, 0, 30)
+			Frame.Position = UDim2.new(0.8, 0, 0.8, 0)
+			Frame.SizeConstraint = "RelativeYY"
+			Frame.ZIndex = Gui.ZIndex + 1
+			Frame.Style = "DropShadow"
+
+			local TextLabel = Instance.new("TextLabel", Frame)
+			TextLabel.BackgroundTransparency = 1
+			TextLabel.TextXAlignment = "Left"
+			TextLabel.Text = Text
+			TextLabel.BorderSizePixel = 0
+			TextLabel.TextColor3 = Color3.new(1, 1, 1)
+			TextLabel.Size = UDim2.new(1, -30, 1, 0);
+			TextLabel.Position = UDim2.new(0, 10, 0, 0);
+			TextLabel.FontSize = "Size10"
+			TextLabel.ZIndex = Frame.ZIndex
+			TextLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+			TextLabel.TextStrokeTransparency = 0.87
+
+			Frame.Visible = false
+
+			Gui.MouseEnter:connect(function()
+				ActiveToolTip.Value = Name
+				Frame.Visible = true
+				Frame.Size = UDim2.new(0, math.ceil(TextLabel.TextBounds.X + 36), Frame.Size.Y.Scale, Frame.Size.Y.Offset)
+			end)
+			ActiveToolTip.Changed:connect(function()
+				if ActiveToolTip.Value ~= Name then
+					Frame.Visible = false
+				end
+			end)
+			Gui.MouseLeave:connect(function()
+				Frame.Visible = false
+			end)
+		end
 	end
 
 	local function setMaterialSelection(newMaterialSelection)
