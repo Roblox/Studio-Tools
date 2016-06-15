@@ -294,6 +294,27 @@ function FirstTimeSetUp()
 		end)
 	end
 
+	local function MakeToolTip(Gui, Text)
+		local TextLabel = Instance.new("TextLabel", Gui)
+		TextLabel.Size = UDim2.new(3, 0, 0.6, 0)
+		TextLabel.Position = UDim2.new(0.8, 0, 0.8, 0)
+		TextLabel.SizeConstraint = "RelativeYY"
+		TextLabel.TextScaled = true
+		TextLabel.Text = Text
+		TextLabel.BackgroundTransparency = 0.3
+		TextLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+		TextLabel.BorderSizePixel = 0
+		TextLabel.TextColor3 = Color3.new(1, 1, 1)
+		TextLabel.Visible = false
+
+		Gui.MouseEnter:connect(function()
+			TextLabel.Visible = true
+		end)
+		Gui.MouseLeave:connect(function()
+			TextLabel.Visible = false
+		end)
+	end
+
 	local function setMaterialSelection(newMaterialSelection)
 		materialSelection = newMaterialSelection
 		updateUsabilityLocks()
@@ -321,6 +342,7 @@ function FirstTimeSetUp()
 			setMaterialSelection(materialsTable[i])
 		end)
 		newMaterialButton.Parent = guiFrame
+		MakeToolTip(newMaterialButton, materialSubTable.enum.Name:gsub("([A-Z])", " %1"):gsub("^%s", "")) -- Add spaces to names
 	end
 
 	function resizeGuiFrame()
