@@ -6576,12 +6576,11 @@ local function findFirstCFrame(parent)
 	return nil
 end
 
-local function findPartsInSelection(startPos, endPos)
-
-	local children = game.Workspace:GetChildren()
+local function findPartsInSelection(parent, startPos, endPos, partsList)
+	local children = parent:GetChildren()
 	local camera = workspace.CurrentCamera
 	
-	local ret = {}
+	local partsList = partsList or {}
 	
 	for i, v in ipairs(children) do
 		local pos = nil
@@ -6598,8 +6597,10 @@ local function findPartsInSelection(startPos, endPos)
 			end
 			isLocked = false
 		elseif v:IsA("Tool") then
-			pos =  findFirstCFrame(v)
+			pos = findFirstCFrame(v).p
 			isLocked = false
+		elseif v:IsA("Folder") then
+			findPartsInSelection(v, startPos, endPos, partsList)
 		end
 		
 		if pos then
@@ -6611,14 +6612,14 @@ local function findPartsInSelection(startPos, endPos)
 					projection.X > math.min(startPos.X, endPos.X) and
 					projection.Y < math.max(startPos.Y, endPos.Y) and
 					projection.Y > math.min(startPos.Y, endPos.Y) then
-					table.insert(ret, v)
+					table.insert(partsList, v)
 				end
 			end
 			
 		end
 		
 	end
-	return ret
+	return partsList
 end
 
 local function isRubberBandDragInProgress()
@@ -6684,7 +6685,7 @@ function updateRubberBand(location)
 	rubberBandFrames[3].Position = UDim2.new(0, selectionBoxStart.X, 0, selectionBoxStart.Y)
 	rubberBandFrames[4].Position = UDim2.new(0, selectionBoxStart.X, 0, selectionBoxStart.Y + ySize)
 	
-	partsInRubberbandSelection = findPartsInSelection(selectionBoxStart, location)
+	partsInRubberbandSelection = findPartsInSelection(workspace, selectionBoxStart, location)
 	
 	if (#game:GetService("Selection"):Get() ~= #partsInRubberbandSelection) then
 		game:GetService("Selection"):Set(partsInRubberbandSelection)
