@@ -8,6 +8,10 @@
 			<string name="Name">VideoDocumentation</string>
 			<ProtectedString name="Source"><![CDATA[plugin:Activate(false)
 
+local enabledFlagExists, enabledFlagValue = pcall(function() return settings():GetFFlag("VideoDocumentationPluginEnabled") end)
+			
+if enabledFlagExists and enabledFlagValue then
+
 local BUTTON_NORMAL = "rbxassetid://417211667"
 local BUTTON_HOVER = "rbxassetid://417211758"
 local BUTTON_DOWN = "rbxassetid://417211718"
@@ -139,7 +143,9 @@ end
 game.DescendantAdded:connect(checkInstance)
 game.DescendantRemoving:connect(onDescendantRemoved)
 
-findWikiLinks(game)]]></ProtectedString>
+findWikiLinks(game)
+
+end]]></ProtectedString>
 		</Properties>
 	</Item>
 </roblox>
