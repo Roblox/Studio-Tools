@@ -55,7 +55,6 @@ local function setupButton(frame, link)
 
 	local buttonConnections = {}
 	local clickConnection = button.MouseButton1Click:connect(function()
-		print("Navigate to", link.Value)
 		plugin:OpenWikiPage(link.Value)
 	end)
 	local partAncestor = findPartAncestor(button)
@@ -132,9 +131,7 @@ end
 local function onDescendantRemoved(instance)
 	local buttonConnections = connections[instance]
 	if not buttonConnections then return end
-	--print("Removing connections for", instance)
 	for i = 1, #buttonConnections do
-		--print("removing connection:", buttonConnections[i])
 		buttonConnections[i]:disconnect()
 	end
 end
