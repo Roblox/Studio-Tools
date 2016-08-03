@@ -27,8 +27,8 @@
 				<string name="Name">TerrainBrushScript</string>
 				<ProtectedString name="Source"><![CDATA[--Made by Stickmasterluke
 
-
-while not workspace:WaitForChild('Terrain').IsSmooth do
+local Terrain = workspace:WaitForChild('Terrain', 86400) or workspace:WaitForChild('Terrain')
+while not Terrain.IsSmooth do
 	workspace.Terrain.Changed:wait()
 end
 
@@ -1340,8 +1340,8 @@ return {
 	-optimize resize scaling code more
 ]]
 
-
-while not workspace:WaitForChild('Terrain').IsSmooth do
+local Terrain = workspace:WaitForChild('Terrain', 86400) or workspace:WaitForChild('Terrain')
+while not Terrain.IsSmooth do
 	workspace.Terrain.Changed:wait()
 end
 
