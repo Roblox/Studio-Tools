@@ -849,7 +849,7 @@ local Plugin = PluginManager():CreatePlugin()
 local toolbar = Plugin:CreateToolbar("Animations")
 local button = toolbar:CreateButton(
 	"", -- The text next to the icon. Leave Othis blank if the icon is sufficient.
-	"Animation Editor 3.3", -- hover text
+	"Animation Editor 3.3.1", -- hover text
 	"http://www.roblox.com/asset/?id=142301226" -- The icon file's name
 )
 
@@ -6214,6 +6214,7 @@ function exitPlugin()
 		mProxyPart:Destroy()
 	end
 	_G["AnimationEdit"] = false
+	modal = false
 	releaseListeners()
 	game:GetService("ChangeHistoryService"):SetEnabled(true)
 	game:GetService("ChangeHistoryService"):ResetWaypoints()
@@ -13914,6 +13915,7 @@ module.Quit = function()
 	module.tooltips = {}
 	module.tip.Text = ""
 	module.tip.Parent = nil
+	module.activeWindow = nil
 end
 
 module.SetEasingStyle = function(pose, exitFunction)
@@ -14557,6 +14559,7 @@ module.InitializeTopbar = function(timeline, canOpenFunc, openFunc, closeFunc, f
 		if tb:findFirstChild("FileFrame") then tb.FileFrame.Visible = false end
 		if tb:findFirstChild("EditFrame") then tb.EditFrame.Visible = false end
 		if tb:findFirstChild("SettingsFrame") then tb.SettingsFrame.Visible = false end
+		module.activeWindow = nil
 	end
 	
 	tb.File.MouseButton1Click:connect(function()
