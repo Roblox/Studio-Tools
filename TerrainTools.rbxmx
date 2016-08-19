@@ -29,7 +29,7 @@
 
 local Terrain = workspace:WaitForChild('Terrain', 86400) or workspace:WaitForChild('Terrain')
 while not Terrain.IsSmooth do
-	workspace.Terrain.Changed:wait()
+	Terrain.Changed:wait()
 end
 
 local on = false
@@ -1342,7 +1342,7 @@ return {
 
 local Terrain = workspace:WaitForChild('Terrain', 86400) or workspace:WaitForChild('Terrain')
 while not Terrain.IsSmooth do
-	workspace.Terrain.Changed:wait()
+	Terrain.Changed:wait()
 end
 
 local on = false
