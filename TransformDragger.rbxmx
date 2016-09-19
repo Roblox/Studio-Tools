@@ -25,6 +25,7 @@
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Precision</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[local plugin, settings = plugin, settings
 
 -----------------------------------
@@ -956,17 +957,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 		
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new((originalSize - selectedPart.Size) * 0.5
-				* Vector3.new(currentHandle == S_X_POS and -1 or 0, -1, currentHandle == S_Z_POS and -1 or 0)))
-
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) * 0.5)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) * 0.5)))
 		
 		local totalDist = Utility.distanceVector3(preactionCFrame.p, selectedPart.CFrame.p)
 		local diff = (preactionCFrame.p - selectedPart.CFrame.p).unit
@@ -1020,16 +1012,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 	
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new((originalSize - selectedPart.Size) * 0.5
-				* Vector3.new(currentHandle == S_X_NEG and 1 or 0, -1, currentHandle == S_Z_NEG and 1 or 0)))
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(((originalSize - selectedPart.Size) * 0.5)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(((originalSize - selectedPart.Size) * 0.5)))
 				
 		local totalDist = Utility.distanceVector3(preactionCFrame.p, selectedPart.CFrame.p)
 		local diff = (preactionCFrame.p - selectedPart.CFrame.p).unit
@@ -1102,15 +1086,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 		
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 1, 1)))
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, 1)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, 1)))
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = Utility.getVector3Sign(localCamera)
@@ -1130,15 +1107,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 		
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 1, -1)))
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)			
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, -1)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)			
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(-1, 0, -1)))
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = Utility.getVector3Sign(localCamera)
@@ -1158,15 +1128,8 @@ function updatePart()
 			BreakJoints(selectedPart)
 		end
 
-		if (selectedPart.FormFactor == Enum.FormFactor.Symmetric) and 
-			(selectedPart.Shape == Enum.PartType.Ball or selectedPart.Shape == Enum.PartType.Cylinder) then
-			
-			selectedPart.Size = snapVector3ByHandle(originalSize + Utility.customToSymmetric(currentDist), currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 1, -1)))
-		else
-			selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
-			selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 0, -1)))
-		end
+		selectedPart.Size = snapVector3ByHandle(originalSize + currentDist, currentHandle)
+		selectedPart.CFrame = originalCFrame:toWorldSpace(CFrame.new(-((originalSize - selectedPart.Size) / 2) * Vector3.new(1, 0, -1)))
 		
 		local localCamera = selectedPart.CFrame:pointToObjectSpace(game.Workspace.Camera.CoordinateFrame.p)
 		local side = Utility.getVector3Sign(localCamera)
@@ -1397,7 +1360,6 @@ function updatePart()
 			
 			if not planeObject then
 				planeObject = Instance.new("Part", cg)
-				planeObject.FormFactor = Enum.FormFactor.Custom
 				planeObject.Size = Vector3.new(50, 50, 0.01)
 				planeObject.Position = Vector3.new(0,0,0)
 				planeObject.Transparency = 1
@@ -1460,7 +1422,6 @@ function updateDragPart()
 	if not dragPart then
 		dragPart = Instance.new("Part", nil)
 		dragPart.Name = "DragParte1b1aec5"
-		dragPart.FormFactor = Enum.FormFactor.Custom
 		dragPart.BottomSurface = Enum.SurfaceType.Smooth
 		dragPart.TopSurface = Enum.SurfaceType.Smooth
 		dragPart.Transparency = 1
@@ -1490,7 +1451,6 @@ function updateDragPart()
 		dragPart.Name = "DragParte1b1aec5"
 		dragPart.Archivable = false
 		dragPart.Parent = nil
-		dragPart.FormFactor = Enum.FormFactor.Custom
 		dragPart.BottomSurface = Enum.SurfaceType.Smooth
 		dragPart.TopSurface = Enum.SurfaceType.Smooth
 		if shouldBreakJoints then
@@ -2373,7 +2333,6 @@ function selectDragPlane(selectBase)
 	
 	if selectBase then
 		tmpPart = Instance.new("Part", cg)
-		tmpPart.FormFactor = Enum.FormFactor.Custom
 		tmpPart.Size = Vector3.new(100, 1, 100)
 		tmpPart.CFrame = CFrame.new(0, -0.5, 0)
 		tmpLocation = Vector3.new(0,0,0)
@@ -2397,7 +2356,6 @@ function selectDragPlane(selectBase)
 	
 	--use proxy part
 	local tmpPart = Instance.new("Part", cg)
-	tmpPart.FormFactor = Enum.FormFactor.Custom
 	tmpPart.Size = secondaryPart.Size
 	tmpPart.CFrame = secondaryPart.CFrame
 	
@@ -2650,7 +2608,6 @@ function recreateAdornment()
 	if not invisiblePart then
 		invisiblePart = Instance.new("Part", nil)
 		invisiblePart.Name = "InvisibleParte1b1aec5"
-		invisiblePart.FormFactor = Enum.FormFactor.Custom
 		invisiblePart.TopSurface = Enum.SurfaceType.Smooth
 		invisiblePart.BottomSurface = Enum.SurfaceType.Smooth
 		invisiblePart.Archivable = false
@@ -2659,7 +2616,6 @@ function recreateAdornment()
 	
 	if not castPart then
 		castPart = Instance.new("Part")
-		castPart.FormFactor = Enum.FormFactor.Custom
 	end
 	
 	Adorn.adornInstanceWithTranslate(invisiblePart)
@@ -2836,8 +2792,6 @@ function selectPart(instances)
 		RubberBand.startRubberbandDrag(Vector2.new(mouse.X, mouse.Y))
 	end
 	
-	if selectedPart and selectedPart:IsA("FormFactorPart") then selectedPart.FormFactor = Enum.FormFactor.Custom end
-	
 	recreateAdornment()
 	
 end
@@ -2879,7 +2833,6 @@ function selectionChanged()
 	
 	if (#currentSelection == 1) then
 		selectedPart = Metapart.convertToPart(currentSelection[1])
-		if selectedPart and selectedPart:IsA("FormFactorPart") then selectedPart.FormFactor = Enum.FormFactor.Custom end
 	end
 	
 	recreateAdornment()
@@ -2917,7 +2870,6 @@ local function togglePlaneSelection()
 		
 		if not planeObject then
 			planeObject = Instance.new("Part", cg)
-			planeObject.FormFactor = Enum.FormFactor.Custom
 			planeObject.Size = Vector3.new(50, 50, 0.01)
 			planeObject.Position = Vector3.new(0,0,0)
 			planeObject.Transparency = 1
@@ -3062,6 +3014,7 @@ inputBeganConnection = uis.InputBegan:connect(keyPress)
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Collision</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[local Utility = require(script.Parent.Utility)
 local List = require(script.Parent.List)
 
@@ -3295,6 +3248,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Utility</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[function min(...)
 	local arg = {...}
 	local currentMin = nil
@@ -3425,6 +3379,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">List</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[local function itemExistsInList(item, list)
 	for i = 1, #list do
 		if list[i] == item then
@@ -3538,6 +3493,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Plane</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[
 
 
@@ -3561,6 +3517,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Selection</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[local RubberBand = require(script.Parent.Rubberband)
 local Metapart = require(script.Parent.Metapart)
 
@@ -3625,6 +3582,7 @@ return module]]></ProtectedString>
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Metapart</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[local FuzzyMath = require(script.Parent.FuzzyMath)
 local List = require(script.Parent.List)
 local Extent = require(script.Parent.Extent)
@@ -4509,6 +4467,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">FuzzyMath</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[local Round = require(script.Parent.Round)
 
 function fuzzyCompare(value1, value2, delta)
@@ -4657,6 +4616,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Round</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[function round(value)
 	return math.floor(value + 0.5)
 end
@@ -4692,6 +4652,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Extent</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[local Utility = require(script.Parent.Utility)
 --local Selection = require(script.Parent.Selection)
 
@@ -4935,9 +4896,19 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Adornments</string>
-				<ProtectedString name="Source"><![CDATA[local Metapart = require(script.Parent.Metapart)
+				<string name="ScriptGuid"></string>
+				<ProtectedString name="Source"><![CDATA[
+-----------------------------------
+-----------MODULE SCRIPTS----------
+-----------------------------------
+
+local Metapart = require(script.Parent.Metapart)
 local Input = require(script.Parent.Input)
 local Utility = require(script.Parent.Utility)
+
+-----------------------------------
+--------------VARIABLES------------
+-----------------------------------
 
 local adornKeeper = {}
 local shadowKeeper = {}
@@ -4960,17 +4931,8 @@ local measureFrame2 = nil
 local measureLabel2 = nil
 local unitLabel2 = nil
 
-local measureLine1 = nil
-local measureLine2 = nil
-local measureLine3 = nil
-local measureCone1 = nil
-local measureCone2 = nil
-
-local measureLine4 = nil
-local measureLine5 = nil
-local measureLine6 = nil
-local measureCone3 = nil
-local measureCone4 = nil
+local measureLine = {}
+local measureCone = {}
 
 local planeOriginLines = {}
 
@@ -4991,7 +4953,6 @@ local miniPlaneLines = {}
 
 local shadowTransparency = 0.7
 local shadowTransparencyHover = 0.2
---local gridSphere = nil
 
 local oneDegrees = "rbxasset://textures/transformOneDegree.png"
 local fiveDegrees = "rbxasset://textures/transformFiveDegrees.png"
@@ -5000,7 +4961,6 @@ local ninetyDegrees = "rbxasset://textures/transformNinetyDegrees.png"
 local planeImage = "rbxasset://textures/whiteCircle.png"
 local rotationArrow = "rbxasset://textures/rotationArrow.png"--"rbxassetid://232196030"
 local gradient = "rbxasset://textures/gradient.png"
---local planeImage = "rbxasset://textures/planeImage.png"
 
 --duplicate - please consolidate
 local H_NONE = 0
@@ -5028,58 +4988,34 @@ local yScale = 1
 local TYPE_STUDS = 1
 local TYPE_DEGREES = 2
 
-local function setUnitText1(str, type)
-	if not measureFrame1 then return end
+-----------------------------------
+--------------FUNCTIONS------------
+-----------------------------------
+
+local function setUnitText(measureFrame, measureLabel, unitLabel, str, unitType)
+	if not measureFrame then return end
 	
-	measureLabel1.Text = str
-	unitLabel1.Text = type == TYPE_STUDS and "studs" or "o"
+	measureLabel.Text = str
+	measureLabel.Size = UDim2.new(0, measureLabel.TextBounds.X, 0, measureLabel.TextBounds.Y)
+	measureLabel.Position = UDim2.new(0, 3, 0, 0)
 	
-	measureLabel1.Size = UDim2.new(0, measureLabel1.TextBounds.X, 0, measureLabel1.TextBounds.Y)
-	measureLabel1.Position = UDim2.new(0, 3, 0, 0)
-	unitLabel1.Size = UDim2.new(0, unitLabel1.TextBounds.X, 0, unitLabel1.TextBounds.Y)
+	unitLabel.Text = unitType == TYPE_STUDS and "studs" or "o"
+	unitLabel.Size = UDim2.new(0, unitLabel.TextBounds.X, 0, unitLabel.TextBounds.Y)
+	unitLabel.Position = UDim2.new(0, measureLabel.TextBounds.X + 4, 0, unitType == TYPE_STUDS and 7 or 0)
 	
-	unitLabel1.Position = UDim2.new(0, measureLabel1.TextBounds.X + 4, 0, type == TYPE_STUDS and 7 or 0)
-	
-	measureFrame1.Size = UDim2.new(0, measureLabel1.TextBounds.X + unitLabel1.TextBounds.X + 7, 0, measureLabel1.TextBounds.Y + 2)
+	measureFrame.Size = UDim2.new(0, measureLabel.TextBounds.X + unitLabel.TextBounds.X + 7, 0, measureLabel.TextBounds.Y + 2)
 end
 
-local function setUnitText2(str, type)
-	if not measureFrame2 then return end
+local function setLinePosition(cone1, cone2, line1, line2, line3, point1, point2, direction)
+	cone1.CFrame = CFrame.new(point2, point1) - point2 + point1 + ((point2 - point1).unit * cone1.Height) + direction
+	cone2.CFrame = CFrame.new(point1, point2) - point1 + point2 - ((point2 - point1).unit * cone2.Height) + direction
+	line1.CFrame = CFrame.new(point1 + direction, point2 + direction)
+	line1.Length = (point1 - point2).magnitude
 	
-	measureLabel2.Text = str
-	unitLabel2.Text = type == TYPE_STUDS and "studs" or "o"
-	
-	measureLabel2.Size = UDim2.new(0, measureLabel2.TextBounds.X, 0, measureLabel2.TextBounds.Y)
-	measureLabel2.Position = UDim2.new(0, 3, 0, 0)
-	unitLabel2.Size = UDim2.new(0, unitLabel2.TextBounds.X, 0, unitLabel2.TextBounds.Y)
-	
-	unitLabel2.Position = UDim2.new(0, measureLabel2.TextBounds.X + 4, 0, type == TYPE_STUDS and 7 or 5)
-	
-	measureFrame2.Size = UDim2.new(0, measureLabel2.TextBounds.X + unitLabel2.TextBounds.X + 7, 0, measureLabel2.TextBounds.Y + 2)
-end
-
-local function setLinePosition1(point1, point2, direction)
-	measureCone1.CFrame = CFrame.new(point2, point1) - point2 + point1 + ((point2 - point1).unit * measureCone1.Height) + direction
-	measureCone2.CFrame = CFrame.new(point1, point2) - point1 + point2 - ((point2 - point1).unit * measureCone2.Height) + direction
-	measureLine1.CFrame = CFrame.new(point1 + direction, point2 + direction)
-	measureLine1.Length = (point1 - point2).magnitude
-	
-	measureLine2.CFrame = CFrame.new(point1, point1 + direction)
-	measureLine2.Length = direction.magnitude
-	measureLine3.CFrame = CFrame.new(point2, point2 + direction)
-	measureLine3.Length = direction.magnitude
-end
-
-local function setLinePosition2(point1, point2, direction)
-	measureCone3.CFrame = CFrame.new(point2, point1) - point2 + point1 + ((point2 - point1).unit * measureCone3.Height) + direction
-	measureCone4.CFrame = CFrame.new(point1, point2) - point1 + point2 - ((point2 - point1).unit * measureCone4.Height) + direction
-	measureLine4.CFrame = CFrame.new(point1 + direction, point2 + direction)
-	measureLine4.Length = (point1 - point2).magnitude
-	
-	measureLine5.CFrame = CFrame.new(point1, point1 + direction)
-	measureLine5.Length = direction.magnitude
-	measureLine6.CFrame = CFrame.new(point2, point2 + direction)
-	measureLine6.Length = direction.magnitude
+	line2.CFrame = CFrame.new(point1, point1 + direction)
+	line2.Length = direction.magnitude
+	line3.CFrame = CFrame.new(point2, point2 + direction)
+	line3.Length = direction.magnitude
 end
 
 local tmpRotation = {}
@@ -5103,11 +5039,7 @@ local function setRotation(cframe, radius, degrees)
 	if flip then
 		direction = direction * -1
 	end
-	
-	
-	local originalRadius = radius
-	
-	
+		
 	if not internalRotate then
 		if direction > 0 then
 			degrees = math.floor(degrees)
@@ -5119,12 +5051,7 @@ local function setRotation(cframe, radius, degrees)
 	end
 	
 	local amount = math.abs(degrees)
-	
-	--local pos = cframe:toWorldSpace(CFrame.Angles(flip and math.rad(180) or 0,0, math.rad((amount * direction)+ 45)) * CFrame.new(Vector3.new(-originalRadius, originalRadius, 0)))
-	--setTextVisible1(true, game.Workspace.Camera:WorldToScreenPoint(pos.p))
-	
-	--if degrees == 0 then return end
-	
+		
 	while amount >= 90 do
 		--add 90
 		if direction < 0 then
@@ -5304,6 +5231,10 @@ local function hoverLeaveHandle(handle)
 	
 	currentHandle = H_NONE
 	if finalHandle ~= H_NONE then
+		if (finalHandle == H_PLANE) then
+			hoveredHandles[H_PLANE] = nil
+			return
+		end
 		hoverEnterHandle(finalHandle)
 	end
 end
@@ -5512,29 +5443,29 @@ local function initializeAdorns()
 		strayAdornee.Anchored = true
 		strayAdornee.CFrame = CFrame.new()
 		
-		measureLine1 = Instance.new("LineHandleAdornment", cg)
-		measureLine1.Visible = false
-		measureLine1.Color3 = black
-		measureLine1.Adornee = strayAdornee
-		measureLine1.AlwaysOnTop = true
-		measureLine1.ZIndex = 5
+		measureLine[1] = Instance.new("LineHandleAdornment", cg)
+		measureLine[1].Visible = false
+		measureLine[1].Color3 = black
+		measureLine[1].Adornee = strayAdornee
+		measureLine[1].AlwaysOnTop = true
+		measureLine[1].ZIndex = 5
 		
-		measureLine2 = measureLine1:Clone()
-		measureLine2.Parent = cg
+		measureLine[2] = measureLine[1]:Clone()
+		measureLine[2].Parent = cg
 		
-		measureLine3 = measureLine1:Clone()
-		measureLine3.Parent = cg
+		measureLine[3] = measureLine[1]:Clone()
+		measureLine[3].Parent = cg
 		
-		measureLine4 = measureLine1:Clone()
-		measureLine4.Parent = cg
+		measureLine[4] = measureLine[1]:Clone()
+		measureLine[4].Parent = cg
 		
-		measureLine5 = measureLine1:Clone()
-		measureLine5.Parent = cg
+		measureLine[5] = measureLine[1]:Clone()
+		measureLine[5].Parent = cg
 		
-		measureLine6 = measureLine1:Clone()
-		measureLine6.Parent = cg
+		measureLine[6] = measureLine[1]:Clone()
+		measureLine[6].Parent = cg
 		
-		planeOriginLines[1] = measureLine1:Clone()
+		planeOriginLines[1] = measureLine[1]:Clone()
 		planeOriginLines[1].Color3 = yellow
 		planeOriginLines[1].Parent = cg
 		planeOriginLines[1].Thickness = 2
@@ -5545,41 +5476,30 @@ local function initializeAdorns()
 			planeOriginLines[i].Parent = cg
 		end
 				
-		measureCone1 = Instance.new("ConeHandleAdornment", cg)
-		measureCone1.Visible = false
-		measureCone1.Color3 = black
-		measureCone1.Adornee = strayAdornee
-		measureCone1.Height = 0.5
-		measureCone1.Radius = 0.1
-		measureCone1.AlwaysOnTop = true
-		measureCone1.ZIndex = 5
+		measureCone[1] = Instance.new("ConeHandleAdornment", cg)
+		measureCone[1].Visible = false
+		measureCone[1].Color3 = black
+		measureCone[1].Adornee = strayAdornee
+		measureCone[1].Height = 0.5
+		measureCone[1].Radius = 0.1
+		measureCone[1].AlwaysOnTop = true
+		measureCone[1].ZIndex = 5
 		
-		measureCone2 = measureCone1:Clone()
-		measureCone2.Parent = cg
+		measureCone[2] = measureCone[1]:Clone()
+		measureCone[2].Parent = cg
 		
-		measureCone3 = measureCone1:Clone()
-		measureCone3.Parent = cg
+		measureCone[3] = measureCone[1]:Clone()
+		measureCone[3].Parent = cg
 		
-		measureCone4 = measureCone1:Clone()
-		measureCone4.Parent = cg
+		measureCone[4] = measureCone[1]:Clone()
+		measureCone[4].Parent = cg
 		
-		-- mini plane
-				
---		miniPlaneLine1 = Instance.new("ImageHandleAdornment", cg)
---		miniPlaneLine1.Visible = false
---		miniPlaneLine1.Color3 = white
---		miniPlaneLine1.Adornee = strayAdornee
---		miniPlaneLine1.AlwaysOnTop = true
---		miniPlaneLine1.ZIndex = 10
-		
+		-- mini plane		
 		miniPlaneLines[1] = Instance.new("ImageLabel", parentScreen)
 		miniPlaneLines[1].Visible = false
-		--miniPlaneLines[1].BackgroundColor3 = white
 		miniPlaneLines[1].BackgroundTransparency = 1
 		miniPlaneLines[1].BorderSizePixel = 0
 		miniPlaneLines[1].Image = gradient
---		miniPlaneLines[1].Size = UDim2.new(0,10,0,10)
---		miniPlaneLines[1].Position = UDim2.new(0, 100, 0, 100)
 		
 		for i = 2, 8 do
 			miniPlaneLines[i] = miniPlaneLines[1]:Clone()
@@ -5600,8 +5520,6 @@ local function initializeAdorns()
 		rotateLine.Thickness = 2
 		table.insert(rotateLines, rotateLine)
 	end
-	
-	
 	
 	--------
 	local line1 = Instance.new("LineHandleAdornment", cg)
@@ -5630,42 +5548,31 @@ local function setAdornVisibility(adorn, value)
 	end
 end
 
-local function setTextLocation1(location)
+local function setTextLocation(measureFrame, location)
 	if location then
-		measureFrame1.Position = UDim2.new(0, location.X, 0, location.Y)
+		measureFrame.Position = UDim2.new(0, location.X, 0, location.Y)
 	end
 end
 
-local function setTextLocation2(location)
-	if location then
-		measureFrame2.Position = UDim2.new(0, location.X, 0, location.Y)
-	end
-end
-
-function setTextVisible1(value, location)
-	setTextLocation1(location)	
-	measureFrame1.Visible = value
-end
-
-local function setTextVisible2(value, location)
-	setTextLocation2(location)
-	measureFrame2.Visible = value
+local function setTextVisible(measureFrame, value, location)
+	setTextLocation(measureFrame, location)	
+	measureFrame.Visible = value
 end
 
 local function setSizeLineVisible1(value)
-	measureLine1.Visible = value
-	measureLine2.Visible = value
-	measureLine3.Visible = value
-	measureCone1.Visible = value
-	measureCone2.Visible = value
+	measureLine[1].Visible = value
+	measureLine[2].Visible = value
+	measureLine[3].Visible = value
+	measureCone[1].Visible = value
+	measureCone[2].Visible = value
 end
 
 local function setSizeLineVisible2(value)
-	measureLine4.Visible = value
-	measureLine5.Visible = value
-	measureLine6.Visible = value
-	measureCone3.Visible = value
-	measureCone4.Visible = value
+	measureLine[4].Visible = value
+	measureLine[5].Visible = value
+	measureLine[6].Visible = value
+	measureCone[3].Visible = value
+	measureCone[4].Visible = value
 end
 
 local function setRotateVisible(value)
@@ -5891,11 +5798,6 @@ local function updatePlanePosition()
 	local minFarDist = 250;
 	local maxFarDist = 400;
 	
-	--setUnitText("34.56", TYPE_STUDS)
-	--setLinePosition(Vector3.new(0,0,0), Vector3.new(3, 5, 7))
-	--setSizeLineVisible1(true)
-	--setTextVisible(true, Vector2.new(25, 300))
-
 	local transparencyDist = (-1 / (maxVisibleDist - minVisibleDist) * distFromCamera) + (minVisibleDist / (maxVisibleDist - minVisibleDist)) + 1;
 	local farTransparency =  (-1 / (maxFarDist - minFarDist) * distFromCamera) + (minFarDist / (maxFarDist - minFarDist)) + 1;
 	transparencyDist = math.max(math.min(transparencyDist, 0.9), 0.0)
@@ -5977,7 +5879,7 @@ local function updatePlanePosition()
 							0.0, 2.0, adornee)
 		drawTemporaryLine(	v2,
 							v4,
-		0.0, 2.0, adornee)
+							0.0, 2.0, adornee)
 		
 		local tmpPlane = Instance.new("BoxHandleAdornment", cg)
 	
@@ -6063,7 +5965,7 @@ local function updateAdornmentPositions()
 			setTranslateAdornVisibility(false)
 		elseif (currentHandle == S_X_POS or currentHandle == S_X_NEG or currentHandle == S_Z_POS or
 			currentHandle == S_Z_NEG or currentHandle == S_Y_POS or currentHandle == S_X_POS_Z_POS or
-		currentHandle == S_X_POS_Z_NEG or currentHandle == S_X_NEG_Z_POS or currentHandle == S_X_NEG_Z_NEG) then
+			currentHandle == S_X_POS_Z_NEG or currentHandle == S_X_NEG_Z_POS or currentHandle == S_X_NEG_Z_NEG) then
 			setRotateAdornVisibility(false)
 			setTranslateAdornVisibility(false)
 			setScaleAdornVisibility(false)
@@ -6076,10 +5978,6 @@ local function updateAdornmentPositions()
 			setRotateAdornVisibility(false)
 			setTranslateAdornVisibility(false)
 			setScaleAdornVisibility(false)
-		else
-			--setTranslateAdornVisibility(true)
-			--setPlaneVisibility(true)
-			--setScaleAdornVisibility(not adornKeeper[R_XY][1].Adornee:IsA("Model") and selectionSize == 1)
 		end
 	elseif not planeSelectionActive then
 		setRotateAdornVisibility(true)
@@ -6219,74 +6117,44 @@ local function updateAdornmentPositions()
 				v[2].Height = v[7].X * sizeIncrease
 				v[2].Radius = v[7].Y * sizeIncrease
 			elseif v[1]:IsA("ImageHandleAdornment") then
-				--local sizeIncrease = math.max(((location - cameraPos).Magnitude / 40.0) + 1, 1.0)
 				local sizeIncrease = math.max(((location - cameraPos).Magnitude / 30.0) + 1, 1.0)
 				v[1].Size = v[6] * sizeIncrease
 				v[2].Size = v[7] * sizeIncrease
 			end
-			
-			--always on top
-			
-			
 		end
 	end
 	
-	
-		local transition = nil
-	
-		if planeHoverTransition or planeSelectionActive then
-			if currentPlaneHoverTransitionLevel < 1 then
-				currentPlaneHoverTransitionLevel = math.min(currentPlaneHoverTransitionLevel + planeHoverTransitionSpeed, 1)
-				transition = Utility.smoothstep(0, 1, currentPlaneHoverTransitionLevel)
-			end
-		else
-			if currentPlaneHoverTransitionLevel > 0 then
-				currentPlaneHoverTransitionLevel = math.max(currentPlaneHoverTransitionLevel - planeHoverTransitionSpeed, 0)
-				transition = Utility.smoothstep(0, 1, currentPlaneHoverTransitionLevel)
-			end
+	local transition = nil
+
+	if planeHoverTransition or planeSelectionActive then
+		if currentPlaneHoverTransitionLevel < 1 then
+			currentPlaneHoverTransitionLevel = math.min(currentPlaneHoverTransitionLevel + planeHoverTransitionSpeed, 1)
+			transition = Utility.smoothstep(0, 1, currentPlaneHoverTransitionLevel)
 		end
-		
-		if transition then
-			local colorEnter = Utility.colorMultiply(adornKeeper[H_PLANE][4][1], transition) 
-			local colorLeave = Utility.colorMultiply(adornKeeper[H_PLANE][5][1], 1-transition)
-				
-			adornKeeper[H_PLANE][2].ImageColor3 = Utility.colorAdd(colorEnter, colorLeave)
-			adornKeeper[H_PLANE][2].ImageTransparency = (transition * adornKeeper[H_PLANE][4][2]) + ((1-transition) * adornKeeper[H_PLANE][5][2])
+	else
+		if currentPlaneHoverTransitionLevel > 0 then
+			currentPlaneHoverTransitionLevel = math.max(currentPlaneHoverTransitionLevel - planeHoverTransitionSpeed, 0)
+			transition = Utility.smoothstep(0, 1, currentPlaneHoverTransitionLevel)
+		end
+	end
+	
+	if transition then
+		local colorEnter = Utility.colorMultiply(adornKeeper[H_PLANE][4][1], transition) 
+		local colorLeave = Utility.colorMultiply(adornKeeper[H_PLANE][5][1], 1-transition)
 			
-			for i = 1, 8 do
-				miniPlaneLines[i].ImageColor3 = Utility.colorAdd(Utility.colorMultiply(black, transition), Utility.colorMultiply(white, 1-transition))
-			end
-		end
+		adornKeeper[H_PLANE][2].ImageColor3 = Utility.colorAdd(colorEnter, colorLeave)
+		adornKeeper[H_PLANE][2].ImageTransparency = (transition * adornKeeper[H_PLANE][4][2]) + ((1-transition) * adornKeeper[H_PLANE][5][2])
 		
-		if planeSelectionActive then
-			adornKeeper[H_PLANE][2].ImageColor3 = rbxBlue
-			adornKeeper[H_PLANE][2].ImageTransparency = 0
+		for i = 1, 8 do
+			miniPlaneLines[i].ImageColor3 = Utility.colorAdd(Utility.colorMultiply(black, transition), Utility.colorMultiply(white, 1-transition))
 		end
---	end
+	end
 	
-	
-	
-	
-	--set planeColor
-	
-	
-	--setAlways on top
-	
-	--local adornee = Metapart.convertToPart(adornKeeper[R_XY][1].Adornee)
-	--local cameraPos = Input.getMouseLocation()
-	
---	local halfSize = adornee.Size * 0.5
---	local localCameraPos = adornee.CFrame:pointToObjectSpace(cameraPos)
-	
-	
-	
---	if (localCameraPos.X > -halfSize.X) and (localCameraPos.Y > -halfSize.Y) then
---		adornKeeper[S_X_NEG][1].AlwaysOnTop = false
---		adornKeeper[S_X_NEG][2].AlwaysOnTop = false
---	else
---		adornKeeper[S_X_NEG][1].AlwaysOnTop = true
---		adornKeeper[S_X_NEG][2].AlwaysOnTop = true
---	end
+	if planeSelectionActive then
+		adornKeeper[H_PLANE][2].ImageColor3 = rbxBlue
+		adornKeeper[H_PLANE][2].ImageTransparency = 0
+	end
+
 	updatePlanePosition()
 end
 
@@ -6307,23 +6175,23 @@ local function setCurrentHandle(value)
 end
 
 local function scaleOne(point1, point2, direction)
-	setLinePosition1(point1, point2, direction)
+	setLinePosition(measureCone[1], measureCone[2], measureLine[1], measureLine[2], measureLine[3], point1, point2, direction)
 	local mag = (point1 - point2).magnitude
 	
-	setUnitText1(string.format("%.2f",mag), TYPE_STUDS)
+	setUnitText(measureFrame1, measureLabel1, unitLabel1, string.format("%.2f",mag), TYPE_STUDS)
 	setSizeLineVisible1(true)
 	local midpoint = ((point1 + point2) / 2) + direction
-	setTextVisible1(true, game.Workspace.Camera:WorldToScreenPoint(midpoint))
+	setTextVisible(measureFrame1, true, game.Workspace.Camera:WorldToScreenPoint(midpoint))
 end
 
 local function scaleTwo(point1, point2, direction)
-	setLinePosition2(point1, point2, direction)
+	setLinePosition(measureCone[3], measureCone[4], measureLine[4], measureLine[5], measureLine[6], point1, point2, direction)
 	local mag = (point1 - point2).magnitude
 	
-	setUnitText2(string.format("%.2f",mag), TYPE_STUDS)
+	setUnitText(measureFrame2, measureLabel2, unitLabel2, string.format("%.2f",mag), TYPE_STUDS)
 	setSizeLineVisible2(true)
 	local midpoint = ((point1 + point2) / 2) + direction
-	setTextVisible2(true, game.Workspace.Camera:WorldToScreenPoint(midpoint))
+	setTextVisible(measureFrame2, true, game.Workspace.Camera:WorldToScreenPoint(midpoint))
 end
 
 local function showRotate(cframe, radius, degrees, textLocation)
@@ -6340,14 +6208,12 @@ local function showRotate(cframe, radius, degrees, textLocation)
 	
 	setRotatePosition(cframe, radius, degrees)
 	setRotateVisible(true)
-	setUnitText1(string.format(internalRotate and "%.1f" or "%d", -degrees), TYPE_DEGREES)
+	setUnitText(measureFrame1, measureLabel1, unitLabel1, string.format(internalRotate and "%.1f" or "%d", -degrees), TYPE_DEGREES)
 
-	--text Location is currently at plane intersection point, not actual text location
-	--local realLocation = cframe.p + ((textLocation - cframe.p).unit * radius)
-	
+	--text Location is currently at plane intersection point, not actual text location	
 	local realLocation = (cframe  * CFrame.Angles(0, 0, math.rad(degrees + 180))):toWorldSpace(CFrame.new(Vector3.new(radius, 0, 0))).p
 	
-	setTextVisible1(true, game.Workspace.Camera:WorldToScreenPoint(realLocation))
+	setTextVisible(measureFrame1, true, game.Workspace.Camera:WorldToScreenPoint(realLocation))
 end
 
 local function drawPlaneCenter(cframe)
@@ -6356,8 +6222,8 @@ local function drawPlaneCenter(cframe)
 end
 
 local function clearExtraAdorns()
-	setTextVisible1(false)
-	setTextVisible2(false)
+	setTextVisible(measureFrame1, false)
+	setTextVisible(measureFrame2, false)
 	setSizeLineVisible1(false)
 	setSizeLineVisible2(false)
 	
@@ -6488,6 +6354,9 @@ local function resetDragger()
 end
 
 
+-----------------------------------
+---------FUNCTION ACCESSORS--------
+-----------------------------------
 
 local module = {}
 
@@ -6546,6 +6415,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Input</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[
 --buttons
 local enum =
@@ -6603,6 +6473,7 @@ return module
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Rubberband</string>
+				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[local Adorn = require(script.Parent.Adornments)
 
 local selectionScreenGui = nil
@@ -6625,12 +6496,11 @@ local function findFirstCFrame(parent)
 	return nil
 end
 
-local function findPartsInSelection(startPos, endPos)
-
-	local children = game.Workspace:GetChildren()
+local function findPartsInSelection(parent, startPos, endPos, partsList)
+	local children = parent:GetChildren()
 	local camera = workspace.CurrentCamera
 	
-	local ret = {}
+	local partsList = partsList or {}
 	
 	for i, v in ipairs(children) do
 		local pos = nil
@@ -6647,8 +6517,10 @@ local function findPartsInSelection(startPos, endPos)
 			end
 			isLocked = false
 		elseif v:IsA("Tool") then
-			pos =  findFirstCFrame(v)
+			pos = findFirstCFrame(v).p
 			isLocked = false
+		elseif v:IsA("Folder") then
+			findPartsInSelection(v, startPos, endPos, partsList)
 		end
 		
 		if pos then
@@ -6660,14 +6532,14 @@ local function findPartsInSelection(startPos, endPos)
 					projection.X > math.min(startPos.X, endPos.X) and
 					projection.Y < math.max(startPos.Y, endPos.Y) and
 					projection.Y > math.min(startPos.Y, endPos.Y) then
-					table.insert(ret, v)
+					table.insert(partsList, v)
 				end
 			end
 			
 		end
 		
 	end
-	return ret
+	return partsList
 end
 
 local function isRubberBandDragInProgress()
@@ -6733,7 +6605,7 @@ function updateRubberBand(location)
 	rubberBandFrames[3].Position = UDim2.new(0, selectionBoxStart.X, 0, selectionBoxStart.Y)
 	rubberBandFrames[4].Position = UDim2.new(0, selectionBoxStart.X, 0, selectionBoxStart.Y + ySize)
 	
-	partsInRubberbandSelection = findPartsInSelection(selectionBoxStart, location)
+	partsInRubberbandSelection = findPartsInSelection(workspace, selectionBoxStart, location)
 	
 	if (#game:GetService("Selection"):Get() ~= #partsInRubberbandSelection) then
 		game:GetService("Selection"):Set(partsInRubberbandSelection)

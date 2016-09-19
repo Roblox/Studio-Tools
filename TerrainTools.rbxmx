@@ -27,9 +27,9 @@
 				<string name="Name">TerrainBrushScript</string>
 				<ProtectedString name="Source"><![CDATA[--Made by Stickmasterluke
 
-
-while not workspace:WaitForChild('Terrain').IsSmooth do
-	workspace.Terrain.Changed:wait()
+local Terrain = workspace:WaitForChild('Terrain', 86400) or workspace:WaitForChild('Terrain')
+while not Terrain.IsSmooth do
+	Terrain.Changed:wait()
 end
 
 local on = false
@@ -294,6 +294,53 @@ function FirstTimeSetUp()
 		end)
 	end
 
+	local MakeToolTip 
+	do
+		local ActiveToolTip = Instance.new("StringValue")
+
+		function MakeToolTip(Gui, Text)
+			local Name = tostring(Gui:GetFullName() .. Text)
+
+			local Frame = Instance.new("Frame", Gui)
+			Frame.BackgroundTransparency = 0.3
+			Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+			Frame.Size = UDim2.new(0, 100, 0, 30)
+			Frame.Position = UDim2.new(0.8, 0, 0.8, 0)
+			Frame.SizeConstraint = "RelativeYY"
+			Frame.ZIndex = Gui.ZIndex + 1
+			Frame.Style = "DropShadow"
+
+			local TextLabel = Instance.new("TextLabel", Frame)
+			TextLabel.BackgroundTransparency = 1
+			TextLabel.TextXAlignment = "Left"
+			TextLabel.Text = Text
+			TextLabel.BorderSizePixel = 0
+			TextLabel.TextColor3 = Color3.new(1, 1, 1)
+			TextLabel.Size = UDim2.new(1, -30, 1, 0);
+			TextLabel.Position = UDim2.new(0, 10, 0, 0);
+			TextLabel.FontSize = "Size10"
+			TextLabel.ZIndex = Frame.ZIndex
+			TextLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+			TextLabel.TextStrokeTransparency = 0.87
+
+			Frame.Visible = false
+
+			Gui.MouseEnter:connect(function()
+				ActiveToolTip.Value = Name
+				Frame.Visible = true
+				Frame.Size = UDim2.new(0, math.ceil(TextLabel.TextBounds.X + 36), Frame.Size.Y.Scale, Frame.Size.Y.Offset)
+			end)
+			ActiveToolTip.Changed:connect(function()
+				if ActiveToolTip.Value ~= Name then
+					Frame.Visible = false
+				end
+			end)
+			Gui.MouseLeave:connect(function()
+				Frame.Visible = false
+			end)
+		end
+	end
+
 	local function setMaterialSelection(newMaterialSelection)
 		materialSelection = newMaterialSelection
 		updateUsabilityLocks()
@@ -321,6 +368,7 @@ function FirstTimeSetUp()
 			setMaterialSelection(materialsTable[i])
 		end)
 		newMaterialButton.Parent = guiFrame
+		MakeToolTip(newMaterialButton, materialSubTable.enum.Name:gsub("([A-Z])", " %1"):gsub("^%s", "")) -- Add spaces to names
 	end
 
 	function resizeGuiFrame()
@@ -472,7 +520,6 @@ function FirstTimeSetUp()
 				linePart.BottomSurface = 'Smooth'
 				linePart.Anchored = true
 				linePart.CanCollide = false
-				linePart.formFactor = 'Custom'
 				local selectionBox = Instance.new('SelectionBox')
 				selectionBox.Color = color
 				selectionBox.Transparency = transparency
@@ -497,7 +544,6 @@ function FirstTimeSetUp()
 				linePart.BottomSurface = 'Smooth'
 				linePart.Anchored = true
 				linePart.CanCollide = false
-				linePart.formFactor = 'Custom'
 				local selectionBox = Instance.new('SelectionBox')
 				selectionBox.Color = color
 				selectionBox.Transparency = transparency
@@ -944,7 +990,6 @@ function FirstTimeSetUp()
 					selectionPart.BottomSurface = 'Smooth'
 					selectionPart.Anchored = true
 					selectionPart.CanCollide = false
-					selectionPart.formFactor = 'Custom'
 					selectionPart.Size = Vector3.new(1, 1, 1) * selectionSize * resolution + Vector3.new(.1, .1, .1)
 					selectionPart.Parent = gui
 				end
@@ -1132,6 +1177,12 @@ function FirstTimeSetUp()
 	updatePlaneLock()
 	updateSnapToGrid()
 	updateDynamicMaterial()
+
+	-- Reset keyboard status on lost focus as key release may never come blocked by popups etc.
+	userInput.WindowFocusReleased:connect(function()
+		downKeys = {}
+	end)
+
 end
 
 
@@ -1289,9 +1340,9 @@ return {
 	-optimize resize scaling code more
 ]]
 
-
-while not workspace:WaitForChild('Terrain').IsSmooth do
-	workspace.Terrain.Changed:wait()
+local Terrain = workspace:WaitForChild('Terrain', 86400) or workspace:WaitForChild('Terrain')
+while not Terrain.IsSmooth do
+	Terrain.Changed:wait()
 end
 
 local on = false
@@ -1321,6 +1372,7 @@ function FirstTimeSetUp()
 	setup = true
 	local changeHistory = game:GetService('ChangeHistoryService')
 	local terrain = game.Workspace.Terrain
+	local utilityModule = require(script.Parent.Utility)()
 	local coreGui = utilityModule:GetUsingAsPlugin() and game:GetService('CoreGui') or game.Players.LocalPlayer:WaitForChild('PlayerGui')
 	local gui = script.Parent:WaitForChild('TerrainRegionGui')
 	local guiFrame = gui:WaitForChild('Frame')
@@ -2067,7 +2119,6 @@ function FirstTimeSetUp()
 		effectPart.BottomSurface = 'Smooth'
 		effectPart.Anchored = true
 		effectPart.CanCollide = false
-		effectPart.formFactor = 'Custom'
 		effectPart.Parent = gui
 
 		local selectionEffectObject = Instance.new('SelectionBox')
@@ -2136,7 +2187,6 @@ function FirstTimeSetUp()
 			selectionPart.BottomSurface = 'Smooth'
 			selectionPart.Anchored = true
 			selectionPart.CanCollide = false
-			selectionPart.formFactor = 'Custom'
 			selectionPart.Parent = gui
 		end
 		if not selectionObject then
@@ -2339,6 +2389,7 @@ local initialised = false
 
 function initialiseUtility(plugin)
 	if not initialised then
+		initialised = true
 		utility.usingAsPlugin = (plugin ~= nil)
 		utility.plugin = plugin	
 		
@@ -3465,6 +3516,13 @@ local materialsTable = {	--Interface order is defined by order here
 	{enum = Enum.Material.WoodPlanks, image = 'http://www.roblox.com/asset/?id=225315705', forceSnapToGrid = true},
 	{enum = Enum.Material.CrackedLava, image = 'http://www.roblox.com/asset/?id=254541726'},
 	{enum = Enum.Material.Basalt, image = 'http://www.roblox.com/asset/?id=254542066'},
+	{enum = Enum.Material.Ice, image = 'rbxassetid://397352205'},
+	{enum = Enum.Material.Salt, image = 'rbxassetid://397352299'},
+	{enum = Enum.Material.Cobblestone, image = 'rbxassetid://397352378'},
+	{enum = Enum.Material.Limestone, image = 'rbxassetid://397352474'},
+	{enum = Enum.Material.Asphalt, image = 'rbxassetid://397352644'},
+	{enum = Enum.Material.LeafyGrass, image = 'rbxassetid://397720681'},
+	{enum = Enum.Material.Pavement, image = 'rbxassetid://397727024'},
 }
 
 return materialsTable
@@ -5908,7 +5966,7 @@ return materialsTable
 							<int name="BorderSizePixel">0</int>
 							<bool name="ClipsDescendants">false</bool>
 							<bool name="Draggable">false</bool>
-							<Content name="Image"><url>rbxassetid://170952383</url></Content>
+							<Content name="Image"><url>rbxasset://textures/ui/dropdown_arrow.png</url></Content>
 							<Color3 name="ImageColor3">4294967295</Color3>
 							<Vector2 name="ImageRectOffset">
 								<X>0</X>
@@ -5918,7 +5976,7 @@ return materialsTable
 								<X>0</X>
 								<Y>0</Y>
 							</Vector2>
-							<float name="ImageTransparency">0.699999988</float>
+							<float name="ImageTransparency">0.300000012</float>
 							<string name="Name">ArrowLabel</string>
 							<Ref name="NextSelectionDown">null</Ref>
 							<Ref name="NextSelectionLeft">null</Ref>
@@ -5926,9 +5984,9 @@ return materialsTable
 							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
 								<XS>1</XS>
-								<XO>-12</XO>
+								<XO>-13</XO>
 								<YS>0.5</YS>
-								<YO>-8</YO>
+								<YO>-4</YO>
 							</UDim2>
 							<float name="Rotation">0</float>
 							<token name="ScaleType">0</token>
@@ -5938,7 +5996,7 @@ return materialsTable
 								<XS>0</XS>
 								<XO>16</XO>
 								<YS>0</YS>
-								<YO>16</YO>
+								<YO>10</YO>
 							</UDim2>
 							<token name="SizeConstraint">2</token>
 							<Rect2D name="SliceCenter">
@@ -5952,118 +6010,6 @@ return materialsTable
 								</max>
 							</Rect2D>
 							<bool name="Visible">true</bool>
-							<int name="ZIndex">3</int>
-						</Properties>
-					</Item>
-					<Item class="ImageLabel" referent="RBXBA83B2F6ED314CFBAF2258441CFEDADD">
-						<Properties>
-							<bool name="Active">false</bool>
-							<Color3 name="BackgroundColor3">4294967295</Color3>
-							<float name="BackgroundTransparency">1</float>
-							<Color3 name="BorderColor3">4279970357</Color3>
-							<int name="BorderSizePixel">0</int>
-							<bool name="ClipsDescendants">false</bool>
-							<bool name="Draggable">false</bool>
-							<Content name="Image"><url>rbxassetid://311226754</url></Content>
-							<Color3 name="ImageColor3">4294967295</Color3>
-							<Vector2 name="ImageRectOffset">
-								<X>0</X>
-								<Y>0</Y>
-							</Vector2>
-							<Vector2 name="ImageRectSize">
-								<X>0</X>
-								<Y>0</Y>
-							</Vector2>
-							<float name="ImageTransparency">0</float>
-							<string name="Name">MenuLabel</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
-							<UDim2 name="Position">
-								<XS>1</XS>
-								<XO>-17</XO>
-								<YS>0.5</YS>
-								<YO>-17</YO>
-							</UDim2>
-							<float name="Rotation">0</float>
-							<token name="ScaleType">0</token>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
-							<UDim2 name="Size">
-								<XS>0</XS>
-								<XO>26</XO>
-								<YS>0</YS>
-								<YO>34</YO>
-							</UDim2>
-							<token name="SizeConstraint">2</token>
-							<Rect2D name="SliceCenter">
-								<min>
-									<X>0</X>
-									<Y>0</Y>
-								</min>
-								<max>
-									<X>0</X>
-									<Y>0</Y>
-								</max>
-							</Rect2D>
-							<bool name="Visible">false</bool>
-							<int name="ZIndex">3</int>
-						</Properties>
-					</Item>
-					<Item class="ImageLabel" referent="RBXC11F59134F794DB4A407FC6ADC83503A">
-						<Properties>
-							<bool name="Active">false</bool>
-							<Color3 name="BackgroundColor3">4294967295</Color3>
-							<float name="BackgroundTransparency">1</float>
-							<Color3 name="BorderColor3">4279970357</Color3>
-							<int name="BorderSizePixel">0</int>
-							<bool name="ClipsDescendants">false</bool>
-							<bool name="Draggable">false</bool>
-							<Content name="Image"><url>rbxassetid://222790673</url></Content>
-							<Color3 name="ImageColor3">4294967295</Color3>
-							<Vector2 name="ImageRectOffset">
-								<X>0</X>
-								<Y>0</Y>
-							</Vector2>
-							<Vector2 name="ImageRectSize">
-								<X>0</X>
-								<Y>0</Y>
-							</Vector2>
-							<float name="ImageTransparency">0.5</float>
-							<string name="Name">MenuBlackLabel</string>
-							<Ref name="NextSelectionDown">null</Ref>
-							<Ref name="NextSelectionLeft">null</Ref>
-							<Ref name="NextSelectionRight">null</Ref>
-							<Ref name="NextSelectionUp">null</Ref>
-							<UDim2 name="Position">
-								<XS>1</XS>
-								<XO>-17</XO>
-								<YS>0.5</YS>
-								<YO>-15</YO>
-							</UDim2>
-							<float name="Rotation">0</float>
-							<token name="ScaleType">0</token>
-							<bool name="Selectable">false</bool>
-							<Ref name="SelectionImageObject">null</Ref>
-							<UDim2 name="Size">
-								<XS>0</XS>
-								<XO>24</XO>
-								<YS>0</YS>
-								<YO>30</YO>
-							</UDim2>
-							<token name="SizeConstraint">2</token>
-							<Rect2D name="SliceCenter">
-								<min>
-									<X>0</X>
-									<Y>0</Y>
-								</min>
-								<max>
-									<X>0</X>
-									<Y>0</Y>
-								</max>
-							</Rect2D>
-							<bool name="Visible">false</bool>
 							<int name="ZIndex">3</int>
 						</Properties>
 					</Item>
