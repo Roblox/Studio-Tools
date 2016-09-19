@@ -4050,7 +4050,7 @@ function createMetaPart(object, subscribe)
 			elseif #finalObject.children > 0 then
 				extentFrame = finalObject.children[1].CFrame
 			else
-				extentFrame = createMetaPart(finalObject.object[1]).CFrame
+				extentFrame = CFrame.new()
 			end
 			
 			finalObject.info.oCFrame, finalObject.info.oSize = Extent.getCFrameAndSizeOfList(finalObject.children, extentFrame)
@@ -4850,6 +4850,14 @@ function getExtentsOfList(list, extentSpace)
 		lowerBounds, upperBounds = unionVector3(bounds.Lower, lowerBounds, upperBounds, extentSpace)
 		lowerBounds, upperBounds = unionVector3(bounds.Upper, lowerBounds, upperBounds, extentSpace)
 		
+	end
+	
+	if not lowerBounds then
+		lowerBounds = Vector3.new(0,0,0)
+	end
+	
+	if not upperBounds then
+		upperBounds = Vector3.new(0,0,0)
 	end
 	
 	lowerBounds = extentSpace:pointToObjectSpace(lowerBounds)
