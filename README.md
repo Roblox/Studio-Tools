@@ -6,6 +6,7 @@ This repository contains built-in plugins that are used in ROBLOX Studio.
 
 * TerrainTools.rbxmx - smooth terrain manipulation and generation plugin
 * TransformDragger.rbxmx - new part dragger (also known as Transform Tool)
+* AnimationEditorV2.rbxmx - animation editor and rigging tools plugin
 
 ## Issues
 
