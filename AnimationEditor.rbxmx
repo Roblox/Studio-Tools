@@ -1,11 +1,11 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Folder" referent="RBXCB7CFA336E5E4F5CBCB72ACE3252A681">
+	<Item class="Folder" referent="RBX928CE1B118E84DFA8EAC821B7D4A44AE">
 		<Properties>
 			<string name="Name">Plugin</string>
 		</Properties>
-		<Item class="Script" referent="RBXD50390BD122F46FF848FE3C3EAE71C7F">
+		<Item class="Script" referent="RBX50F2A6F55C4B402BA061A08D6CC9A9F5">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -31,7 +31,7 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBX2791D950E8494CBC9D56EB4008FDB1D0">
+		<Item class="Script" referent="RBXCCFFA53CAC784114B940C30BEB26EB0D">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -85,7 +85,7 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBX58FF1DDEE6D14D3FA65363766955B9C2">
+		<Item class="Script" referent="RBX608869301E964C4E8797A7A2BE4600A1">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -138,7 +138,7 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBXDE8389A383DF47D8B2D1452BA9565250">
+		<Item class="Script" referent="RBX0B2D05207E454D79A2D3F7E420646EF6">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -192,7 +192,7 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBXBE0BAA4276AD4447A9CC45FB393322DA">
+		<Item class="Script" referent="RBX2BB4AC051FA7410392C18E29952D2A40">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -5941,7 +5941,7 @@ button.Click:connect(function()
 	menuManager.SelectRig(Plugin:GetMouse(), Plugin, retFunc)
 end)]]></ProtectedString>
 			</Properties>
-			<Item class="ModuleScript" referent="RBX8D8FE78A05B8446FB54936D0D107E748">
+			<Item class="ModuleScript" referent="RBX82708D4C8FCD41BAAA1D2C9FA741763C">
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">EasingStyles</string>
@@ -6045,11 +6045,11 @@ return module
 ]]></ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Folder" referent="RBX0AD44D8AE53D4F19B3B37EBAB6B4E064">
+			<Item class="Folder" referent="RBX5F5DB00C4D42408AAB3725E04976A2E3">
 				<Properties>
 					<string name="Name">GUIs</string>
 				</Properties>
-				<Item class="Frame" referent="RBXEB60CFC521C44F90A4B87CFF9890B563">
+				<Item class="Frame" referent="RBX8C5E5FEF09384AFFB053F208476FDE1D">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -6083,7 +6083,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBXFA4C88C0F4EC4EF1AD7FA373405AE6DC">
+					<Item class="TextButton" referent="RBX7E2BEB98EA3B451D91CEDBB11547BCCC">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -6132,7 +6132,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBXE29BDAA704A64DB4B1727C442C2E7F4C">
+					<Item class="TextButton" referent="RBX742E6061AE48425C92165FAAB24D665A">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -6181,7 +6181,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXF5E5AECDE3AF497C91BBC10ADF9FE3F1">
+					<Item class="TextLabel" referent="RBXF96A3E7471CF47E5BB858131B452E4AB">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -6226,7 +6226,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXA4F63745B47C4E8EA393706BBB867C36">
+					<Item class="TextLabel" referent="RBXA660C5DC33084EA2BE3D1D0A422804DE">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -6271,7 +6271,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="Frame" referent="RBX2081C87B299249258565E4562DC53161">
+					<Item class="Frame" referent="RBX0DAB5FC551354D52B532DF0849D821D9">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6305,7 +6305,7 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="TextButton" referent="RBXD2074F79B11F43BF936748038F77ED9E">
+						<Item class="TextButton" referent="RBX9778368AD2AB46CE8849889ECE29A426">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6354,7 +6354,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextButton" referent="RBX9299DC061AA3431CA34456213A649655">
+						<Item class="TextButton" referent="RBXA63508FBE3094D9D9316586CDD175BBC">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6403,7 +6403,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextButton" referent="RBX5FBCF45862C44E14BBC7C18953C46997">
+						<Item class="TextButton" referent="RBX972DA826B22D4FDC9B26434CDB61AD17">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6452,7 +6452,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextButton" referent="RBX9388922A562D4D7CBF8D6983389226F6">
+						<Item class="TextButton" referent="RBX9CCA8434094340D4BEEE54103328CB2D">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6501,7 +6501,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextButton" referent="RBXA68EED1DFA724F3592E0262BB61DDF6C">
+						<Item class="TextButton" referent="RBX3BFCC1E8181547E7996E2F2F693DC796">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6550,20 +6550,20 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="Color3Value" referent="RBXF6BC26DC2F7F466E98509E69A7938864">
+						<Item class="Color3Value" referent="RBXB636AEB1C1284DBAAD22687FD0DEB477">
 							<Properties>
 								<string name="Name">DeselectedColor</string>
 								<Color3 name="Value">4282269246</Color3>
 							</Properties>
 						</Item>
-						<Item class="Color3Value" referent="RBX2387B4DA44C646B09428BA9B012D72A9">
+						<Item class="Color3Value" referent="RBX8063999DE8284B85A83B6E6B6C7A19D6">
 							<Properties>
 								<string name="Name">SelectedColor</string>
 								<Color3 name="Value">4285953654</Color3>
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="TextLabel" referent="RBX1C060961EAAD45F4BFD12286276132FA">
+					<Item class="TextLabel" referent="RBX73BD0F08656C465D801C92BE792A134F">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -6608,7 +6608,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="Frame" referent="RBX986273BE7C67477F90CC035312EBBBB5">
+					<Item class="Frame" referent="RBX78CEE32F4CCF40C5885AC3C20DCF0B5A">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6642,7 +6642,7 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="TextButton" referent="RBX7139AC81CF2E46BAB933E542215728F1">
+						<Item class="TextButton" referent="RBX435F020B264D44B1B4B3AFE6D64BFDB4">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6691,7 +6691,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextButton" referent="RBX7BCD7605CA5B46E2ABD34963093CB4D8">
+						<Item class="TextButton" referent="RBX8A31FA046C7B4D4A8717C1881515F900">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6740,7 +6740,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextButton" referent="RBX864998F3DBFF4E44A99F9BE6A20A478D">
+						<Item class="TextButton" referent="RBX0142104D5DD34997BD7A1137A5958847">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6789,20 +6789,20 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="Color3Value" referent="RBX728CBB64B0AA4E739BB3179C1C9190D0">
+						<Item class="Color3Value" referent="RBXFE99137CFA8547E2B60AE0CA68AABEC4">
 							<Properties>
 								<string name="Name">SelectedColor</string>
 								<Color3 name="Value">4285953654</Color3>
 							</Properties>
 						</Item>
-						<Item class="Color3Value" referent="RBXBF4107A644924E60977212EAEF6EB0A8">
+						<Item class="Color3Value" referent="RBX3A93CBFA8D934655AD3DA1C0679AEC74">
 							<Properties>
 								<string name="Name">DeselectedColor</string>
 								<Color3 name="Value">4282269246</Color3>
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="TextLabel" referent="RBX67DC076A06464E60A1C5704680F41A74">
+					<Item class="TextLabel" referent="RBX2F68328717B742A5A075BCC9A5F1122C">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6848,7 +6848,7 @@ return module
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX4E42262AA19A470BA283E9E910114B51">
+				<Item class="Frame" referent="RBX22F0E7C27D2B417E8CF571377D553B93">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -6882,7 +6882,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBX05706702B0DB44DCB060176CB4E00451">
+					<Item class="TextButton" referent="RBX5B230324874A4B04BA788CD6A10163F7">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -6931,7 +6931,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBXA8932ABF2A3944D1B9CE767D51FE3EC1">
+					<Item class="TextButton" referent="RBXA4B15B98877D4310AAD7B2A5AB24790A">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -6980,7 +6980,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX9C69935B3F9F4AFEB37B6660C82F65FE">
+					<Item class="TextLabel" referent="RBXB7484E4614104C92A92851D543AD25BA">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7025,7 +7025,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX7F8BC069AA9C4BEA9EFEF66874B07E61">
+					<Item class="TextLabel" referent="RBX0CBEBEBE4369437488D83083301B05E2">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7070,7 +7070,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX09A1AD7EA053436BA5A049F36C62AD70">
+					<Item class="TextLabel" referent="RBX623DA67458A944AE9343D1EEA42964AA">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -7115,7 +7115,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextBox" referent="RBXEEEB8469AACE48FBB5558F632C099B91">
+					<Item class="TextBox" referent="RBX54F5E6C70A18470883E9CB0CF8A63B5B">
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279374354</Color3>
@@ -7162,7 +7162,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX003C953FC5D7459195554AD14D76D882">
+					<Item class="TextLabel" referent="RBX4FD921566EC042D4A07F680E546214B7">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7207,7 +7207,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="ScrollingFrame" referent="RBX07EE31D9AE384BD69A944C745979669D">
+					<Item class="ScrollingFrame" referent="RBXA81A8C769EBC408CB6CA376F4EA81913">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4279374354</Color3>
@@ -7256,7 +7256,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX9EB9ABA4F2EE4720BF353780817D5BE9">
+					<Item class="TextButton" referent="RBX53D882BCB7CB4A6EBF5ECD1693DFBDAB">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7306,7 +7306,7 @@ return module
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX8443CF96906847798D6F99E82BB38EBE">
+				<Item class="Frame" referent="RBX2D5938C452D745FCA7C59CB2DD069988">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -7340,7 +7340,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBX700852C8E2AD47EC85584DC18256F5FB">
+					<Item class="TextButton" referent="RBX8A55120200624683A7176A171838A6FC">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7389,7 +7389,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX9354352EDDFE4D27BC083838B484B0B5">
+					<Item class="TextButton" referent="RBXBF24CBCCBDAB4700BACE6ED737443252">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7438,7 +7438,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXFF583FE44D484E7BA1449B141626D4A4">
+					<Item class="TextLabel" referent="RBX1D20597A4DDD47CDB079B11672290604">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7483,7 +7483,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX4D3F1D231D6E49FCA104315F9575687F">
+					<Item class="TextLabel" referent="RBX205950FB7AC24B5181F0467ACE8DAF2D">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7528,7 +7528,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="ScrollingFrame" referent="RBX31F96E14E39643E68975F2D15ED32F61">
+					<Item class="ScrollingFrame" referent="RBXD02E8729FE6546C492846F9A2592AB9D">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4279374354</Color3>
@@ -7577,7 +7577,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBXF772320C02994660BED3BCA9C6484E3D">
+					<Item class="TextButton" referent="RBX7C7FA797CF6A4AE88C0DA75907A7C71C">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7626,7 +7626,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXFB4DB03D8EA341C8A31668BF771156A4">
+					<Item class="TextLabel" referent="RBX13AA5A46862F43F89A3C758D12DAA21F">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7672,7 +7672,7 @@ return module
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBXA8AAB63585614EA5AFD93C285BDDD2D7">
+				<Item class="Frame" referent="RBXAA51DCDDC5674924847384F34300102D">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4280821800</Color3>
@@ -7706,7 +7706,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBXF6C789EB45414445931BCA710BCE9F49">
+					<Item class="TextButton" referent="RBXA4D77891438D44628B0D965BA811BAB5">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7755,7 +7755,7 @@ return module
 							<int name="ZIndex">2</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX1E9192E5C4F34520A2FA7BC46F7751D5">
+					<Item class="TextButton" referent="RBX3491B7FB6ED349259EBA947F2A11B349">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7804,7 +7804,7 @@ return module
 							<int name="ZIndex">2</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBXC4A875216A4946A9ACC02105C90D52A8">
+					<Item class="TextButton" referent="RBXF2DD722719EC4CCEADE723101A8EAF5C">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7853,7 +7853,7 @@ return module
 							<int name="ZIndex">2</int>
 						</Properties>
 					</Item>
-					<Item class="Frame" referent="RBX2B087E35A56740B190DDB381B492F4C0">
+					<Item class="Frame" referent="RBXA112BB886E73466AB4F0ADD36BCB45A9">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4280821800</Color3>
@@ -7887,7 +7887,7 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
-						<Item class="TextButton" referent="RBXC3B8973CEFA9467D867C5BD2B211F062">
+						<Item class="TextButton" referent="RBXAA4DEA5D627C491195D1869B82D94073">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -7935,7 +7935,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXD4185AAEF78B4BC099EA105A3A5C495E">
+							<Item class="ImageLabel" referent="RBXE22B1D47001947F98974443525E0206B">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -7991,14 +7991,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBXCEDBE7CD062248DEBBB0018A84C72C89">
+							<Item class="StringValue" referent="RBX5149CA1E304A4276A209A1F48D23E513">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Start a new animation</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBXC8D7D1FDF6A946CDB6EF77738C6AF06F">
+						<Item class="TextButton" referent="RBXC7907212C0B547EFA114F2849A36402C">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8046,7 +8046,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXD652EEF63D6C455695FED9344B3FB5F1">
+							<Item class="ImageLabel" referent="RBX5622E7A75A6D49BA9C8E84EF66F1AC00">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8102,14 +8102,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX007851EFC3574E28A38A5CE30F5A3164">
+							<Item class="StringValue" referent="RBXC7B31F7598D94871AA27343E26B2C086">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Load an animation saved in this rig</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBXDDBD8CF06A7B4953B901AC32266973CC">
+						<Item class="TextButton" referent="RBXA4B43109B3A24ED38A8769409858902B">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8157,7 +8157,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX50AEA3FDE3F842B6BCE66C08329E3797">
+							<Item class="ImageLabel" referent="RBX0FDD1CADB1CF44BF96674747B1C86D98">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8213,14 +8213,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX1D1C873964304D34AAEBF1D9AC274C28">
+							<Item class="StringValue" referent="RBX747751E7EE48415ABE56C2664DE1CD07">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Save the current animation in this place. This does not upload your animation.</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX624D2CCF8A70423F82DC96046A4DF8C7">
+						<Item class="TextButton" referent="RBXBA57F52D25374720A05B390C0FF5CF6A">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8268,7 +8268,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX498C114FB79A47278E49701B657052DF">
+							<Item class="ImageLabel" referent="RBX804F5261839D4155A080E42C6C51028D">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8324,14 +8324,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX14B5F64302D1462381D45CFAAE0ECF77">
+							<Item class="StringValue" referent="RBX40D4655DF3CD433A8DD1DFA02D428D55">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Import an animation from the website</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX208B9D22678F4073A80C3A7AF5346439">
+						<Item class="TextButton" referent="RBX6C8EE1587F8E45C483794052FBBB3756">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8379,7 +8379,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXCF3186A10321435FBE453E92D5C0B64D">
+							<Item class="ImageLabel" referent="RBXEE885941DD944FC887BFD19F29B264F0">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8435,14 +8435,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBXDCDB626B73B747168441AE05C5E5ED21">
+							<Item class="StringValue" referent="RBX3E086F4C2CEB4111887E518600645A0D">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Export an animation to the website</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX781685307CA5454D85EA33FB28E8C213">
+						<Item class="TextButton" referent="RBX21059C142E36492181158036BC2A50B7">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8490,7 +8490,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX1A5A92E2B7BF49FF945AADFB7C15B2AE">
+							<Item class="ImageLabel" referent="RBXFCA96744CA01481E92C481BA954E3877">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8547,7 +8547,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX0B9BC438E3BF4D9FBA2403805BD98403">
+						<Item class="TextButton" referent="RBXD901937FC15545EBAFC4EFE3BF1EF7B0">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8595,7 +8595,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXDEAF2C982AE242B7A689F0EBDEA503DD">
+							<Item class="ImageLabel" referent="RBX7CC9B7D3B8554C6A80B7DAE80CFAE44A">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8651,14 +8651,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX4FC109B3A1C34A8ABBCC5EBE527C6CC8">
+							<Item class="StringValue" referent="RBX6F1AFAF6553741E88E2F7E046199F664">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Play the animation</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBXB90D76AD2581475B892A66BA71BEAF28">
+						<Item class="TextButton" referent="RBX18802C280AEA47E49A8C17AAA8B225F5">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8706,7 +8706,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXD6D1F64DCF004E7F835D9134F157910E">
+							<Item class="ImageLabel" referent="RBXBA35D63CD26A42C4B89AE205DAA05C3B">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8762,7 +8762,7 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX096FB5880AE743619C2DBED79E8EFF69">
+							<Item class="StringValue" referent="RBX42CC1947A14446048B41FB3374B56F4F">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Experimental FBX importing.</string>
@@ -8770,7 +8770,7 @@ return module
 							</Item>
 						</Item>
 					</Item>
-					<Item class="Frame" referent="RBX416157F8EA574C58BE0D9A2F65D24DA8">
+					<Item class="Frame" referent="RBX9EA1C11C111B4A56B59391D0E4CB1421">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4280821800</Color3>
@@ -8804,7 +8804,7 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
-						<Item class="TextButton" referent="RBX322B1004C3D44B5C9DD6FDF4AAD340DF">
+						<Item class="TextButton" referent="RBX73784F49B5A3400996A6B374C15BE078">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8852,7 +8852,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX46D5CB2C16B54BEA859FF54B764F6A79">
+							<Item class="ImageLabel" referent="RBX904C7D003CD049B19AAE5ABFDA97E3D0">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8909,7 +8909,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX1338F37D036F48F2AC20E0851187F885">
+						<Item class="TextButton" referent="RBXDBF34D9052274D2BBC5AFD5C180D1F02">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8957,7 +8957,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXD4B80DA7B38445EE97ED82D32A287FDC">
+							<Item class="ImageLabel" referent="RBX7419F93F65C0456E85549FCBD9E3AE1C">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9014,7 +9014,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBXA9F430ECC09C41288066112608C708F6">
+						<Item class="TextButton" referent="RBX802995A8BFA04DF3B35C6C12EFD9195C">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9062,7 +9062,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXC4F0B284D3B4495DB640679F08E5701E">
+							<Item class="ImageLabel" referent="RBX503FADE037F44E9EA1994AC525E32D3E">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9118,14 +9118,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX30E3B4FDE23E4F7385D939919B988DBC">
+							<Item class="StringValue" referent="RBXE3D57AFFD5864F148D3C29FC91797088">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Change the animation length</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX8F642ED291BB42B5B1374ABEC437AD73">
+						<Item class="TextButton" referent="RBX82F1330D1F094ED19B8302AB5AC3582C">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9173,7 +9173,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX81885E186F9440FB9E708EB46230BB9F">
+							<Item class="ImageLabel" referent="RBX31EF847D24F149DDA360CEB9D1E532D8">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9229,14 +9229,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBXDC2DB1659CE54781A5349AF0974A06AA">
+							<Item class="StringValue" referent="RBX008F2D502DA34BE4BD063DDE8784D5E2">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Insert time at the cursor. Pushes keyframes forward</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX8C4721D3BDC14820A3DA8068BDD6F913">
+						<Item class="TextButton" referent="RBX5F38F9C0CDFE4437A8E258D48C920F5D">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9284,7 +9284,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXB59DE1978477454FB45898DB1AC0EE78">
+							<Item class="ImageLabel" referent="RBXFC82E88BF44B4D0795228F36AD6D1020">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9340,14 +9340,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBXCEB60861A83C463985E11C6913407772">
+							<Item class="StringValue" referent="RBX6F5DD21205E4475DB09C7E4C13D839DD">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Remove time at the cursor. Pulls keyframes backwards</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX80D7147607484D2CB006F3F2BCE35181">
+						<Item class="TextButton" referent="RBX5FF16ED822CC46318224C10453D147AC">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9395,7 +9395,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXA2DCF3B828C44DC382C42C185B597D48">
+							<Item class="ImageLabel" referent="RBXF1009BCB42BE468CAC9DB8A46D3CDCB0">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9451,13 +9451,13 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX0A62760AA6F74316950A1432DE68546E">
+							<Item class="StringValue" referent="RBXC8A705D787A14FC697BBA555288FA43A">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Set if the animation should loop or not</string>
 								</Properties>
 							</Item>
-							<Item class="TextLabel" referent="RBX7DDA35599253476DBEC5BAE77B5AC9BD">
+							<Item class="TextLabel" referent="RBXDD1F9E5BEDEB4D7CA49FBEE1ADC77BB3">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4282664004</Color3>
@@ -9503,7 +9503,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX35CD2387CE144482866049FE602FE06E">
+						<Item class="TextButton" referent="RBX663FFAC8E6C04EFD925C5873FB717157">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9551,7 +9551,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX92CD7D3B7FAF4A34980D1ECF463402EF">
+							<Item class="ImageLabel" referent="RBXDCE8FB1B19C34D54A4A0ADDE43E1A5E0">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9607,13 +9607,13 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX71C3345852E74155950476F6D480F9B2">
+							<Item class="StringValue" referent="RBX81C3F04C19FE4C25A46A182AD30B80D9">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Set the animation priority</string>
 								</Properties>
 							</Item>
-							<Item class="TextLabel" referent="RBX2696E6A8BEE446C5892FFFE2FD229880">
+							<Item class="TextLabel" referent="RBX53F3610661BE4DFB996FD153A228C37C">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4282664004</Color3>
@@ -9659,7 +9659,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBXB96A926ADB8F498BB715BF63C35454CA">
+						<Item class="TextButton" referent="RBXAD1B4566D8DB44CBBA7606C583372BE4">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9707,7 +9707,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXF6276492BA4248D2AF20A02A47F9876C">
+							<Item class="ImageLabel" referent="RBXF2D89F8419DA4CE48EE84A0E5510B691">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9764,7 +9764,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBXFDCF3FF6617E49EEA44D95E2BA3E219D">
+						<Item class="TextButton" referent="RBXDCD8D13910954682B04975F70841AC69">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9812,7 +9812,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX12CE4118779042988190C2C17B5B838A">
+							<Item class="ImageLabel" referent="RBXB07214D7BDAF4163BD45384C4F1CE670">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9868,14 +9868,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX495AE11A4695454CBA6FFFAFCEF28953">
+							<Item class="StringValue" referent="RBXB87EB2E64C8C4A42AAFB3B1114EFAFF6">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Paste copied pose</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBXA070F289FFE44CACB874DC474B525D37">
+						<Item class="TextButton" referent="RBX027AB7787B284800BD2AFF4DCEE2C069">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9923,7 +9923,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX19753487BED0499F80E81DC6F2D82B0F">
+							<Item class="ImageLabel" referent="RBX61CE3F133CF54FC8A03C1B4EFF197987">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9979,7 +9979,7 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX52A1A629A8DB4915819CACAB96DD641D">
+							<Item class="StringValue" referent="RBXE833AD002EB6489DA735DC1E00417240">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Create a blank keyframe at the cursor</string>
@@ -9987,7 +9987,7 @@ return module
 							</Item>
 						</Item>
 					</Item>
-					<Item class="Frame" referent="RBX3336627955F64C5EBF0A0E3072368985">
+					<Item class="Frame" referent="RBX73C2333BB17349708A5A288A08A1C4A2">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4280821800</Color3>
@@ -10021,7 +10021,7 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
-						<Item class="TextButton" referent="RBXF34E90A114D44CC3AB32066FA4F34A39">
+						<Item class="TextButton" referent="RBXC7FC6B517FB34346BF73BC6C11406336">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10069,7 +10069,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX1250482305A94217B16F25D7C976F06C">
+							<Item class="ImageLabel" referent="RBXFF56D8A4F4B44EEE9772E6F2344F8298">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10125,14 +10125,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX606541B8A1DD4E319FBA04890E3955B3">
+							<Item class="StringValue" referent="RBXCDA5D1793FFD4D89A1B94AF07E58882B">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Should the cursor use the tween effect?</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX240AA444B6714C13A0BEE1D417654E85">
+						<Item class="TextButton" referent="RBXD127258197074CCDACB0EC7B796111E5">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10180,7 +10180,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX5A184E04179944C3BE84162B9CE37A63">
+							<Item class="ImageLabel" referent="RBX0F2FD80422BF400A8C23356CD26102A2">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10236,14 +10236,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX8E3B08C46FB14854997E6CED07479B46">
+							<Item class="StringValue" referent="RBXFF3FD604ACD34F80BEE70835FA4FF892">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Show partial poses, or only on keyframes?</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX48A477F99854424DBAD7F1B97053BB8B">
+						<Item class="TextButton" referent="RBX6E3E932C88EF4C36ACB48CCFF8082B0A">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10291,7 +10291,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXEB35D163C1D2452A98B41A196FDF952E">
+							<Item class="ImageLabel" referent="RBX907C1ECE59D444BA82B78D134CE194ED">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10347,14 +10347,14 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX96FCA10BADB9482D88CCE51FDF69604E">
+							<Item class="StringValue" referent="RBXF4A6CBE09FC840DEA0CB47B52E6F0F59">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Select invisible parts, or ignore them?</string>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX00DB83225F6540CC97841922E1887089">
+						<Item class="TextButton" referent="RBX0800B0FF6EFA4ECD8B3B13E521BBB085">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10402,7 +10402,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBXA909D818E51446639110F8A1D8033D07">
+							<Item class="ImageLabel" referent="RBXC3E1C7B21AC2464E8DB09AE17EF27A5D">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10458,13 +10458,13 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX43D158486E8644BB885379AD846EABD5">
+							<Item class="StringValue" referent="RBX1327585F859D4226BFAE418422BF8552">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">What times should the cursor snap at?</string>
 								</Properties>
 							</Item>
-							<Item class="TextLabel" referent="RBXBA968A5B767B466A899A4308AA8E33D9">
+							<Item class="TextLabel" referent="RBX079877DB9ACC4E31A9954DD703038F4D">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4282664004</Color3>
@@ -10510,7 +10510,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX04098BC93ABE4A34A38724D1F4045192">
+						<Item class="TextButton" referent="RBX776F53E6E7334DEE820B257AC93AF869">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10558,7 +10558,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX1E07A3D292DD46588288A46EDAA85288">
+							<Item class="ImageLabel" referent="RBXBF6A8D96238945B0962965962F8E6FDB">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10614,13 +10614,13 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBX03FD34FB9C234ADEBF258585D0D909A0">
+							<Item class="StringValue" referent="RBX02912F913FA244218D37BFDB5B5A2CE0">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">How often should markers be shown on the timeline?</string>
 								</Properties>
 							</Item>
-							<Item class="TextLabel" referent="RBXD1C86387DFAE41E2B3F29A70C5FF0127">
+							<Item class="TextLabel" referent="RBXBA336930EE954D3CA70435929132FC02">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4282664004</Color3>
@@ -10666,7 +10666,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX9119F7C2A7D64436BFC21799DC587D40">
+						<Item class="TextButton" referent="RBXC0B2C4137DA04B9486C282FE8341B880">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10714,7 +10714,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX31AFDD6952BB42A3A163F22BDB60B10B">
+							<Item class="ImageLabel" referent="RBX146B5A9B6CDF4E0BAF870DEC7D1D06E6">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10771,7 +10771,7 @@ return module
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="TextButton" referent="RBX576E7CC0CED24582A03E53573C6F2A3D">
+						<Item class="TextButton" referent="RBX842D4D13BFAF4CF2B06883A8B146A485">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10819,7 +10819,7 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
-							<Item class="ImageLabel" referent="RBX5346EF648F4C474AA10BAD2FB049D4D7">
+							<Item class="ImageLabel" referent="RBX7A92970A1064415C9CA15DE1AAB268F7">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10875,7 +10875,7 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
-							<Item class="StringValue" referent="RBXE0420FF53395441694EEDE1266E4DB22">
+							<Item class="StringValue" referent="RBXF40D09D8AE4044EF9CFFA1115A7738F7">
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Show tooltips? This text is a tooltip!</string>
@@ -10884,7 +10884,7 @@ return module
 						</Item>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX94CDC5BE8918463BBA065EFF72B63527">
+				<Item class="Frame" referent="RBXA37211652C6C4372820B3C0DC974F1B5">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -10918,7 +10918,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextBox" referent="RBX323424D4E4074B43BC2B52813B72EB1B">
+					<Item class="TextBox" referent="RBX6D6195ACF63B4EE4B072F7178E4A5634">
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -10965,7 +10965,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX39AF5BA44A6244078CF944E6A5E49272">
+					<Item class="TextButton" referent="RBX7BB2EB67154A40B389EA1285F12CD80E">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11014,7 +11014,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBXC6D94272BB57414E9089DDAB231328BF">
+					<Item class="TextButton" referent="RBX3E22020F5DA04CCF9620F24DED145402">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11063,7 +11063,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXA0E3A198809941479DFC2EC754D93788">
+					<Item class="TextLabel" referent="RBXA6782F094322430B932C2F99E3E2B90F">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11108,7 +11108,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX45B10AE1D1DC40199984AEEF38277F05">
+					<Item class="TextLabel" referent="RBX3C89AE88A0744C7AA13F1C31EBC6BBEF">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11154,7 +11154,7 @@ return module
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX4271E1A6D3AA4E669C196E82FBD21454">
+				<Item class="Frame" referent="RBX93BBBE27715C48109E1EF47B4401B8FD">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -11188,7 +11188,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBX4E2C4CEB19E348BFA049630BAD518457">
+					<Item class="TextButton" referent="RBX91707EA00EE24A009333C9F55DF14637">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11236,14 +11236,14 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="StringValue" referent="RBXF9470302A1734EE5BC1672E1678FF7D9">
+						<Item class="StringValue" referent="RBX4BB1CC20972B4AF4981232CD2E26137E">
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Lowest priority</string>
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="TextLabel" referent="RBXBBB0E8D9BB7B4C72AC522ED178660D4D">
+					<Item class="TextLabel" referent="RBXC9B644019A374514B07CEECAD5B5925E">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11288,7 +11288,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXCB2B9BA5EF7A4B0C9131288DE0C256E7">
+					<Item class="TextLabel" referent="RBXA01D72053ADA4C99840DA8D55912D718">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11333,7 +11333,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX3BC28E34C90140829FA9E97A79B7C33A">
+					<Item class="TextButton" referent="RBX33E91A58700F4AD08533D2A38F0B00EB">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11382,7 +11382,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX73DA4A8D49DD4419B228B8246340507B">
+					<Item class="TextButton" referent="RBX0A26B1720E2D4BF5804994D5108C095B">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11430,14 +11430,14 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="StringValue" referent="RBX15BA69895E1542C9A16D55239A670A89">
+						<Item class="StringValue" referent="RBXCBCF9A3AE52047FA880437946C3F02FD">
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Plays on top of core animations</string>
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="TextButton" referent="RBXCBD07EE004F84E9BB938BE9F63C70DCE">
+					<Item class="TextButton" referent="RBX9454A14286E248648EC95D177CBE841C">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11485,14 +11485,14 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="StringValue" referent="RBXEE14A49B6F0E4F62992F8AAB5784C427">
+						<Item class="StringValue" referent="RBX68CA2350792A4B3FB9BD5BE76F153D7F">
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Plays on top of idle animations</string>
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="TextButton" referent="RBXB4EC72CA4B0E4D4D833F3804E2C4D184">
+					<Item class="TextButton" referent="RBX77811D673E1E459C8CEDBE441458197C">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11540,14 +11540,14 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="StringValue" referent="RBX8B9B8BA8B3454C8EAC45E39B95B370FC">
+						<Item class="StringValue" referent="RBX167F89BB630F41D58B810905080FF7D3">
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Plays on top of movement animations</string>
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="TextButton" referent="RBX61707311612047B780BA0B5147E1A1E0">
+					<Item class="TextButton" referent="RBX48FF0D345149418C8B52336FA8F0ACEE">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11595,7 +11595,7 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="StringValue" referent="RBXB18E97A342F84F058CD63AE5A65EE848">
+						<Item class="StringValue" referent="RBXBB99E8192396418CAC8F64E9062B2B36">
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Lowest priority</string>
@@ -11603,7 +11603,7 @@ return module
 						</Item>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBXDCE7A121F05743D099A6E940C5FE6077">
+				<Item class="Frame" referent="RBX083EABA6A75340B7962FDD982B09F328">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -11637,7 +11637,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">5</int>
 					</Properties>
-					<Item class="TextButton" referent="RBXDFAD42A3CBA4405A902E5F7E33128F4C">
+					<Item class="TextButton" referent="RBX2F68B4D21AA24A008434CF867283383F">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11685,14 +11685,14 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
-						<Item class="StringValue" referent="RBXC5C5BF3585954AE89D7767633C6236CB">
+						<Item class="StringValue" referent="RBXDB3DF704FA304F268C94672EE7115049">
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Animation will restart once it has ended</string>
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="TextLabel" referent="RBX3797A844540E425A8E361810D7A15B5E">
+					<Item class="TextLabel" referent="RBX4665A0E487554331A023B161E5A29C58">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11737,7 +11737,7 @@ return module
 							<int name="ZIndex">5</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXA06E4370117F4D379ED990CD0C12B6FD">
+					<Item class="TextLabel" referent="RBXB3FD7E918B794B498F8CE8D4C08E4D72">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11782,7 +11782,7 @@ return module
 							<int name="ZIndex">5</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX23F3099A2F314E8C8C5DEDEC52463383">
+					<Item class="TextButton" referent="RBXC8B820CAE5224BCFAB73E5D254EF56DE">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11831,7 +11831,7 @@ return module
 							<int name="ZIndex">5</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBXA4B33D588F454F6589D1C8795194B1C7">
+					<Item class="TextButton" referent="RBXB58DF4CDD7D74C24BC550934E3BFFC50">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11879,14 +11879,14 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
-						<Item class="StringValue" referent="RBX0B274FD1BF094E949B5E5FCA8AE4670D">
+						<Item class="StringValue" referent="RBX6A3F57F21902414AB1CD7EC0FEC63287">
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Animation stops when it ends</string>
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="TextButton" referent="RBX0E1B705934B449628F67A486A9440AE1">
+					<Item class="TextButton" referent="RBXB0B276B5BA6E497FA517CC1F0E5B725A">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11934,7 +11934,7 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
-						<Item class="StringValue" referent="RBX79DFD4EDED8240CBB2E3D6C2A165A35F">
+						<Item class="StringValue" referent="RBXD6C3E5CC0D774176BD6921C1725AEC7D">
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Lowest priority</string>
@@ -11942,7 +11942,7 @@ return module
 						</Item>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBXA9D7CA4FEC6646EBBD1AD0EF21FFE618">
+				<Item class="Frame" referent="RBX35845CDAAA1C40CE8F2C1D2091DA90C8">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -11976,7 +11976,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBXECE6EF5831AC4195AB766FF472EC4161">
+					<Item class="TextButton" referent="RBX5C05157FEC19430FA86496E1CD90B33A">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12025,7 +12025,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX185F25D7877A46E4B9475E1D4869EADF">
+					<Item class="TextLabel" referent="RBX883064DC563B4A7395D7A70EBABA6053">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12070,7 +12070,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX000BE9A6582C4D69BCDED8AEE860AA90">
+					<Item class="TextLabel" referent="RBX593DCF0C3BD54539B9110CA6F6381727">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12116,7 +12116,7 @@ return module
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBX31EFD2E3E41543F59495DF85ADFB8058">
+				<Item class="Frame" referent="RBXAB85ABFEA656419D9312F04477873238">
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -12150,7 +12150,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBXC91F9394CA7A4A51BC04FA0D6BAFCB69">
+					<Item class="TextButton" referent="RBX6DA07EFEA2A84F0986D7EB17727E07DF">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12199,7 +12199,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX95146713BE8B462382E7578DA0C3411D">
+					<Item class="TextButton" referent="RBX4BD154A51E6D4D728DBCF1E895634AA4">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12248,7 +12248,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX0EEDE5BF44F3471086EFAD7A0EED1A11">
+					<Item class="TextLabel" referent="RBXD06B6C9A06C34534B91F1F80601F9E2A">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12293,7 +12293,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXECA3F8617D6E4623B9286F8C9B8AE4BB">
+					<Item class="TextLabel" referent="RBX9A7D12C66F704AC0B42EA1E258017900">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12339,7 +12339,7 @@ return module
 						</Properties>
 					</Item>
 				</Item>
-				<Item class="Frame" referent="RBXF7CE5E32F36B46C78C797D6DF1D90A12">
+				<Item class="Frame" referent="RBXD9F6D1F231284E91933E3AF36FFF2128">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -12373,7 +12373,7 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBX2A1DC0823B004438BD2A042820E126FA">
+					<Item class="TextButton" referent="RBXBD775688BE8B4988A36E23F47FFC3633">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12422,7 +12422,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX11C1D99B9D75469180BA5A36A2A49DA8">
+					<Item class="TextButton" referent="RBX6D7BEC1E7D8F41B2963D60DA21CA7F40">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12471,7 +12471,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX0004939436404CD9965B14D4225510DA">
+					<Item class="TextLabel" referent="RBX3660A125A34C444C91300217C7EDFC8A">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12516,7 +12516,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXDE417CCD58D147ACBDF8480C9D0B1B4A">
+					<Item class="TextLabel" referent="RBX53630EF7D0F147468C7861212A64B8B1">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12561,7 +12561,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX2E92345F680D44589E7CEF226D485C02">
+					<Item class="TextButton" referent="RBXD7BC25ABEA79424CBC2C5C00816C5228">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12610,7 +12610,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX05B4DEF010524887B64B73342DE10E24">
+					<Item class="TextLabel" referent="RBXE7848625B364477B8585D8B0409E5226">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12655,7 +12655,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXE197320CABCF44D191FBD21A57964A18">
+					<Item class="TextLabel" referent="RBX889280D00FC44D2B92DB1150A8EB29A4">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12700,7 +12700,7 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="Frame" referent="RBX786E553B9A85440DA5415C13C8E08D20">
+					<Item class="Frame" referent="RBXA96008C265BE449BBB0E124D26E14B00">
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -12734,7 +12734,7 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBX06E37E3F41F740F399FF1E4DC000050D">
+						<Item class="TextLabel" referent="RBXBE665BDFC0864A99A1329884A75BF950">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12779,7 +12779,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBXC7B9703066244134970D4ED978223B55">
+						<Item class="TextLabel" referent="RBXD30D9E9A0FF644E7833B0915602323E2">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12824,7 +12824,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBX462BF648F0304F96B8D72039276A65DA">
+						<Item class="TextLabel" referent="RBX1CF83B2361164B858B81354FF7ACD970">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12869,7 +12869,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBX48D4566DA22F444F9FD1C67D162D3AC5">
+						<Item class="TextLabel" referent="RBXDE2E41625E344CA99595FFBE788C06EC">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12915,7 +12915,7 @@ return module
 							</Properties>
 						</Item>
 					</Item>
-					<Item class="Frame" referent="RBX2D41AC0F0EC24E549BFC9FF62D8CE966">
+					<Item class="Frame" referent="RBX8A95FC926E82468A8DF87DDF4625376F">
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -12949,7 +12949,7 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBXDE81268D465F4201B54B63B2B1CDE1AC">
+						<Item class="TextLabel" referent="RBXFC07625E39DA4DBBA59568DBA3C53343">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12994,7 +12994,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBXEA28CA6D2420445EAD02BEB6460313AB">
+						<Item class="TextLabel" referent="RBXF961C608B9F44F3487625FBC4365E242">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -13039,7 +13039,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBX5D40D88483DD4EB18431ED609BC1A024">
+						<Item class="TextLabel" referent="RBXDF9C3037DDC6443399B6766BF85BB0DD">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -13084,7 +13084,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBXD733A47C223043DFBB6FB163370477C3">
+						<Item class="TextLabel" referent="RBX26EDFD4CE58F46DCA74BF77544FD3546">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -13129,7 +13129,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextButton" referent="RBXDED215C8CD864C2CB718CF2396CC70B6">
+						<Item class="TextButton" referent="RBX036AC32D94EB49038B1387E25679A6AD">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -13178,7 +13178,7 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="TextButton" referent="RBX5F3A0145D212498482B5171EA840E0AA">
+						<Item class="TextButton" referent="RBX694445499C614B8C962B8A891E9E8C38">
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -13230,7 +13230,7 @@ return module
 					</Item>
 				</Item>
 			</Item>
-			<Item class="ModuleScript" referent="RBXF0C5C903C2C14391B5DD6290884D5D0B">
+			<Item class="ModuleScript" referent="RBX8FC604186A77430D8F6FB09EE7CC42BD">
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">MenuHandler</string>
@@ -13987,23 +13987,23 @@ return module
 ]]></ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Folder" referent="RBX9759D280E8814752A5B97A19D1BAC73A">
+			<Item class="Folder" referent="RBX7920BA36A2BC4E7AAFCE1EEC892B9A40">
 				<Properties>
 					<string name="Name">Customize</string>
 				</Properties>
-				<Item class="BrickColorValue" referent="RBXF761A0EE887E4FBD82DE92E9AE251F00">
+				<Item class="BrickColorValue" referent="RBXDA7C772189424050B79A49CFBCB05B79">
 					<Properties>
 						<string name="Name">MouseoverColor</string>
 						<int name="Value">1015</int>
 					</Properties>
 				</Item>
-				<Item class="BrickColorValue" referent="RBXCA6C4202AC4045329D644F2B438C4EE6">
+				<Item class="BrickColorValue" referent="RBX47F95B66058B4C208BEFC43F6086CA02">
 					<Properties>
 						<string name="Name">SelectedColor</string>
 						<int name="Value">1017</int>
 					</Properties>
 				</Item>
-				<Item class="BrickColorValue" referent="RBXA98FACA21A8A44B9BC79FD09689FEBF8">
+				<Item class="BrickColorValue" referent="RBX4C2702F87EDB45859ED1C3BB176B356F">
 					<Properties>
 						<string name="Name">GridColor</string>
 						<int name="Value">1001</int>
@@ -14011,7 +14011,7 @@ return module
 				</Item>
 			</Item>
 		</Item>
-		<Item class="Script" referent="RBX21539A28CFC94979BC94F765DA9453CD">
+		<Item class="Script" referent="RBXBDB7B2F727924AB9AAFFBA6BF3CA8D6F">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -14113,25 +14113,9 @@ function createConfigureGui(R15Folder, R6Folder)
 	end)
 end
 
-if fbxFlagExists and fbxFlagValue == true then
-	local button = toolbar:CreateButton(
-		"", -- The text next to the icon. Leave this blank if the icon is sufficient.
-		"Import FBX Rig", -- hover text
-		"http://roblox.com/asset/?id=467691760" -- The icon file's name.
-	)
-	
-	button.Click:connect(function()
-		if (_G["AnimationEdit"] == true) then
-			print("Cannot import rig while in edit mode.")
-			return
-		end		
-		
-		warn("This operation may take a few seconds depending on rig complexity!")
-		local R15Rig = plugin:ImportFbxRig()
-		
-		if R15Rig == nil then
-			return
-		end
+game.Workspace.ChildAdded:connect(function(child)
+	if child.Name == "FBXImport" then
+		local R15Rig = child
 		
 		local Face = Instance.new("Decal", R15Rig.Head)
 		Face.Name = "Face"
@@ -14168,17 +14152,35 @@ if fbxFlagExists and fbxFlagValue == true then
 		R6Rig:Destroy()
 		
 		createConfigureGui(R15Folder, R6Folder)
+	end
+end)
+
+if fbxFlagExists and fbxFlagValue == true then
+	local button = toolbar:CreateButton(
+		"", -- The text next to the icon. Leave this blank if the icon is sufficient.
+		"Import FBX Rig", -- hover text
+		"http://roblox.com/asset/?id=467691760" -- The icon file's name.
+	)
+	
+	button.Click:connect(function()
+		if (_G["AnimationEdit"] == true) then
+			print("Cannot import rig while in edit mode.")
+			return
+		end		
+		
+		warn("This operation may take a few seconds depending on rig complexity!")
+		plugin:ImportFbxRig()
 	end)
 end
 
 
 ]]></ProtectedString>
 			</Properties>
-			<Item class="ScreenGui" referent="RBX5B37E6E6D53D4D37830976343427235D">
+			<Item class="ScreenGui" referent="RBXDD27755A86D14711AE2758E8E0082CDF">
 				<Properties>
 					<string name="Name">FBXimport</string>
 				</Properties>
-				<Item class="Frame" referent="RBXDC132C62FB534FA5BB1DF40583712BD9">
+				<Item class="Frame" referent="RBX617DA08FC0F24F0BB73F816CB81142FE">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14212,7 +14214,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBX7A7AE5BE5648415A8044F7B73ACA29D3">
+					<Item class="TextButton" referent="RBX9250963DEEA14E838D8537A5FEFFAE08">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14261,7 +14263,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX10C3A5683DDA4629B4EBBF60F4AE170E">
+					<Item class="TextButton" referent="RBX4A6FDB0DB0A642B58A9DB49FE9FCD94E">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14310,7 +14312,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXEAEFE93432F7458E91D4F181C6B0623B">
+					<Item class="TextLabel" referent="RBXFB004684C67B4994880E1E80B3B72EF7">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14355,7 +14357,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBXA62A110023CD43A795907BD0C85527C0">
+					<Item class="TextLabel" referent="RBXDBB721E32FAD4E34A41D7770A117583D">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14400,7 +14402,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX5BE368C4622E4975962BF2298C265C07">
+					<Item class="TextButton" referent="RBX815811F49FB44BF88ED519329D246EF9">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14449,7 +14451,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX69DB8374011545C09E7FBF878E1FA011">
+					<Item class="TextLabel" referent="RBX689E3C843A6F45189693287D94122EC8">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14494,7 +14496,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="Frame" referent="RBX8D4CE89C2ABE4832B9C53AE1C4BEB6EE">
+					<Item class="Frame" referent="RBX24F4330763FB417D974FC17818F754ED">
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14528,7 +14530,7 @@ end
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBX4DE3319F188940DFBE6FCD94DC67D38E">
+						<Item class="TextLabel" referent="RBX75E212E2DF3341B5A283F25523356A1E">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14573,7 +14575,7 @@ end
 								<int name="ZIndex">2</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBXF8B8E993553F4AA59A394074593721DB">
+						<Item class="TextLabel" referent="RBXC36F5E7FE2C8441BAE966EEAAFD897C0">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14618,7 +14620,7 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="Frame" referent="RBXA04BA66FC4A64BB5B1F5529FB1AA8150">
+						<Item class="Frame" referent="RBX085CFB155B0A4FB39203B6C04B70948E">
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14652,7 +14654,7 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="Frame" referent="RBXD1B70CDFAC5D4B6D98072E3F92A2C7EE">
+							<Item class="Frame" referent="RBX52D09C21F9B04775AACF1E1F5F8388E7">
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14686,7 +14688,7 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextBox" referent="RBX2975FA13321549AB895023ACAD3A71EE">
+								<Item class="TextBox" referent="RBX96E516A085BC4BA4A8EE5E59492CE00B">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -14733,7 +14735,7 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBXB784FAA11E634339B86BD1F7B748CCC3">
+								<Item class="TextLabel" referent="RBXC35FC1D0793D44EA9CACAC8D2BDF8E80">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14781,7 +14783,7 @@ end
 							</Item>
 						</Item>
 					</Item>
-					<Item class="Frame" referent="RBX6006C209DB984BBC98A94233512E157E">
+					<Item class="Frame" referent="RBXCA26FF02DB144C7596F65E06288CE250">
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14815,7 +14817,7 @@ end
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBX4C75B688E2DA427F915851EF8946BC4F">
+						<Item class="TextLabel" referent="RBX4885C1A4962E444681C76C7D182D213C">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14860,7 +14862,7 @@ end
 								<int name="ZIndex">2</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBXBF3168AF27144A078E10D8C300B45917">
+						<Item class="TextLabel" referent="RBXB1E4EC381F8D4E449D62D6DE7AEFBA72">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14905,7 +14907,7 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="Frame" referent="RBX6A6F7F202B9A4B1FB192D89D0272CD7F">
+						<Item class="Frame" referent="RBXAAC3B9485E0049EFAFA3FE41459B1ED0">
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14939,7 +14941,7 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="Frame" referent="RBXE21A7F5C9ACC4D73BFFD8024AC45B8D7">
+							<Item class="Frame" referent="RBXA66DDF96CE134B82AF28D4D5BA8730BC">
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14973,7 +14975,7 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextBox" referent="RBX8937CAAE9ED345C18248BBB5CCC3DFAD">
+								<Item class="TextBox" referent="RBX38E4C999957F456098C04E994798615E">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15020,7 +15022,7 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextBox" referent="RBXED25005E99EE44138CC8D4AB5AE2453E">
+								<Item class="TextBox" referent="RBX9C59DEB85AF14039B525BB53411EDB1B">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15069,7 +15071,7 @@ end
 								</Item>
 							</Item>
 						</Item>
-						<Item class="TextLabel" referent="RBX8D622B732B064BDDA95976B9A70AD326">
+						<Item class="TextLabel" referent="RBX6C354876B67C42EF8177773DCFFF8806">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15114,7 +15116,7 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="Frame" referent="RBXD921776FA42242729E7DBC155592222E">
+						<Item class="Frame" referent="RBX890D61CE6F994115B8D8E1144BE4888B">
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15148,7 +15150,7 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="Frame" referent="RBXCB204F1632EF467690632969605BBA16">
+							<Item class="Frame" referent="RBXD017AF71B53E4360BBB43CF6B5FF3263">
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15182,7 +15184,7 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextBox" referent="RBX394F0932F5D24EE297AB5DAD170E561C">
+								<Item class="TextBox" referent="RBXAC7CDBE0D5F8407A8D7183AD6A8BF2C7">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15229,7 +15231,7 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBXB8005B28E1BF4B02B22C8F008AAF8211">
+								<Item class="TextLabel" referent="RBX2AC3BD8607F74F9E8AF2A09F15FB29B3">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15277,7 +15279,7 @@ end
 							</Item>
 						</Item>
 					</Item>
-					<Item class="Frame" referent="RBX683F2E7F5387440EA32C493B59ED89EC">
+					<Item class="Frame" referent="RBX4CC6A74073CF409399EC1AFE84DDF274">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294944010</Color3>
@@ -15315,7 +15317,7 @@ end
 				</Item>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBX2D9DE6903DAB4FE4BF57342D291DF154">
+		<Item class="ModuleScript" referent="RBX39E635FF5C7340288C267B47AFEBCECB">
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">RigCreator</string>
