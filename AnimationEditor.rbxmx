@@ -1,11 +1,19 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
+<<<<<<< HEAD
 	<Item class="Folder" referent="RBX34B9F9F8B8B9477C97B67C5689E286EA">
 		<Properties>
 			<string name="Name">Plugin</string>
 		</Properties>
 		<Item class="Script" referent="RBX4EA395B74F96480D9A1316227E16A32B">
+=======
+	<Item class="Folder" referent="RBX370267A7B18644029484AC7ADED0571E">
+		<Properties>
+			<string name="Name">Plugin</string>
+		</Properties>
+		<Item class="Script" referent="RBX76ED7072E7BE4CA5A8F7C026A1E11936">
+>>>>>>> refs/remotes/ROBLOX/master
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -31,7 +39,11 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
+<<<<<<< HEAD
 		<Item class="Script" referent="RBXBFD013F057CE48BBA5F04EF5162EE20D">
+=======
+		<Item class="Script" referent="RBX3BCDB550BFFE41C8A7262CE455027BF5">
+>>>>>>> refs/remotes/ROBLOX/master
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -85,7 +97,11 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
+<<<<<<< HEAD
 		<Item class="Script" referent="RBXF41303EAE6F14CD4A43EFF31955AC0D3">
+=======
+		<Item class="Script" referent="RBXBF254432BFBA4595B416051CC6D56861">
+>>>>>>> refs/remotes/ROBLOX/master
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -138,7 +154,11 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
+<<<<<<< HEAD
 		<Item class="Script" referent="RBX9322CCB9AE644431B181BE7F6DAA4075">
+=======
+		<Item class="Script" referent="RBXE1DFD02679BF4585A57C8F6DA64F8788">
+>>>>>>> refs/remotes/ROBLOX/master
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -192,7 +212,11 @@ button.Click:connect(function()
 end)]]></ProtectedString>
 			</Properties>
 		</Item>
+<<<<<<< HEAD
 		<Item class="Script" referent="RBX0277FA23B02442D7A23FE0D00454861C">
+=======
+		<Item class="Script" referent="RBX85B916B3BA7B4CD888F8D92AB4374020">
+>>>>>>> refs/remotes/ROBLOX/master
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -5941,7 +5965,11 @@ button.Click:connect(function()
 	menuManager.SelectRig(Plugin:GetMouse(), Plugin, retFunc)
 end)]]></ProtectedString>
 			</Properties>
+<<<<<<< HEAD
 			<Item class="ModuleScript" referent="RBXF830733D5C684ADFB504EDB81D06F578">
+=======
+			<Item class="ModuleScript" referent="RBX767108CC03C242D685DD34C676A42C8B">
+>>>>>>> refs/remotes/ROBLOX/master
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">EasingStyles</string>
@@ -6045,11 +6073,19 @@ return module
 ]]></ProtectedString>
 				</Properties>
 			</Item>
+<<<<<<< HEAD
 			<Item class="Folder" referent="RBXA4DA2CB778DB4EDDA1E419C2127A6080">
 				<Properties>
 					<string name="Name">GUIs</string>
 				</Properties>
 				<Item class="Frame" referent="RBX0196DC31B95E483CADA813B461FA3626">
+=======
+			<Item class="Folder" referent="RBX8B90F58812F64B24B78681C7762E0A48">
+				<Properties>
+					<string name="Name">GUIs</string>
+				</Properties>
+				<Item class="Frame" referent="RBX727086F11A1E42FAA199754D8E05022E">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -6083,7 +6119,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX9A5DE56AAFF143B098066AF2A87B7650">
+=======
+					<Item class="TextButton" referent="RBX404DF56DBA3F4045990065F4300206EE">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -6132,7 +6172,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX6E936BB00CF5492E903AA48D39F33042">
+=======
+					<Item class="TextButton" referent="RBX9429671C1F744C888B761060B975CEE4">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -6181,7 +6225,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX34BB21CD2BA34C61828B4FB9FE04008D">
+=======
+					<Item class="TextLabel" referent="RBX0F3F8E5CA3484C9ABF7FFB7E750A5F98">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -6226,7 +6274,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXFB9B6C27E92B4A3C806D1AD20CA15912">
+=======
+					<Item class="TextLabel" referent="RBX0F95FA7D53B743709C41168F22E75135">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -6271,7 +6323,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX95AEE0167C194AACA1FDCF6300F4AB3D">
+=======
+					<Item class="Frame" referent="RBXECA7717B477F42868E7D97A86A35E38A">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6305,7 +6361,11 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXAF820CC692264D2D92644546EAC821C2">
+=======
+						<Item class="TextButton" referent="RBX20B9C35D09A3466299A7E77F05585E95">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6354,7 +6414,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXAAF277ACF45B454288BC19BE844F5976">
+=======
+						<Item class="TextButton" referent="RBXEDB95AEECCED4BC79A0CF7EFB2A0618D">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6403,7 +6467,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX469D3973E7254E08B64B6FFDAC5BC3FC">
+=======
+						<Item class="TextButton" referent="RBX99A3B9CEEC274177B0262804075725B9">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6452,7 +6520,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXE6174C9F0F40423FAD52717E14EEE690">
+=======
+						<Item class="TextButton" referent="RBX0C533810775147CCBB779AD847C2F7B8">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6501,7 +6573,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXE1947A14C5EA48E08D427A04DCEB46C0">
+=======
+						<Item class="TextButton" referent="RBX013684E6D6814491AC52A56D5092367D">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6550,20 +6626,32 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="Color3Value" referent="RBX59236C2C595C4B339682741A43967A57">
+=======
+						<Item class="Color3Value" referent="RBXB99641C153444906B55499F4F2C1E374">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">DeselectedColor</string>
 								<Color3 name="Value">4282269246</Color3>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="Color3Value" referent="RBXF240B029FDBD48619E300487E9FBEC5B">
+=======
+						<Item class="Color3Value" referent="RBX39D2C20769254887A60AFDE6F5F50FFE">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">SelectedColor</string>
 								<Color3 name="Value">4285953654</Color3>
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX8F84EE3E409645589B7C9E5A3059025D">
+=======
+					<Item class="TextLabel" referent="RBX95AA285C32C941F4AC627F090E209E15">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -6608,7 +6696,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX3CD91CA4C7764B94AB7A90152963B003">
+=======
+					<Item class="Frame" referent="RBXA2FCAD1879B94B7E8F24988D79708F24">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6642,7 +6734,11 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX9B6769205AC6456D91955445B5C47077">
+=======
+						<Item class="TextButton" referent="RBX70D94924199A4F088A56128B507D860F">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6691,7 +6787,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX70E56484232C47B1BAC1A2A90009C8BD">
+=======
+						<Item class="TextButton" referent="RBX74DE5F8B46114636BF5F2D8747D21C04">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6740,7 +6840,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX123B312680284B1797559B1470710667">
+=======
+						<Item class="TextButton" referent="RBX7EA011EB92974E38A6A52BF3250DFA0B">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -6789,20 +6893,32 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="Color3Value" referent="RBXED1FE15663CE410D83934D8B0A306021">
+=======
+						<Item class="Color3Value" referent="RBX090678CF0EB846FEB32E83D0EE6D3808">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">SelectedColor</string>
 								<Color3 name="Value">4285953654</Color3>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="Color3Value" referent="RBXC5A4762618AB4E83A56B919A6CF9D65F">
+=======
+						<Item class="Color3Value" referent="RBX5CA4DA74BFBC44DD8120DA7B73EC6234">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">DeselectedColor</string>
 								<Color3 name="Value">4282269246</Color3>
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX89FE6438EC604175A48C0A703D9939EF">
+=======
+					<Item class="TextLabel" referent="RBX5CDDAA153E7047338ABA6B013E3AEF9E">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -6848,7 +6964,11 @@ return module
 						</Properties>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBX142D4999B2F44122B677A0CAA16AFFE1">
+=======
+				<Item class="Frame" referent="RBX73BAB6D5EC4145C59F08C5AD9AD6F642">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -6882,7 +7002,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXB19D28D43E3B4CA39EEB646BD88EC1F9">
+=======
+					<Item class="TextButton" referent="RBX6E08FFDE09274EF2853A20619E7D0DC6">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -6931,7 +7055,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX593FB42C14744C28B473F4539824C513">
+=======
+					<Item class="TextButton" referent="RBX78CB0F90F6BC43D0BE3083FFDD361B14">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -6980,7 +7108,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX4642DAEF19364DB5ABAD1D6E1630E658">
+=======
+					<Item class="TextLabel" referent="RBXEB611B66A84F4C6492A3EF5E365DFCF0">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7025,7 +7157,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXA4636144CB9D42AB8345788FF9632E16">
+=======
+					<Item class="TextLabel" referent="RBX5714E36AA8404F8E8A753E2E153064B0">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7070,7 +7206,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX4BE6B6534EBF4F219D9ED93AFDF82231">
+=======
+					<Item class="TextLabel" referent="RBX805DB9E9927D4EAB9AB1D0EC07092053">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -7115,7 +7255,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextBox" referent="RBX15F9E0C768364592843A66DF1A442EA6">
+=======
+					<Item class="TextBox" referent="RBX30E70D44FA9145D0962C6A8D5C621A0D">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279374354</Color3>
@@ -7162,7 +7306,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXFCB15877BB8243B9B34AE8297CB14150">
+=======
+					<Item class="TextLabel" referent="RBX53DA61957B054258BFCF7F74A223FE86">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7207,7 +7355,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="ScrollingFrame" referent="RBX93E372B155DD4CAF9091D589FD65F0AA">
+=======
+					<Item class="ScrollingFrame" referent="RBX10CDC0B7892845E9860D2EE852A278F6">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4279374354</Color3>
@@ -7256,7 +7408,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXF08F46A6841F41B58F13840F3190C374">
+=======
+					<Item class="TextButton" referent="RBX0687EAD8143A4CC596F6B55BE49D5683">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7306,7 +7462,11 @@ return module
 						</Properties>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBX82F62D3F08C04E88BC7E9AEF08BBC7CB">
+=======
+				<Item class="Frame" referent="RBXFCCD8487E51A4E06A5998C59FD9A59BC">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -7340,7 +7500,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX307BE86D6D034625864858CBB96A5273">
+=======
+					<Item class="TextButton" referent="RBX5AB1AA04ADFE44F7A51413CDFA63A3E9">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7389,7 +7553,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX88B2DA4B9212490A9934A57232CC12DE">
+=======
+					<Item class="TextButton" referent="RBX7F7306CF46044D02BFED658D99958CAE">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7438,7 +7606,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXC409DCABA5B84F85AEC3FA7BAE30D75F">
+=======
+					<Item class="TextLabel" referent="RBXC25EC28C60B348B0A340B25FC507E0A4">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7483,7 +7655,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXBD849EF1D1274C06B0819BBEE30EC9C7">
+=======
+					<Item class="TextLabel" referent="RBX8EC11D76F8954298A852DDC73C1442B1">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7528,7 +7704,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="ScrollingFrame" referent="RBX97E6AAD42E44490CB51E90A3F7105ADC">
+=======
+					<Item class="ScrollingFrame" referent="RBXA769C199B8444F47926307B472E7CD7D">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4279374354</Color3>
@@ -7577,7 +7757,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX4DC2D7A70AD547EBB2DB256F4DCA1FC0">
+=======
+					<Item class="TextButton" referent="RBXADD98CE83EC444EA88AA034C25E229E6">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7626,7 +7810,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXB9BB6BE218E444C69D18F505979E7150">
+=======
+					<Item class="TextLabel" referent="RBX2EFF9F89E3264DBA8F5264FB8EB94A0C">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -7672,7 +7860,11 @@ return module
 						</Properties>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBX4E519A2BEAC94E4F91786244C15BE567">
+=======
+				<Item class="Frame" referent="RBX45BE06403E8B4A5B82DAF5E360602ADC">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4280821800</Color3>
@@ -7706,7 +7898,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXD4FA8567EE3C48DB904E9BBB64AB92AE">
+=======
+					<Item class="TextButton" referent="RBX4E94EE4123594948AE6714A45611D90F">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7755,7 +7951,11 @@ return module
 							<int name="ZIndex">2</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX3B22B17BB573463AB1EEF5B640245E2B">
+=======
+					<Item class="TextButton" referent="RBX5DE9176751B447D1B10C6A57D6FC43A3">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7804,7 +8004,11 @@ return module
 							<int name="ZIndex">2</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX88454CE71A1143F9AAC7B39E7BF0EE70">
+=======
+					<Item class="TextButton" referent="RBX705E6F145A24469399AC08F86745CF77">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -7853,7 +8057,11 @@ return module
 							<int name="ZIndex">2</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX4CE2546B844C46D381D6A0C5326E3EBD">
+=======
+					<Item class="Frame" referent="RBXE018FE954A3346BC8CE62AAC406AA70B">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4280821800</Color3>
@@ -7887,7 +8095,11 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXFD9493A28A7C449BA919811750F4B6E4">
+=======
+						<Item class="TextButton" referent="RBX2324446474A643DB816F0B88D80EC605">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -7935,7 +8147,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXA5C580EEEAC846258322BA71A80699BA">
+=======
+							<Item class="ImageLabel" referent="RBX5B4A44AB81E141F386E5475A527E1309">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -7991,14 +8207,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX460057AD6163447DB818C2BBEF5EFE07">
+=======
+							<Item class="StringValue" referent="RBXCA5D26C7CC3B48BDAA203DFA1157A481">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Start a new animation</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX260310E846074D5CA2E8FCD95A40BC1F">
+=======
+						<Item class="TextButton" referent="RBX15A14EFE17B84676B0D9C394234B625B">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8046,7 +8270,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX9D8889717D6B4297AC20569CCADD1C1D">
+=======
+							<Item class="ImageLabel" referent="RBXEE15594E26184B0ABCF3AD1C6D5CCECE">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8102,14 +8330,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBXEE6E5A7097C24E78A9799B456AC0493B">
+=======
+							<Item class="StringValue" referent="RBX322895072C8A444082D688B99B47CA3E">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Load an animation saved in this rig</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX95C97D1E2FF94A98B6EA97F9178AD464">
+=======
+						<Item class="TextButton" referent="RBX504F1D0752A643459355F6BBDB78EA00">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8157,7 +8393,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXA2E39F8F086749F39C10702EC2FD0BED">
+=======
+							<Item class="ImageLabel" referent="RBX44EA4EA185074420B553FA03EEBB4F59">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8213,14 +8453,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX4024FF424DA04EF38A2587E3DDDA3152">
+=======
+							<Item class="StringValue" referent="RBX6F7C05782030409F98686C7476512CBB">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Save the current animation in this place. This does not upload your animation.</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX8EE95C94D12A4709BBA72EF4EB93F42A">
+=======
+						<Item class="TextButton" referent="RBX431D524C903F4AAE88BEB51C7ABC317B">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8268,7 +8516,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXF081265A09474C7185662D15EE8652B4">
+=======
+							<Item class="ImageLabel" referent="RBXFA48521E2FC74B758C611D7B53E047B3">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8324,14 +8576,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX63E2390362494FDDAD10E0EC2968AB4C">
+=======
+							<Item class="StringValue" referent="RBX18CB9BE6F30441CD8C5F164008BE4232">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Import an animation from the website</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX27F77AA460A14BCDA42804BE3292553C">
+=======
+						<Item class="TextButton" referent="RBX5F33469EBE814D84B648E23489D3958D">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8379,7 +8639,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX0F0AC2880E8A4681A11C542694D8215F">
+=======
+							<Item class="ImageLabel" referent="RBX374A304CFA5944749098F013CB265FAE">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8435,14 +8699,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX17E17AD6445B4B54A39B4CB6EC312501">
+=======
+							<Item class="StringValue" referent="RBX4127FA65A2F14C3E863D9F6D4A9EFAC6">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Export an animation to the website</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXBDCEAC4C7FD64A16883F376A33538ECB">
+=======
+						<Item class="TextButton" referent="RBXD362B360DB3B4758BC2CFD5E8F5DFD20">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8490,7 +8762,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXA38CBAA8AF4540B19759030979FB91FE">
+=======
+							<Item class="ImageLabel" referent="RBX846B265933C6492E813F064E8823EDCE">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8547,7 +8823,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX2DA600A03FD343CDBC70EDAE172B852A">
+=======
+						<Item class="TextButton" referent="RBXACB55234E29E49FF8F9BAC7226A6BB79">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8595,7 +8875,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX374437B8C8E1468B8C7E8332F4577C60">
+=======
+							<Item class="ImageLabel" referent="RBX788CDB91A0D54EF7A6A045EDEE5693A7">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8651,14 +8935,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX335D098FB3354CFEABAE83A9299A2DE4">
+=======
+							<Item class="StringValue" referent="RBXCF240F58A61549908A7A166F5DC15EBD">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Play the animation</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX34A7697A5B8D4EEB952F87B327D35432">
+=======
+						<Item class="TextButton" referent="RBX2706E36A62BB4D66B8CCB0BAE515101E">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8706,7 +8998,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXA9B40DAD282B4853A311B0B304633439">
+=======
+							<Item class="ImageLabel" referent="RBX2A37205D01CA413A9F6C7FBC61B3C6AE">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8762,7 +9058,11 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBXD8956607066C4D62BF02C0D410C4AEA9">
+=======
+							<Item class="StringValue" referent="RBXDF29A8F0E15B4A1CB98EC8FFB70743C2">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Experimental FBX importing.</string>
@@ -8770,7 +9070,11 @@ return module
 							</Item>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX3C04155C357F4A33B3A589F7C65DCC35">
+=======
+					<Item class="Frame" referent="RBX3904AEF340DA4F1F8141F85E571BC710">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4280821800</Color3>
@@ -8804,7 +9108,11 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX6F9DBE5F3AE9421B96AEC7F7CFE28C96">
+=======
+						<Item class="TextButton" referent="RBX3B039B9DA0634FB58D38C44DA4F4AB93">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8852,7 +9160,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX2CE76B4708EB4624A7765FEAA00AB752">
+=======
+							<Item class="ImageLabel" referent="RBXC66543304C4846A3A2CE9E4081F1E61E">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -8909,7 +9221,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXAF03F6E7556148A5A8632F77FB9D3218">
+=======
+						<Item class="TextButton" referent="RBXA1355B41EF80498281863A897D7D6ED1">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -8957,7 +9273,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXA6C2004A78654CA88799DACC7F63A52B">
+=======
+							<Item class="ImageLabel" referent="RBX2BC6E88347884CEAA9BF8189BF68C5D5">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9014,7 +9334,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXFC1D73C67ABC441388EDBD4207DE995F">
+=======
+						<Item class="TextButton" referent="RBXDB8DC8C144FA4B0D9F38B89172404D3C">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9062,7 +9386,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX8754252E83564AE19445ECAEA56E0878">
+=======
+							<Item class="ImageLabel" referent="RBX3E248D7A3C9543AC91E344ED7D9461AD">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9118,14 +9446,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX837EC22C1AEF438A81B01A3E4A787BDE">
+=======
+							<Item class="StringValue" referent="RBX296D33B520BA43A49C81F8B6495BBA67">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Change the animation length</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXFBB8FD54B12149659D0BC9118BCE8848">
+=======
+						<Item class="TextButton" referent="RBXEFA464E342CC4A5CB472143D708E1182">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9173,7 +9509,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX923960D175534544A7D76A29378EC046">
+=======
+							<Item class="ImageLabel" referent="RBX554C64977DB74D90AEE5D0ACF103EEF2">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9229,14 +9569,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX489F0033EAA84AC7B7502509533954DE">
+=======
+							<Item class="StringValue" referent="RBX6BA4D3A454274E3A91075D13A7468A47">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Insert time at the cursor. Pushes keyframes forward</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXF40C3EDFCCDA4E3DBB187BE6992FBAF7">
+=======
+						<Item class="TextButton" referent="RBX6C7C530A81B347FD968EC51AE24D3A41">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9284,7 +9632,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX348AE9420AFF42C899592F68272E7870">
+=======
+							<Item class="ImageLabel" referent="RBX9275081EC66E4FD195B8B6D5BF35F4D9">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9340,14 +9692,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX1B678806F1E7408885E9AC0160C2F6F0">
+=======
+							<Item class="StringValue" referent="RBXB28BCD3073A748389B1A5204C6BD1A03">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Remove time at the cursor. Pulls keyframes backwards</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXF496CB402EBC4774AEFF97D4A239271C">
+=======
+						<Item class="TextButton" referent="RBX9F150105B0C84D1287DCFD6B578C1254">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9395,7 +9755,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXBDAF704C20C74F1FA22E46EB0F62A9C1">
+=======
+							<Item class="ImageLabel" referent="RBX1396CE85381545538664F9BC82F8648D">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9451,13 +9815,21 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBXBD33E6AC68164D6B8C4CD77E54D7C4CA">
+=======
+							<Item class="StringValue" referent="RBX6FA56659DF21428E9EFB010B0DDA450D">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Set if the animation should loop or not</string>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="TextLabel" referent="RBX97713B302B38485885DA44BB42E9D587">
+=======
+							<Item class="TextLabel" referent="RBX7B945E635A774FFD952C2B19A473B2B5">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4282664004</Color3>
@@ -9503,7 +9875,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXFE32E103BA954AE98756998CFCD62F72">
+=======
+						<Item class="TextButton" referent="RBXB82EBACA538E4DDAABF2A9720D1ED46C">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9551,7 +9927,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX73CFFE1D18E24DB8AC09A302D8E6F6FB">
+=======
+							<Item class="ImageLabel" referent="RBX8D5D94ADAB2748D2A6685086FE1DC758">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9607,13 +9987,21 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBXF0D32D34CA2A49D2880BA112465DD496">
+=======
+							<Item class="StringValue" referent="RBX4548FCAB6EDD41EE8901BCF767D40D9E">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Set the animation priority</string>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="TextLabel" referent="RBX958A867BB2B64690BCCE73DF8A2E32D7">
+=======
+							<Item class="TextLabel" referent="RBXF0195961EC2A40AEA6D8BD5880DBA563">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4282664004</Color3>
@@ -9659,7 +10047,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXAEAD8CE2BD10489EB7A859EA67A2F2F9">
+=======
+						<Item class="TextButton" referent="RBXFC30B55EAC934DEB9FDD5DBF95FA507B">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9707,7 +10099,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXE31FBC1C9C814132BFB0CF618E77494F">
+=======
+							<Item class="ImageLabel" referent="RBX9F35DA2FFDAC480798060487EFF99C10">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9764,7 +10160,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX08681C3B549249D497027164A991F3BC">
+=======
+						<Item class="TextButton" referent="RBX869195EC2ED0499188D3E6C7433281FE">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9812,7 +10212,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX4C94D7D825324B4F989EEF83970BD7B4">
+=======
+							<Item class="ImageLabel" referent="RBX4DF105A5D8364696A3EA9AF4E6B8C6A7">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9868,14 +10272,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX5027B8A4EA3446D8A4CA193D877373E0">
+=======
+							<Item class="StringValue" referent="RBXA0B7740D83BB4762823B7B8A690F98D7">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Paste copied pose</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX6AD3EF0FE5564C79966A1E5F45C9F123">
+=======
+						<Item class="TextButton" referent="RBX22EC94A9E3E140B6941E30906B7EB010">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -9923,7 +10335,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX628248BA920E428D81D34504EFC4F424">
+=======
+							<Item class="ImageLabel" referent="RBX89D9AF3C1DA14DE4B57D9C00AE9B86D4">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -9979,7 +10395,11 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX8F735B08C0FF41D58A009D2225FBD4A2">
+=======
+							<Item class="StringValue" referent="RBXDD4439C835FD44A7A93924CD8F259B12">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Create a blank keyframe at the cursor</string>
@@ -9987,7 +10407,11 @@ return module
 							</Item>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX8A3B34386C8E46ECA170227521374C78">
+=======
+					<Item class="Frame" referent="RBX4FF8F5C2B1594DEFA674C59334271C9F">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4280821800</Color3>
@@ -10021,7 +10445,11 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX7C231ABEB8474D639F4D0874F1184CF8">
+=======
+						<Item class="TextButton" referent="RBX63B62FAAC6AC404091EDE43C48D117A0">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10069,7 +10497,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX01BA09895D9148F09878DD840753636E">
+=======
+							<Item class="ImageLabel" referent="RBXE3135341071A44A284BED13B6709BF3B">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10125,14 +10557,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX55D091BBA7F24775B08D6213AC876175">
+=======
+							<Item class="StringValue" referent="RBXAED362203821479EBC2EADC2A3B78FF9">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Should the cursor use the tween effect?</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXD6BEFC1BFFAE47CA8202762979E67504">
+=======
+						<Item class="TextButton" referent="RBX12750D0C56E94FB4AB1B4F5DC5A32EE8">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10180,7 +10620,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX5F29CB425BF243B89F79B205D2650C07">
+=======
+							<Item class="ImageLabel" referent="RBX82C9C85E005547C0B1069993268DB688">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10236,14 +10680,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBXC78B2E46D3D542088D8B164E063669E8">
+=======
+							<Item class="StringValue" referent="RBXB47EDF3A3571455FA04FEAA9920B9C2A">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Show partial poses, or only on keyframes?</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX9E09B9A48FF94C74A4F49F8B0FF0221B">
+=======
+						<Item class="TextButton" referent="RBX9D3FF033B7614A428FBD2DB33D79D775">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10291,7 +10743,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX25E158D652224F8589572E7A112E2B0B">
+=======
+							<Item class="ImageLabel" referent="RBX718D7A82D32D49C99FF0F9A302CAA317">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10347,14 +10803,22 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX22002B8F68C04A4AB168F6A56CDC3407">
+=======
+							<Item class="StringValue" referent="RBX8728C635A282429BB78289FA598625EE">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Select invisible parts, or ignore them?</string>
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX83322437FE924C92A258F30C16A84C41">
+=======
+						<Item class="TextButton" referent="RBX1FB99AC5FA004CA493D2DB71F6093689">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10402,7 +10866,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXD0D0B1BA69EF4BD1A30A397EF71A7010">
+=======
+							<Item class="ImageLabel" referent="RBXB8F8A208AC5F45A5A389848EB3C5F28F">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10458,13 +10926,21 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX5E554115902F410FAF0E49E453CBCC20">
+=======
+							<Item class="StringValue" referent="RBXFAD7823153C24217B97C2B9FB919BF8D">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">What times should the cursor snap at?</string>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="TextLabel" referent="RBXB901C0AE849A45B899D43DF2554E257C">
+=======
+							<Item class="TextLabel" referent="RBX165FA417C7FD41C084D8D8A1ECAA3927">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4282664004</Color3>
@@ -10510,7 +10986,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXDEF27CA867574F06B0211B2A40BED559">
+=======
+						<Item class="TextButton" referent="RBX8EC3C773C8B04D0D973DB8B37CD0231B">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10558,7 +11038,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBXD590BABCC31149349573089011F0CF00">
+=======
+							<Item class="ImageLabel" referent="RBX8A7E735ED7E941EE8E48119D41A2ADF4">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10614,13 +11098,21 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX3BF1426B03AA4E649BAFF9E1A028CEBB">
+=======
+							<Item class="StringValue" referent="RBX905B7A78AE09409CBCA5F837C2E1D1AE">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">How often should markers be shown on the timeline?</string>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="TextLabel" referent="RBX208A65FA0A4F4DEE814E316259A27E38">
+=======
+							<Item class="TextLabel" referent="RBXB920BD65853E46FD8DBD74D674D6EF69">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4282664004</Color3>
@@ -10666,7 +11158,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX3FC40966EB2E49418489966C5C6453B3">
+=======
+						<Item class="TextButton" referent="RBX8DD3D574083A42869AA03DF8D66420DF">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10714,7 +11210,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX9AD39C1A9D3E482987CB3BC447957C0F">
+=======
+							<Item class="ImageLabel" referent="RBXEB38F083AB28487B9FC21CCC969A92BD">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10771,7 +11271,11 @@ return module
 								</Properties>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBXF8DFABE1FFBE4C14B2F16E29EBA3D6BD">
+=======
+						<Item class="TextButton" referent="RBX5F4D4C193DB74E91B41A7E39D6259F42">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -10819,7 +11323,11 @@ return module
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">5</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="ImageLabel" referent="RBX25A82B6E0C1648D593FBDC7DA98C8C08">
+=======
+							<Item class="ImageLabel" referent="RBX9DE6DE68F1904A21AD2AF5165D0FADAA">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -10875,7 +11383,11 @@ return module
 									<int name="ZIndex">5</int>
 								</Properties>
 							</Item>
+<<<<<<< HEAD
 							<Item class="StringValue" referent="RBX0281C1A3BAC046F8908C6DBDFA4979FD">
+=======
+							<Item class="StringValue" referent="RBX7872DB3E39E34BD6A184F827E71F77E9">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<string name="Name">Tooltip</string>
 									<string name="Value">Show tooltips? This text is a tooltip!</string>
@@ -10884,7 +11396,11 @@ return module
 						</Item>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBXD4DCB6B02FB94B129AB8976641E00BF2">
+=======
+				<Item class="Frame" referent="RBX0D8D9FEC4F864FBD8CD4909C1B5DF4DE">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -10918,7 +11434,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextBox" referent="RBX5C8669A0B4564479AB5C80B5F01D2CCC">
+=======
+					<Item class="TextBox" referent="RBXD7EF2B206507485BB25A46DC825FAC00">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -10965,7 +11485,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXE94449DF1C3B4CCAA5BEAC00BD2637CE">
+=======
+					<Item class="TextButton" referent="RBXA7EE8F7BDD534AFE90C68B9A9DBD89D5">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11014,7 +11538,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX936209AEBCA44057873BB03DB8F78FAF">
+=======
+					<Item class="TextButton" referent="RBXA4BC04B72AF44837BF118A68B44C5889">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11063,7 +11591,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXB31C0ED3F9594C1DA93ACD7661ABEC15">
+=======
+					<Item class="TextLabel" referent="RBX3B1972077261487C9D66C6F903CB9BC9">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11108,7 +11640,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXC84B5D8AA78D460E927EEEC8A9DC8A11">
+=======
+					<Item class="TextLabel" referent="RBX3E5FA7DCFE0840E0A31D452EC8FC2003">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11154,7 +11690,11 @@ return module
 						</Properties>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBXE1C9A20105634CA3938423E7AC06511C">
+=======
+				<Item class="Frame" referent="RBX4771C51D1F4F43F1BA1942248C81B736">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -11188,7 +11728,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX3249256C94324037BF198EBE35AD322F">
+=======
+					<Item class="TextButton" referent="RBXDA765EB7EC0244FDBD6F08BACEF1E89C">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11236,14 +11780,22 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="StringValue" referent="RBXCBA06DEB33594E95AC7D262EDBCC89D2">
+=======
+						<Item class="StringValue" referent="RBXB48191B312294232B85ABB21F855AB6A">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Lowest priority</string>
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX8E19987996FB46ED85E5B2A4D1E059A6">
+=======
+					<Item class="TextLabel" referent="RBX295C0F6DFD824FF5ADB756F8B9085EA9">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11288,7 +11840,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX7B4EC72372A04EC99FDA6710F308F18C">
+=======
+					<Item class="TextLabel" referent="RBX6CC3341154DF4C8CABB4439A6628A80B">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11333,7 +11889,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX1F5B0A2801054813BE1D7DE51623D594">
+=======
+					<Item class="TextButton" referent="RBX17EB66FB4B9243798A36794570565676">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11382,7 +11942,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXD15EB333B35B42928AFCBE3422197654">
+=======
+					<Item class="TextButton" referent="RBXB8E1F8A59F3D49B19AA497A388380513">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11430,14 +11994,22 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="StringValue" referent="RBX4280F05C7B614F0583682B13B874B816">
+=======
+						<Item class="StringValue" referent="RBXB6A3D3C362244E2588C999E021E3439E">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Plays on top of core animations</string>
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXA3D8AE22CC43438BAA93A346FB04ED2D">
+=======
+					<Item class="TextButton" referent="RBX8121B35C90D1431FA770227FAF6B87C8">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11485,14 +12057,22 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="StringValue" referent="RBXEECB7ECE454548EF9029713B52FE98A3">
+=======
+						<Item class="StringValue" referent="RBX3BA87A9CF1494DA1A106F1E840F45F19">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Plays on top of idle animations</string>
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX39EF66E03FEB4722A28E5317B3EA576D">
+=======
+					<Item class="TextButton" referent="RBX539CE766E62F4E858AA22EF74204257A">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11540,14 +12120,22 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="StringValue" referent="RBX57DF37C606124B3DB3C514C9250FE1C4">
+=======
+						<Item class="StringValue" referent="RBX14EA65BA5E0945DDAE8C18E5334E9E3A">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Plays on top of movement animations</string>
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX22BE25733DC64FC28C0EAEAA8E8EAE31">
+=======
+					<Item class="TextButton" referent="RBX00C2C3465CD34098B0E5733074262095">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11595,7 +12183,11 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="StringValue" referent="RBXA2088E7EEF26444CA369B1F8F0BF4B82">
+=======
+						<Item class="StringValue" referent="RBX508F4C3EA699477AA5A35BE3531E5844">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Lowest priority</string>
@@ -11603,7 +12195,11 @@ return module
 						</Item>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBXCDABE7497A88400981833B4427825126">
+=======
+				<Item class="Frame" referent="RBXAF8F2FAB88224A9583B2C1EF935D035E">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -11637,7 +12233,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">5</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX12D56BF43C6E4396AF8E01E4D49A35F3">
+=======
+					<Item class="TextButton" referent="RBXE78C4C22D34543D7B3A6D68CF6BA1A8D">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11685,14 +12285,22 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="StringValue" referent="RBX828F68CF78204554B6AFE2213E8755BE">
+=======
+						<Item class="StringValue" referent="RBX8C4D73F1AD89454D8C3E822EFDF84D1A">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Animation will restart once it has ended</string>
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXAD2892FC98E74FC58B78E0EBF6791187">
+=======
+					<Item class="TextLabel" referent="RBX3ECAE39ADBAB4C9FAAE033504CCCE073">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11737,7 +12345,11 @@ return module
 							<int name="ZIndex">5</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX6698DB7D51DD4A3ABE96878D73BD1D2A">
+=======
+					<Item class="TextLabel" referent="RBXD9396A7172BD4EE293A015B2E089F2D5">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -11782,7 +12394,11 @@ return module
 							<int name="ZIndex">5</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXDAF5C7B862F448B799A9B3BFA9B6A0B1">
+=======
+					<Item class="TextButton" referent="RBX7AE1BECEC9A64AA181A6BC23673F283E">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11831,7 +12447,11 @@ return module
 							<int name="ZIndex">5</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXAA74A16BA54D490BBBFBC77EF15B74B1">
+=======
+					<Item class="TextButton" referent="RBX51940F68A91942F4A2FE5004196C59B3">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11879,14 +12499,22 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="StringValue" referent="RBXB3B8B5D35413445EB9DFBDB82F075DC8">
+=======
+						<Item class="StringValue" referent="RBX3171B673E9D94F6C88EF976955151E3F">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Animation stops when it ends</string>
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXB374D8211F024F84B67F6D87F006820A">
+=======
+					<Item class="TextButton" referent="RBX714507E9BCA34B87B9EF62C9CFF1377D">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -11934,7 +12562,11 @@ return module
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">5</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="StringValue" referent="RBX5AD28887EB864320B8C6E958CBB669AB">
+=======
+						<Item class="StringValue" referent="RBX4B9C9BF94EED4DE1B7598798580658A1">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<string name="Name">Tooltip</string>
 								<string name="Value">Lowest priority</string>
@@ -11942,7 +12574,11 @@ return module
 						</Item>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBX9118F1448260400DA99EF1FC4FE1986C">
+=======
+				<Item class="Frame" referent="RBX605D835147CD451CB6C4C54F91C611B2">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -11976,7 +12612,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX3ADC1ADAA74F4209ABFC9FFD342472A1">
+=======
+					<Item class="TextButton" referent="RBX99A97CCCD08A473B8085E6864D1C52CD">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12025,7 +12665,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXB89DE0E013684D8995CF4427194A18C6">
+=======
+					<Item class="TextLabel" referent="RBX95482EEB65E1440CB18C59981A1E5B34">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12070,7 +12714,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX8B0246160B2143AAAAB0A92986B51F6A">
+=======
+					<Item class="TextLabel" referent="RBX6D8E8A1FD3B24DB1B1CE09ACDEF57C3A">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12116,7 +12764,11 @@ return module
 						</Properties>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBX9FBD3CC69C924E9EA9BECE22FA6C23AC">
+=======
+				<Item class="Frame" referent="RBX7971FF7E922E4F0CA2DCFB118AC7CEBF">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">false</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -12150,7 +12802,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX1AB8249B58994880B3CBD23455787CA4">
+=======
+					<Item class="TextButton" referent="RBX693C2BF3493D44478296911966B56A89">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12199,7 +12855,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX747AFD15A0374E1CB5190DEF10B66168">
+=======
+					<Item class="TextButton" referent="RBX0DADE8CF41704A7EA1B1A5CCFF28F08F">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12248,7 +12908,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX6F5A559029C648E7B7844F345CDACD95">
+=======
+					<Item class="TextLabel" referent="RBX494E319EED424259BA2EDCD1C5D7479E">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12293,7 +12957,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXCD6BFC94682A4544ACBB7B63D9D4DA99">
+=======
+					<Item class="TextLabel" referent="RBX035CF1CD68B8463985EFA728FED4D8EE">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12339,7 +13007,11 @@ return module
 						</Properties>
 					</Item>
 				</Item>
+<<<<<<< HEAD
 				<Item class="Frame" referent="RBX078690390DF64BD2B147ED04ABC35E7A">
+=======
+				<Item class="Frame" referent="RBX440549E3FA0743BAB222643801DBE673">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -12373,7 +13045,11 @@ return module
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXA044DE4B6C574ED2ADE08A3F920E7C47">
+=======
+					<Item class="TextButton" referent="RBXB57C49D9A3DD4928B5FFD94178C3D7E9">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12422,7 +13098,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBX4A8F26F643914E59A6E5D56A92876317">
+=======
+					<Item class="TextButton" referent="RBX326B88C3C593418E9B0A57D874FE5D3D">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12471,7 +13151,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX30D675890585419AA109FD88F0B3B6B7">
+=======
+					<Item class="TextLabel" referent="RBXAA982CDA1DAF41698F82061722C25E11">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12516,7 +13200,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX21D0718DAC9B40348B983A3AE8833827">
+=======
+					<Item class="TextLabel" referent="RBX27F8F95F55D34A69B2E3F43B08459075">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12561,7 +13249,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXF3EE952014AC4F71BFF8BDC13369074D">
+=======
+					<Item class="TextButton" referent="RBX31E9BE5CA55C43C58B50449DE3EB911B">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -12610,7 +13302,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX2863B532BB9A4BAFB628FB7076CDC326">
+=======
+					<Item class="TextLabel" referent="RBX3EA30E98DA57403DAA4F3A8C8FD27A78">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12655,7 +13351,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXDBF3EA4D851C44CAAC5D350F843F4F2E">
+=======
+					<Item class="TextLabel" referent="RBXEF708346F8E8468DA74C682DD042ABE1">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12700,7 +13400,11 @@ return module
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX24ACB3EE02BC4A72861A206B4FAB0335">
+=======
+					<Item class="Frame" referent="RBX7D328E0F5AB34D5DBC30FEDACB0A9079">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -12734,7 +13438,11 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBX03E96E61FEE74A17A23107AF75778868">
+=======
+						<Item class="TextLabel" referent="RBXB39D4BD8ECED45FB85962E9168D1AA95">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12779,7 +13487,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBXEC4F73A49C3646009EBB222353711EC1">
+=======
+						<Item class="TextLabel" referent="RBX9369404322504C76B2A8E011E99528EB">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12824,7 +13536,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBXD757D64AEDA54C52B163AE2C1C1B2B7E">
+=======
+						<Item class="TextLabel" referent="RBXA5D9CB2A213E459DB2DE2CF7FB5C6553">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12869,7 +13585,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBXE1535F7CF4D8448D8438D49F7F96B093">
+=======
+						<Item class="TextLabel" referent="RBX031F794A45B84BB1A5B9C76027DB03C4">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12915,7 +13635,11 @@ return module
 							</Properties>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX10C61A9CEEC647E2BE53CE48175FA30F">
+=======
+					<Item class="Frame" referent="RBX5EA4AC05593741DF9989986B6E617A5F">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -12949,7 +13673,11 @@ return module
 							<bool name="Visible">false</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBX7E5D60E8D88645A7B168F2C8D33D4B93">
+=======
+						<Item class="TextLabel" referent="RBX5E9F04B9BCF041F2BB1611B5747911BD">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -12994,7 +13722,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBXC20D72E5F6914C1C80AB698836B33BFC">
+=======
+						<Item class="TextLabel" referent="RBX358DC73FD7594BD180DC2E8B83003F61">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -13039,7 +13771,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBX424790D4C1274A95AC2A869A3F9BD7BE">
+=======
+						<Item class="TextLabel" referent="RBX3B45BD5C8D6F469F9A7087501F69B6D4">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -13084,7 +13820,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBX36627BE4FA1B445CAEB7257B90B8667B">
+=======
+						<Item class="TextLabel" referent="RBX2765BD8F8B884197B17CFBD5304F828D">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -13129,7 +13869,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX61A3893EEED142ACA6D7F1229856C2C1">
+=======
+						<Item class="TextButton" referent="RBXF8974A0AA3BE43789D4C1DA289EBAECB">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -13178,7 +13922,11 @@ return module
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextButton" referent="RBX7B844ACCE12A41EC866F51682412A312">
+=======
+						<Item class="TextButton" referent="RBXCA7A40630DF745C6A038EA940849C6DE">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<bool name="AutoButtonColor">true</bool>
@@ -13230,7 +13978,11 @@ return module
 					</Item>
 				</Item>
 			</Item>
+<<<<<<< HEAD
 			<Item class="ModuleScript" referent="RBX1B2E725C075D40A3B59E564A51FEE2A5">
+=======
+			<Item class="ModuleScript" referent="RBXB2469E0001BD49C6AEE40517F2B83604">
+>>>>>>> refs/remotes/ROBLOX/master
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">MenuHandler</string>
@@ -13987,23 +14739,39 @@ return module
 ]]></ProtectedString>
 				</Properties>
 			</Item>
+<<<<<<< HEAD
 			<Item class="Folder" referent="RBXFE185F664DA748FD8119E24A375C89B4">
 				<Properties>
 					<string name="Name">Customize</string>
 				</Properties>
 				<Item class="BrickColorValue" referent="RBX3DCD7C174E1B470881EC5B98E69538B6">
+=======
+			<Item class="Folder" referent="RBXFF2B0C85F0EA44D1BB5FC21B6792579C">
+				<Properties>
+					<string name="Name">Customize</string>
+				</Properties>
+				<Item class="BrickColorValue" referent="RBX9D290B69B05446CCA6069166A9120FB2">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<string name="Name">MouseoverColor</string>
 						<int name="Value">1015</int>
 					</Properties>
 				</Item>
+<<<<<<< HEAD
 				<Item class="BrickColorValue" referent="RBX3D5B0437BC554E1882245B4DDBE46669">
+=======
+				<Item class="BrickColorValue" referent="RBXBCE3D25CA36D4033A91DBD4C4316FDD6">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<string name="Name">SelectedColor</string>
 						<int name="Value">1017</int>
 					</Properties>
 				</Item>
+<<<<<<< HEAD
 				<Item class="BrickColorValue" referent="RBX2019AEE5E97D40C090E0C93255952EA0">
+=======
+				<Item class="BrickColorValue" referent="RBXCCAFE9AC613C45E38FDB2C199FE3697D">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<string name="Name">GridColor</string>
 						<int name="Value">1001</int>
@@ -14011,7 +14779,11 @@ return module
 				</Item>
 			</Item>
 		</Item>
+<<<<<<< HEAD
 		<Item class="Script" referent="RBXE2E6B57B01034EAFB4279C15B6225520">
+=======
+		<Item class="Script" referent="RBXD44BA6DE710F4925BBBD08ECC53634A9">
+>>>>>>> refs/remotes/ROBLOX/master
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -14110,7 +14882,11 @@ function createConfigureGui(R15Folder, R6Folder)
 					local rbxAssetId = "rbxassetid://"
 					if string.find(id, rbxAssetId) == nil then
 						id = rbxAssetId.. "" ..id
+<<<<<<< HEAD
 					end
+=======
+					end			
+>>>>>>> refs/remotes/ROBLOX/master
 					
 					for _, name in pairs(R15PartMapping[obj.Name]) do
 						R15Folder[name].TextureID = id
@@ -14197,6 +14973,7 @@ function makeExportVersion(R15Model, R6Model)
 	end
 	populateExportModel()
 	
+<<<<<<< HEAD
 		
 	local changed = false	
 	spawn(function()
@@ -14214,6 +14991,10 @@ function makeExportVersion(R15Model, R6Model)
 	
 	local function recurCheckChanged(obj)
 		obj.Changed:connect(function() changed = true end)
+=======
+	local function recurCheckChanged(obj)
+		obj.Changed:connect(populateExportModel)
+>>>>>>> refs/remotes/ROBLOX/master
 		for _, childObj in pairs(obj:GetChildren()) do
 			recurCheckChanged(childObj)
 		end
@@ -14224,9 +15005,15 @@ function makeExportVersion(R15Model, R6Model)
 	-- For added CharacterMesh objects
 	R6Model.ChildAdded:connect(function(child) 
 		child.Changed:connect(populateExportModel) 
+<<<<<<< HEAD
 		changed = true
 	end)
 	R6Model.ChildRemoved:connect(function() changed = true end)	
+=======
+		populateExportModel() 
+	end)
+	R6Model.ChildRemoved:connect(populateExportModel)
+>>>>>>> refs/remotes/ROBLOX/master
 end
 
 function fbxRigImported(R15Rig)
@@ -14316,11 +15103,19 @@ end
 
 ]]></ProtectedString>
 			</Properties>
+<<<<<<< HEAD
 			<Item class="ScreenGui" referent="RBXDBFB0366953D4109A42484EFB6265B18">
 				<Properties>
 					<string name="Name">FBXimport</string>
 				</Properties>
 				<Item class="Frame" referent="RBXC4EF3FDB2733418FBA81EB92F7D597A7">
+=======
+			<Item class="ScreenGui" referent="RBXE6AB3E4C438F4A5FA449DCB804BA6DF4">
+				<Properties>
+					<string name="Name">FBXimport</string>
+				</Properties>
+				<Item class="Frame" referent="RBX50B7CA3882A3444694376EEBA46A5EF6">
+>>>>>>> refs/remotes/ROBLOX/master
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14354,7 +15149,11 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXF1D5DE54E90C4C95B2EAE7BDA4DF64AC">
+=======
+					<Item class="TextButton" referent="RBX60D761AEFA3848608B8CBE912F41F1C7">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14403,7 +15202,11 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXD8B340E5331D4A3DAEB0DF297DC32E4D">
+=======
+					<Item class="TextButton" referent="RBXBCEFC6A7027F401588BAC6B740C411DB">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14452,7 +15255,11 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXB0B226BCC50540FC9BF79F982EF0A761">
+=======
+					<Item class="TextLabel" referent="RBX9CF59460D0594586B83F28F747CC95BC">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14497,7 +15304,11 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBX01570BB3884B428CADA17ADA1046F6DB">
+=======
+					<Item class="TextLabel" referent="RBX3A4E8112FCD243BEBDD9313109FEE31C">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14542,7 +15353,11 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextButton" referent="RBXFA8CBC4196C444F88A2147ED2AF2FB97">
+=======
+					<Item class="TextButton" referent="RBX9B85C6EB41BB4E6EBD832134404AD4F4">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14591,7 +15406,11 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="TextLabel" referent="RBXBF901942E4614B6C8ACC93EFC67B5040">
+=======
+					<Item class="TextLabel" referent="RBX48DC5BE13B7D4DBC9A395BFD189D7077">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14636,7 +15455,11 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX61D8965AE5CD4D5E8F9F0D0D13E50A88">
+=======
+					<Item class="Frame" referent="RBXDC4B50411D314321AE16487EF4B08775">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14670,7 +15493,11 @@ end
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBXF9E645EBB7B9483D9E143E87542A9125">
+=======
+						<Item class="TextLabel" referent="RBX0821590158964133B307EC6D22B1420D">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14715,7 +15542,11 @@ end
 								<int name="ZIndex">2</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBXC5CBFB22DF4F44D7859E550032F3F637">
+=======
+						<Item class="TextLabel" referent="RBX92E0B097485943E7BF0F74BBBC254EF3">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14760,7 +15591,11 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="Frame" referent="RBX4768D444F84F4DC280189A0512FDDA13">
+=======
+						<Item class="Frame" referent="RBX74ED4AF396A84BB3BD14914D39B65521">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14794,7 +15629,11 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="Frame" referent="RBX63EE83AA29CF41E09F225893EDD65C28">
+=======
+							<Item class="Frame" referent="RBXF8CE93EA1831486DB39C2D567DE046CC">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14828,7 +15667,11 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
+<<<<<<< HEAD
 								<Item class="TextBox" referent="RBX45FC05920C2441F2898E383C6AF1CE7D">
+=======
+								<Item class="TextBox" referent="RBXC06F193A95314F36BAF4BCD5DD3AB1A5">
+>>>>>>> refs/remotes/ROBLOX/master
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -14875,7 +15718,11 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
+<<<<<<< HEAD
 								<Item class="TextLabel" referent="RBXF907D5FCF90D4BDDB725A097E32439A6">
+=======
+								<Item class="TextLabel" referent="RBX18BA7050831F4F7C868554300CB412FF">
+>>>>>>> refs/remotes/ROBLOX/master
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14923,7 +15770,11 @@ end
 							</Item>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX5EA6F1E8A2454F4584D5B7A01540BA4F">
+=======
+					<Item class="Frame" referent="RBXA07C3989CC6147D5919C0F55189AAF5E">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14957,7 +15808,11 @@ end
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBX595DB4B5F43E4AD8A1B4B0893E2D0106">
+=======
+						<Item class="TextLabel" referent="RBXDDF7C85133BE42E1AE41139384E07E5A">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15002,7 +15857,11 @@ end
 								<int name="ZIndex">2</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBXBF38F8FDF79B41649CE728DFA4BBA070">
+=======
+						<Item class="TextLabel" referent="RBXF74BA77549AC48A09FB84B5D5C1C7861">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15047,7 +15906,11 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="Frame" referent="RBX351A9599AA6D48A1A493174BA3930EAA">
+=======
+						<Item class="Frame" referent="RBX2526001B2CAB4B36964E5297B0AD8DD6">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15081,7 +15944,11 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="Frame" referent="RBX94C79A509B604793B5E6B91F005A727A">
+=======
+							<Item class="Frame" referent="RBX006EEC0502A94893830A522843364DE5">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15115,7 +15982,11 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
+<<<<<<< HEAD
 								<Item class="TextBox" referent="RBX0A1A78E0E0DF45C197303B8DDCE23EFF">
+=======
+								<Item class="TextBox" referent="RBX93A00F70695C4213A0A9241EC2DEBD56">
+>>>>>>> refs/remotes/ROBLOX/master
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15162,7 +16033,11 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
+<<<<<<< HEAD
 								<Item class="TextBox" referent="RBX03F3FEC05413420DB45133052762F08E">
+=======
+								<Item class="TextBox" referent="RBX2E95E4ABE8D447418D2CC5EB87C7CAD7">
+>>>>>>> refs/remotes/ROBLOX/master
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15211,7 +16086,11 @@ end
 								</Item>
 							</Item>
 						</Item>
+<<<<<<< HEAD
 						<Item class="TextLabel" referent="RBXE1D7AA40A1044564ADC455DA43C04244">
+=======
+						<Item class="TextLabel" referent="RBX12A73A4E73954F32AE49636DAF6BCFF2">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15256,7 +16135,11 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
+<<<<<<< HEAD
 						<Item class="Frame" referent="RBXB0ED32E000DB4AA48FF49BD80430FA17">
+=======
+						<Item class="Frame" referent="RBXB5139EE486A545B28984AD7C7C1FCB2E">
+>>>>>>> refs/remotes/ROBLOX/master
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15290,7 +16173,11 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
+<<<<<<< HEAD
 							<Item class="Frame" referent="RBX189945E1ACF74EC98FE7CF0EB944347E">
+=======
+							<Item class="Frame" referent="RBX569BCF6F68E84DD68581B8B5B3234307">
+>>>>>>> refs/remotes/ROBLOX/master
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15324,7 +16211,11 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
+<<<<<<< HEAD
 								<Item class="TextBox" referent="RBX88650BA04BC94D5E8AF333B97F837F6C">
+=======
+								<Item class="TextBox" referent="RBXD3B31D0E44684BAA811097E80519CDBC">
+>>>>>>> refs/remotes/ROBLOX/master
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15371,7 +16262,11 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
+<<<<<<< HEAD
 								<Item class="TextLabel" referent="RBX6EEC5BD95E3A4F77A474A1248EB5162E">
+=======
+								<Item class="TextLabel" referent="RBXB9FB6687A0D24E938899604FDCFA6B70">
+>>>>>>> refs/remotes/ROBLOX/master
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15419,7 +16314,11 @@ end
 							</Item>
 						</Item>
 					</Item>
+<<<<<<< HEAD
 					<Item class="Frame" referent="RBX8C3FCF09D1984BF28DD197A992160B4C">
+=======
+					<Item class="Frame" referent="RBX2F2CA3F72F1044CF88CD502DB82CEAF7">
+>>>>>>> refs/remotes/ROBLOX/master
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294944010</Color3>
@@ -15457,7 +16356,11 @@ end
 				</Item>
 			</Item>
 		</Item>
+<<<<<<< HEAD
 		<Item class="ModuleScript" referent="RBX29B538937F8C4C61BE0B51B4ED8555B3">
+=======
+		<Item class="ModuleScript" referent="RBXAA4F3B9D03DA4162A39404E657B1D03E">
+>>>>>>> refs/remotes/ROBLOX/master
 			<Properties>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">RigCreator</string>
