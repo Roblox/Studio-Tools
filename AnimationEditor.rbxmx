@@ -14076,7 +14076,7 @@ function createConfigureGui(R15Folder, R6Folder)
 		local id = tonumber(obj.TextureID.Text)
 		for _, name in pairs(R15PartMapping[obj.Name]) do
 			local part = R15Folder:FindFirstChild(name)
-			if part and part.TextureID ~= "" then
+			if part and part:IsA("MeshPart") and part.TextureID ~= "" then
 				obj.TextureID.Text = part.TextureID
 				break
 			end
@@ -14106,14 +14106,17 @@ function createConfigureGui(R15Folder, R6Folder)
 	    	-- Fill the values from the TextBox fields into the rig
 			for _, obj in pairs(R15TextureIds:GetChildren()) do
 				local id = obj.TextureID.Text
-				if id ~= "" then
-					local rbxAssetId = "rbxassetid://"
-					if string.find(id, rbxAssetId) == nil then
-						id = rbxAssetId.. "" ..id
+				if id ~= "" and string.find(id, "<") == nil then
+					local assetString = "http://roblox.com/asset/?id="
+					if string.find(id, assetString) == nil then
+						id = assetString.. "" ..id
 					end
 					
 					for _, name in pairs(R15PartMapping[obj.Name]) do
-						R15Folder[name].TextureID = id
+						local part = R15Folder:FindFirstChild(name)
+						if part and part:IsA("MeshPart") then
+							part.TextureID = id
+						end
 					end
 				end
 			end
@@ -14160,6 +14163,13 @@ end
 
 -- Makes a copy of the rig in the export format
 function makeExportVersion(R15Model, R6Model)
+	-- Remove existing export models
+	for _, model in pairs(game.ServerStorage:GetChildren()) do
+		if model.Name == "PackageExport" then
+			model:Destroy()
+		end
+	end
+
 	local exportModel = Instance.new("Model")
 	exportModel.Name = "PackageExport"
 	exportModel.Parent = game.ServerStorage
@@ -14229,17 +14239,56 @@ function makeExportVersion(R15Model, R6Model)
 	R6Model.ChildRemoved:connect(function() changed = true end)	
 end
 
+local function jointBetween(a, b, cfa, cfb)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = cfa
+    weld.C1 = cfb
+    weld.Parent = a
+    return weld;
+end
+
 function fbxRigImported(R15Rig)
 	-- This wait is necessary because the imported rig is added to workspace 
 	-- before all the parts are loaded
 	wait(.5)
-				
-	local Face = Instance.new("Decal", R15Rig:WaitForChild("Head"))
+	
+	local r15Head = R15Rig:WaitForChild("Head", 1) -- 1 second timeout
+	
+	if not r15Head then
+		local upperTorso = R15Rig:FindFirstChild("UpperTorso")
+		if upperTorso then
+			-- Add the dummy head
+			local Head = Instance.new("Part", R15Rig)
+			Head.Name = "Head"
+			Head.Anchored = false
+			Head.CanCollide = true
+			Head.Size = Vector3.new(2, 1, 1)
+			Head.CFrame = CFrame.new(upperTorso.Position.X, upperTorso.Position.Y + 1.25, upperTorso.Position.Z)
+			Head.BottomSurface = "Smooth"
+			Head.TopSurface = "Smooth"
+
+			local NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+			local NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+			local Neck = jointBetween(upperTorso, Head, NCA, NCB)
+			Neck.Name = "Neck"
+			Neck.MaxVelocity = 0.1
+			
+			local HeadMesh = Instance.new("SpecialMesh", Head)
+			HeadMesh.MeshType = 0
+			HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+			
+			r15Head = Head
+		end
+	end
+	
+	local Face = Instance.new("Decal", r15Head)
 	Face.Name = "Face"
 	Face.Texture = "rbxasset://textures/face.png"
 	
 	local rigModel = Instance.new("Model")
-	rigModel.Name = "FBXImport"
+	rigModel.Name = "ImportedFbx"
 	rigModel.Parent = game.Workspace
 	
 	local R6Folder = Instance.new("Model")
@@ -14267,16 +14316,32 @@ function fbxRigImported(R15Rig)
 		obj.Parent = R6Folder
 	end
 	R6Rig:Destroy()
-	
-	makeExportVersion(R15Folder, R6Folder)
+
 	createConfigureGui(R15Folder, R6Folder)
 end
 
 game.Workspace.ChildAdded:connect(function(child)
 	if child.Name == "FBXImport" then
 		fbxRigImported(child)
+	elseif child.Name == "ImportedFbx" then
+		local R15Folder = child:WaitForChild("R15", 1)
+		local R6Folder = child:WaitForChild("R6", 1)
+		if R15Folder and R6Folder then
+			makeExportVersion(R15Folder, R6Folder)
+		end
 	end
 end)
+
+-- Hook up events to make export copy of rig for already imported Fbx rigs
+for _, obj in pairs(game.Workspace:GetChildren()) do
+	if obj.Name == "ImportedFbx" then
+		local R15Folder = obj:FindFirstChild("R15")
+		local R6Folder = obj:FindFirstChild("R6")
+		if R15Folder and R6Folder then
+			makeExportVersion(R15Folder, R6Folder)
+		end
+	end
+end
 
 if fbxFlagExists and fbxFlagValue == true then
 	local button = toolbar:CreateButton(
