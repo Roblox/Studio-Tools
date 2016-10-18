@@ -14367,7 +14367,7 @@ if fbxFlagExists and fbxFlagValue == true then
 	)
 	
 	configureButton.Click:connect(function()
-		local fbxImport = game.Workspace:FindFirstChild("FBXImport")
+		local fbxImport = game.Workspace:FindFirstChild("ImportedFbx")
 		
 		if fbxImport then
 			local R15Model = fbxImport:FindFirstChild("R15")
