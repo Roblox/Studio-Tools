@@ -6122,6 +6122,7 @@ return module
 							<string name="Text">Okay</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -6171,6 +6172,7 @@ return module
 							<string name="Text">Cancel</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -6216,6 +6218,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -6261,6 +6264,7 @@ return module
 							<string name="Text">Easing Style:</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -6344,6 +6348,7 @@ return module
 								<string name="Text">Linear</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -6393,6 +6398,7 @@ return module
 								<string name="Text">Cubic</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -6442,6 +6448,7 @@ return module
 								<string name="Text">Constant</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -6491,6 +6498,7 @@ return module
 								<string name="Text">Elastic</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -6540,6 +6548,7 @@ return module
 								<string name="Text">Bounce</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -6598,6 +6607,7 @@ return module
 							<string name="Text">Easing Direction</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -6681,6 +6691,7 @@ return module
 								<string name="Text">Out</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -6730,6 +6741,7 @@ return module
 								<string name="Text">InOut</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -6779,6 +6791,7 @@ return module
 								<string name="Text">In</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -6837,6 +6850,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -6921,6 +6935,7 @@ return module
 							<string name="Text">Save</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -6970,6 +6985,7 @@ return module
 							<string name="Text">Cancel</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -7015,6 +7031,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7060,6 +7077,7 @@ return module
 							<string name="Text">Overwrite</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7105,6 +7123,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7152,6 +7171,7 @@ return module
 							<string name="Text">&lt;enter name&gt;</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.699999988</float>
 							<float name="TextTransparency">0</float>
@@ -7197,6 +7217,7 @@ return module
 							<string name="Text">Save</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7295,6 +7316,7 @@ return module
 							<string name="Text">Save</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -7379,6 +7401,7 @@ return module
 							<string name="Text">Load</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -7428,6 +7451,7 @@ return module
 							<string name="Text">Cancel</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -7473,6 +7497,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7518,6 +7543,7 @@ return module
 							<string name="Text">Load</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7616,6 +7642,7 @@ return module
 							<string name="Text">Save</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -7661,6 +7688,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7745,6 +7773,7 @@ return module
 							<string name="Text">FILE</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7794,6 +7823,7 @@ return module
 							<string name="Text">EDIT</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7843,6 +7873,7 @@ return module
 							<string name="Text">SETTINGS</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -7926,6 +7957,7 @@ return module
 								<string name="Text">New</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8037,6 +8069,7 @@ return module
 								<string name="Text">Load</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8148,6 +8181,7 @@ return module
 								<string name="Text">Save</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8259,6 +8293,7 @@ return module
 								<string name="Text">Import</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8370,6 +8405,7 @@ return module
 								<string name="Text">Export</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8481,6 +8517,7 @@ return module
 								<string name="Text">Help</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8586,6 +8623,7 @@ return module
 								<string name="Text">Play</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8697,6 +8735,7 @@ return module
 								<string name="Text">Import FBX Animation</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8843,6 +8882,7 @@ return module
 								<string name="Text">Undo</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -8948,6 +8988,7 @@ return module
 								<string name="Text">Redo</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -9053,6 +9094,7 @@ return module
 								<string name="Text">Change Length</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -9164,6 +9206,7 @@ return module
 								<string name="Text">Add Time At Cursor</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -9275,6 +9318,7 @@ return module
 								<string name="Text">Remove Time At Cursor</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -9386,6 +9430,7 @@ return module
 								<string name="Text">Set Looping</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -9492,6 +9537,7 @@ return module
 									<string name="Text"></string>
 									<Color3 name="TextColor3">4294967295</Color3>
 									<bool name="TextScaled">false</bool>
+									<float name="TextSize">14</float>
 									<Color3 name="TextStrokeColor3">4278190080</Color3>
 									<float name="TextStrokeTransparency">1</float>
 									<float name="TextTransparency">0</float>
@@ -9542,6 +9588,7 @@ return module
 								<string name="Text">Set Priority</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -9648,6 +9695,7 @@ return module
 									<string name="Text"></string>
 									<Color3 name="TextColor3">4294967295</Color3>
 									<bool name="TextScaled">false</bool>
+									<float name="TextSize">14</float>
 									<Color3 name="TextStrokeColor3">4278190080</Color3>
 									<float name="TextStrokeTransparency">1</float>
 									<float name="TextTransparency">0</float>
@@ -9698,6 +9746,7 @@ return module
 								<string name="Text">Edit Help</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -9803,6 +9852,7 @@ return module
 								<string name="Text">Paste</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -9914,6 +9964,7 @@ return module
 								<string name="Text">Insert Keyframe</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -10060,6 +10111,7 @@ return module
 								<string name="Text">Cursor Animation</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -10171,6 +10223,7 @@ return module
 								<string name="Text">Interpolation</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -10282,6 +10335,7 @@ return module
 								<string name="Text">Select Invisible Parts</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -10393,6 +10447,7 @@ return module
 								<string name="Text">Cursor Snap Increment</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -10499,6 +10554,7 @@ return module
 									<string name="Text"></string>
 									<Color3 name="TextColor3">4294967295</Color3>
 									<bool name="TextScaled">false</bool>
+									<float name="TextSize">14</float>
 									<Color3 name="TextStrokeColor3">4278190080</Color3>
 									<float name="TextStrokeTransparency">1</float>
 									<float name="TextTransparency">0</float>
@@ -10549,6 +10605,7 @@ return module
 								<string name="Text">Line Increment</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -10655,6 +10712,7 @@ return module
 									<string name="Text"></string>
 									<Color3 name="TextColor3">4294967295</Color3>
 									<bool name="TextScaled">false</bool>
+									<float name="TextSize">14</float>
 									<Color3 name="TextStrokeColor3">4278190080</Color3>
 									<float name="TextStrokeTransparency">1</float>
 									<float name="TextTransparency">0</float>
@@ -10705,6 +10763,7 @@ return module
 								<string name="Text">Settings Help</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -10810,6 +10869,7 @@ return module
 								<string name="Text">Show Tooltips</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -10955,6 +11015,7 @@ return module
 							<string name="Text">&lt;input&gt;</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -11004,6 +11065,7 @@ return module
 							<string name="Text">Okay</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11053,6 +11115,7 @@ return module
 							<string name="Text">Cancel</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11098,6 +11161,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -11143,6 +11207,7 @@ return module
 							<string name="Text">Enter the response here:</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -11227,6 +11292,7 @@ return module
 							<string name="Text">Core</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11278,6 +11344,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -11323,6 +11390,7 @@ return module
 							<string name="Text">Set Priority</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -11372,6 +11440,7 @@ return module
 							<string name="Text">Save</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11421,6 +11490,7 @@ return module
 							<string name="Text">Idle</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11476,6 +11546,7 @@ return module
 							<string name="Text">Movement</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11531,6 +11602,7 @@ return module
 							<string name="Text">Action</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11586,6 +11658,7 @@ return module
 							<string name="Text">?</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11676,6 +11749,7 @@ return module
 							<string name="Text">Yes</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11727,6 +11801,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -11772,6 +11847,7 @@ return module
 							<string name="Text">Loop?</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -11821,6 +11897,7 @@ return module
 							<string name="Text">Save</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11870,6 +11947,7 @@ return module
 							<string name="Text">No</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -11925,6 +12003,7 @@ return module
 							<string name="Text">?</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -12015,6 +12094,7 @@ return module
 							<string name="Text">Return To Editor</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -12060,6 +12140,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -12105,6 +12186,7 @@ return module
 							<string name="Text">Playing animation...</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -12189,6 +12271,7 @@ return module
 							<string name="Text">Okay</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -12238,6 +12321,7 @@ return module
 							<string name="Text">Cancel</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -12283,6 +12367,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -12328,6 +12413,7 @@ return module
 							<string name="Text">Is this okay?</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -12412,6 +12498,7 @@ return module
 							<string name="Text">Select</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -12461,6 +12548,7 @@ return module
 							<string name="Text">Cancel</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -12506,6 +12594,7 @@ return module
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -12551,6 +12640,7 @@ return module
 							<string name="Text">Select A Rig To Animate</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -12600,6 +12690,7 @@ return module
 							<string name="Text">Help</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -12645,6 +12736,7 @@ return module
 							<string name="Text">&lt;No Rig Selected&gt;</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -12690,6 +12782,7 @@ return module
 							<string name="Text">Warning: Root Part Is Unanchored</string>
 							<Color3 name="TextColor3">4294944010</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -12769,6 +12862,7 @@ return module
 								<string name="Text"></string>
 								<Color3 name="TextColor3">4279970357</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -12814,6 +12908,7 @@ return module
 								<string name="Text">WARNING</string>
 								<Color3 name="TextColor3">4294938688</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -12859,6 +12954,7 @@ return module
 								<string name="Text">Animating in a place with scripts or moving parts may make unwanted changes to your place. Script(s) have been detected in this place.</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -12904,6 +13000,7 @@ return module
 								<string name="Text">Warning: Root Part Is Unanchored</string>
 								<Color3 name="TextColor3">4294944010</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -12984,6 +13081,7 @@ return module
 								<string name="Text"></string>
 								<Color3 name="TextColor3">4279970357</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -13029,6 +13127,7 @@ return module
 								<string name="Text">WARNING</string>
 								<Color3 name="TextColor3">4294938688</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -13074,6 +13173,7 @@ return module
 								<string name="Text">Your root part is not anchored. This may lead to weird behavior. Want us to anchor it for you?</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -13119,6 +13219,7 @@ return module
 								<string name="Text">Warning: Root Part Is Unanchored</string>
 								<Color3 name="TextColor3">4294944010</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -13168,6 +13269,7 @@ return module
 								<string name="Text">Anchor</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -13217,6 +13319,7 @@ return module
 								<string name="Text">Leave it</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">0.75</float>
 								<float name="TextTransparency">0</float>
@@ -14021,6 +14124,8 @@ return module
 
 local toolbar = plugin:CreateToolbar("Animations")
 local fbxFlagExists, fbxFlagValue = pcall(function () return settings():GetFFlag("StudioFbxRigImporting") end)
+local packageIdsFromAssetIdsFlagExists, packageIdsFromAssetIdsFlagValue = pcall(function() return settings():GetFFlag("GetAssetIdsFromPackageAPI") end)
+local canUseSimpleR6import = (packageIdsFromAssetIdsFlagExists == true and packageIdsFromAssetIdsFlagValue == true)
 
 local R15PartMapping = {
 	["Head"] = {"Head"},
@@ -14076,11 +14181,16 @@ function createConfigureGui(R15Folder, R6Folder)
 		local id = tonumber(obj.TextureID.Text)
 		for _, name in pairs(R15PartMapping[obj.Name]) do
 			local part = R15Folder:FindFirstChild(name)
-			if part and part.TextureID ~= "" then
+			if part and part:IsA("MeshPart") and part.TextureID ~= "" then
 				obj.TextureID.Text = part.TextureID
 				break
 			end
 		end
+	end
+
+	local R6AssetIdFrame = rigConfigurationFrame.R6.AssetId
+	if canUseSimpleR6import then
+		R6AssetIdFrame.Visible = true
 	end
 	
 	for _, obj in pairs(R6Folder:GetChildren()) do
@@ -14106,51 +14216,80 @@ function createConfigureGui(R15Folder, R6Folder)
 	    	-- Fill the values from the TextBox fields into the rig
 			for _, obj in pairs(R15TextureIds:GetChildren()) do
 				local id = obj.TextureID.Text
-				if id ~= "" then
-					local rbxAssetId = "rbxassetid://"
-					if string.find(id, rbxAssetId) == nil then
-						id = rbxAssetId.. "" ..id
+				if id ~= "" and string.find(id, "<") == nil then
+					local assetString = "http://roblox.com/asset/?id="
+					if string.find(id, assetString) == nil then
+						id = assetString.. "" ..id
 					end
 					
 					for _, name in pairs(R15PartMapping[obj.Name]) do
-						R15Folder[name].TextureID = id
+						local part = R15Folder:FindFirstChild(name)
+						if part and part:IsA("MeshPart") then
+							part.TextureID = id
+						end
 					end
 				end
 			end
 
 			local R6TextureTextboxes = rigConfigurationFrame.R6.TextureIDs.Textboxes
 			
-			for _, enum in pairs(Enum.BodyPart:GetEnumItems()) do
-				local meshId = tonumber(R6CharaterMeshes[enum.Name].MeshId.Text)
-				local baseTextureId = tonumber(R6TextureTextboxes.BaseTextureId.Text)
-				local overlayTextureId = tonumber(R6TextureTextboxes.OverlayTextureId.Text)
-				
-				if meshId or baseTextureId or overlayTextureId then		
-					local characterMesh = nil
+			if tonumber(R6AssetIdFrame.OldAssetId.Text) == nil then 
+				for _, enum in pairs(Enum.BodyPart:GetEnumItems()) do
+					local meshId = tonumber(R6CharaterMeshes[enum.Name].MeshId.Text)
+					local baseTextureId = tonumber(R6TextureTextboxes.BaseTextureId.Text)
+					local overlayTextureId = tonumber(R6TextureTextboxes.OverlayTextureId.Text)
 					
-					for _, characterObject in pairs(R6Folder:GetChildren()) do
-						if characterObject:IsA("CharacterMesh") and characterObject.BodyPart == enum then
-							characterMesh = characterObject
+					if meshId or baseTextureId or overlayTextureId then		
+						local characterMesh = nil
+						
+						for _, characterObject in pairs(R6Folder:GetChildren()) do
+							if characterObject:IsA("CharacterMesh") and characterObject.BodyPart == enum then
+								characterMesh = characterObject
+							end
+						end					
+						
+						if not characterMesh then
+							characterMesh = Instance.new("CharacterMesh")
+							characterMesh.BodyPart = enum
+							characterMesh.Parent = R6Folder						
 						end
-					end					
-					
-					if not characterMesh then
-						characterMesh = Instance.new("CharacterMesh")
-						characterMesh.BodyPart = enum
-						characterMesh.Parent = R6Folder						
+						
+						if meshId then
+							characterMesh.MeshId = meshId
+						end
+	
+						if baseTextureId then
+							characterMesh.BaseTextureId = baseTextureId
+						end
+	
+						if overlayTextureId then
+							characterMesh.OverlayTextureId = overlayTextureId
+						end
 					end
-					
-					if meshId then
-						characterMesh.MeshId = meshId
+				end
+			else
+				-- We can get the R6 package information from the asset of the old packages
+				local R6PackageAssetId = tonumber(R6AssetIdFrame.OldAssetId.Text)
+				local bodyPartAssetIds = game:GetService("AssetService"):GetAssetIdsForPackage(R6PackageAssetId)
+				for _, assetId in pairs(bodyPartAssetIds) do
+					local model = game:GetService("InsertService"):LoadAsset(assetId)
+					local children = model:GetChildren()
+					if model:FindFirstChild("R6") then
+						-- This is the new dual format for packages
+						children = model.R6:GetChildren()
 					end
-
-					if baseTextureId then
-						characterMesh.BaseTextureId = baseTextureId
+					for _, child in pairs(children) do
+						if child:IsA("CharacterMesh") then
+							-- Destroy duplicates of this Character mesh if there are any
+							for _, existingPart in pairs(R6Folder:GetChildren()) do
+								if existingPart:IsA("CharacterMesh") and existingPart.BodyPart == child.BodyPart then
+									existingPart:Destroy()
+								end
+							end
+							child.Parent = R6Folder
+						end
 					end
-
-					if overlayTextureId then
-						characterMesh.OverlayTextureId = overlayTextureId
-					end
+					model:Destroy()
 				end
 			end
 		end
@@ -14160,6 +14299,13 @@ end
 
 -- Makes a copy of the rig in the export format
 function makeExportVersion(R15Model, R6Model)
+	-- Remove existing export models
+	for _, model in pairs(game.ServerStorage:GetChildren()) do
+		if model.Name == "PackageExport" then
+			model:Destroy()
+		end
+	end
+
 	local exportModel = Instance.new("Model")
 	exportModel.Name = "PackageExport"
 	exportModel.Parent = game.ServerStorage
@@ -14229,17 +14375,56 @@ function makeExportVersion(R15Model, R6Model)
 	R6Model.ChildRemoved:connect(function() changed = true end)	
 end
 
+local function jointBetween(a, b, cfa, cfb)
+    local weld = Instance.new("Motor6D")
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = cfa
+    weld.C1 = cfb
+    weld.Parent = a
+    return weld;
+end
+
 function fbxRigImported(R15Rig)
 	-- This wait is necessary because the imported rig is added to workspace 
 	-- before all the parts are loaded
 	wait(.5)
-				
-	local Face = Instance.new("Decal", R15Rig:WaitForChild("Head"))
+	
+	local r15Head = R15Rig:WaitForChild("Head", 1) -- 1 second timeout
+	
+	if not r15Head then
+		local upperTorso = R15Rig:FindFirstChild("UpperTorso")
+		if upperTorso then
+			-- Add the dummy head
+			local Head = Instance.new("Part", R15Rig)
+			Head.Name = "Head"
+			Head.Anchored = false
+			Head.CanCollide = true
+			Head.Size = Vector3.new(2, 1, 1)
+			Head.CFrame = CFrame.new(upperTorso.Position.X, upperTorso.Position.Y + 1.25, upperTorso.Position.Z)
+			Head.BottomSurface = "Smooth"
+			Head.TopSurface = "Smooth"
+
+			local NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+			local NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
+			local Neck = jointBetween(upperTorso, Head, NCA, NCB)
+			Neck.Name = "Neck"
+			Neck.MaxVelocity = 0.1
+			
+			local HeadMesh = Instance.new("SpecialMesh", Head)
+			HeadMesh.MeshType = 0
+			HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+			
+			r15Head = Head
+		end
+	end
+	
+	local Face = Instance.new("Decal", r15Head)
 	Face.Name = "Face"
 	Face.Texture = "rbxasset://textures/face.png"
 	
 	local rigModel = Instance.new("Model")
-	rigModel.Name = "FBXImport"
+	rigModel.Name = "ImportedFbx"
 	rigModel.Parent = game.Workspace
 	
 	local R6Folder = Instance.new("Model")
@@ -14267,16 +14452,32 @@ function fbxRigImported(R15Rig)
 		obj.Parent = R6Folder
 	end
 	R6Rig:Destroy()
-	
-	makeExportVersion(R15Folder, R6Folder)
+
 	createConfigureGui(R15Folder, R6Folder)
 end
 
 game.Workspace.ChildAdded:connect(function(child)
 	if child.Name == "FBXImport" then
 		fbxRigImported(child)
+	elseif child.Name == "ImportedFbx" then
+		local R15Folder = child:WaitForChild("R15", 1)
+		local R6Folder = child:WaitForChild("R6", 1)
+		if R15Folder and R6Folder then
+			makeExportVersion(R15Folder, R6Folder)
+		end
 	end
 end)
+
+-- Hook up events to make export copy of rig for already imported Fbx rigs
+for _, obj in pairs(game.Workspace:GetChildren()) do
+	if obj.Name == "ImportedFbx" then
+		local R15Folder = obj:FindFirstChild("R15")
+		local R6Folder = obj:FindFirstChild("R6")
+		if R15Folder and R6Folder then
+			makeExportVersion(R15Folder, R6Folder)
+		end
+	end
+end
 
 if fbxFlagExists and fbxFlagValue == true then
 	local button = toolbar:CreateButton(
@@ -14302,7 +14503,7 @@ if fbxFlagExists and fbxFlagValue == true then
 	)
 	
 	configureButton.Click:connect(function()
-		local fbxImport = game.Workspace:FindFirstChild("FBXImport")
+		local fbxImport = game.Workspace:FindFirstChild("ImportedFbx")
 		
 		if fbxImport then
 			local R15Model = fbxImport:FindFirstChild("R15")
@@ -14316,11 +14517,12 @@ end
 
 ]]></ProtectedString>
 			</Properties>
-			<Item class="ScreenGui" referent="RBX3301C83D93314AD29A9563C4E056C1B8">
+			<Item class="ScreenGui" referent="RBX9C9737840CE148628CB2B2FB0505EF46">
 				<Properties>
 					<string name="Name">FBXimport</string>
+					<bool name="ResetOnSpawn">true</bool>
 				</Properties>
-				<Item class="Frame" referent="RBX8301864561DD4E57B9CF76B9EF046A52">
+				<Item class="Frame" referent="RBXFE0241D1BEFF48389B997297F8C7E1D0">
 					<Properties>
 						<bool name="Active">true</bool>
 						<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14354,7 +14556,7 @@ end
 						<bool name="Visible">true</bool>
 						<int name="ZIndex">1</int>
 					</Properties>
-					<Item class="TextButton" referent="RBX32815207D64147BB83310A266B5D10B4">
+					<Item class="TextButton" referent="RBXA7E4FB087453418DBEC88A6BCEBAED9D">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14393,6 +14595,7 @@ end
 							<string name="Text">Select</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -14403,7 +14606,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX8C2C9F2D525647DEA8509C35A065D305">
+					<Item class="TextButton" referent="RBX08E80FB32B20476BBACA2D110AA8F6E1">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14442,6 +14645,7 @@ end
 							<string name="Text">Cancel</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -14452,7 +14656,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX5B2D5DE5C882473C90DD90E2336FC594">
+					<Item class="TextLabel" referent="RBX3FDA66D191C14394A802EEC19AD37231">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14487,6 +14691,7 @@ end
 							<string name="Text"></string>
 							<Color3 name="TextColor3">4279970357</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -14497,7 +14702,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX7E6BED8BAF5848C68F58F86E35D4606F">
+					<Item class="TextLabel" referent="RBXB7CBCF2E78144DF5BFAE95EF3210473F">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14532,6 +14737,7 @@ end
 							<string name="Text">Configure Imported Rig</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">18</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -14542,7 +14748,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextButton" referent="RBX0692AEA759A542F396272A24B70C8A10">
+					<Item class="TextButton" referent="RBX0C85095A71234645B31AD8843A80AFE2">
 						<Properties>
 							<bool name="Active">true</bool>
 							<bool name="AutoButtonColor">true</bool>
@@ -14581,6 +14787,7 @@ end
 							<string name="Text">Done</string>
 							<Color3 name="TextColor3">4294967295</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">0.75</float>
 							<float name="TextTransparency">0</float>
@@ -14591,7 +14798,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="TextLabel" referent="RBX92DE80FA90A4472BB0F9A4C075F6CDF2">
+					<Item class="TextLabel" referent="RBXF0CBDE2EFFD849BDBBC7EE08537E6F96">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14626,6 +14833,7 @@ end
 							<string name="Text">Warning: Root Part Is Unanchored</string>
 							<Color3 name="TextColor3">4294944010</Color3>
 							<bool name="TextScaled">false</bool>
+							<float name="TextSize">14</float>
 							<Color3 name="TextStrokeColor3">4278190080</Color3>
 							<float name="TextStrokeTransparency">1</float>
 							<float name="TextTransparency">0</float>
@@ -14636,7 +14844,7 @@ end
 							<int name="ZIndex">1</int>
 						</Properties>
 					</Item>
-					<Item class="Frame" referent="RBXC0BABB73B6DC4C29BDDBC7F95F1574F3">
+					<Item class="Frame" referent="RBX42E590023C2C44D9A9F1BD3DB0F6C2C9">
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14670,7 +14878,7 @@ end
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBX1D626E996C1140A9AD2F60170711D8B8">
+						<Item class="TextLabel" referent="RBX8975303FC0344F25B95652467293378B">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14705,6 +14913,7 @@ end
 								<string name="Text">R15</string>
 								<Color3 name="TextColor3">4294944010</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">18</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -14715,7 +14924,7 @@ end
 								<int name="ZIndex">2</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBX74DBF268B11F466DA9B9A5C90E7B6466">
+						<Item class="TextLabel" referent="RBX793967E7459C4AEA9C23CCDFEAEC1017">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14750,6 +14959,7 @@ end
 								<string name="Text">Enter TextureIDs</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -14760,7 +14970,7 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="Frame" referent="RBX82CE6A60F9184B8E88FB60B44C91EC98">
+						<Item class="Frame" referent="RBX3625C4E9BE444FB1BF1EF805AB9B4B50">
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14794,7 +15004,7 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="Frame" referent="RBXFC649731079041D49E256988C87B8F88">
+							<Item class="Frame" referent="RBX45B944CA2F4D47C49193BFB8DCA9351D">
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14828,7 +15038,7 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextBox" referent="RBX2AA08D4E383841F787FC627911032688">
+								<Item class="TextBox" referent="RBX40E05C5F81C44B83BF664E11E55E53A7">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -14865,6 +15075,7 @@ end
 										<string name="Text">&lt;TextureID&gt;</string>
 										<Color3 name="TextColor3">4294967295</Color3>
 										<bool name="TextScaled">false</bool>
+										<float name="TextSize">14</float>
 										<Color3 name="TextStrokeColor3">4278190080</Color3>
 										<float name="TextStrokeTransparency">1</float>
 										<float name="TextTransparency">0</float>
@@ -14875,7 +15086,7 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBX556C7E6AFC3B489EADB9045522CEF1F2">
+								<Item class="TextLabel" referent="RBX68B57F64DC684A3F93694C8B8AFAC55D">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14910,6 +15121,7 @@ end
 										<string name="Text">RightUpperLeg:</string>
 										<Color3 name="TextColor3">4294967295</Color3>
 										<bool name="TextScaled">false</bool>
+										<float name="TextSize">14</float>
 										<Color3 name="TextStrokeColor3">4278190080</Color3>
 										<float name="TextStrokeTransparency">1</float>
 										<float name="TextTransparency">0</float>
@@ -14923,7 +15135,7 @@ end
 							</Item>
 						</Item>
 					</Item>
-					<Item class="Frame" referent="RBX045FB5A19FAC4D3D893C3BCC2B8BD203">
+					<Item class="Frame" referent="RBXE275D84A31624775BB91F990F8616039">
 						<Properties>
 							<bool name="Active">true</bool>
 							<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -14957,7 +15169,7 @@ end
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="TextLabel" referent="RBX67C10399CB384ECFBC8E41A58952080B">
+						<Item class="TextLabel" referent="RBX019906D603C94CCC86FB70CCDB3E4174">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -14992,6 +15204,7 @@ end
 								<string name="Text">R6</string>
 								<Color3 name="TextColor3">4294944010</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">18</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -15002,7 +15215,7 @@ end
 								<int name="ZIndex">2</int>
 							</Properties>
 						</Item>
-						<Item class="TextLabel" referent="RBXFC09D56561AB42258F33B0021EEFFFB4">
+						<Item class="TextLabel" referent="RBX09FF4AA2E4E940898B20A2EDCB6F07E9">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15037,6 +15250,7 @@ end
 								<string name="Text">Enter TextureIDs</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -15047,7 +15261,7 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="Frame" referent="RBX92F77FE6670F4C158E0DE6D6F024EC76">
+						<Item class="Frame" referent="RBXBEC4DBD3EBF14F79A2E633A930E9640D">
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15081,7 +15295,7 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="Frame" referent="RBX6925FC62182E4692A6F7A8CE18F11FF1">
+							<Item class="Frame" referent="RBX7D115926CBC64D5FAC4D354A2649CC42">
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15115,7 +15329,7 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextBox" referent="RBX781B843E79FE4C98BC62794F9EE94386">
+								<Item class="TextBox" referent="RBXF4DDFF7DC4BF498E8D0D244C15760AAD">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15152,6 +15366,7 @@ end
 										<string name="Text">&lt;BaseTextureId&gt;</string>
 										<Color3 name="TextColor3">4294967295</Color3>
 										<bool name="TextScaled">false</bool>
+										<float name="TextSize">14</float>
 										<Color3 name="TextStrokeColor3">4278190080</Color3>
 										<float name="TextStrokeTransparency">1</float>
 										<float name="TextTransparency">0</float>
@@ -15162,7 +15377,7 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextBox" referent="RBX11A4DF112A4F428F82A21CBDEB7A30D4">
+								<Item class="TextBox" referent="RBX18926C5152534E3BB140CE3FB89A933A">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15199,6 +15414,7 @@ end
 										<string name="Text">&lt;OverlayTextureId&gt;</string>
 										<Color3 name="TextColor3">4294967295</Color3>
 										<bool name="TextScaled">false</bool>
+										<float name="TextSize">14</float>
 										<Color3 name="TextStrokeColor3">4278190080</Color3>
 										<float name="TextStrokeTransparency">1</float>
 										<float name="TextTransparency">0</float>
@@ -15211,7 +15427,7 @@ end
 								</Item>
 							</Item>
 						</Item>
-						<Item class="TextLabel" referent="RBX2B353AC2BBFD4629A9A94F8EA90B087F">
+						<Item class="TextLabel" referent="RBXBDC693A5EF9C41DBA0F24008298A16F0">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15246,6 +15462,7 @@ end
 								<string name="Text">Enter Character MeshIDs</string>
 								<Color3 name="TextColor3">4294967295</Color3>
 								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
 								<Color3 name="TextStrokeColor3">4278190080</Color3>
 								<float name="TextStrokeTransparency">1</float>
 								<float name="TextTransparency">0</float>
@@ -15256,7 +15473,7 @@ end
 								<int name="ZIndex">1</int>
 							</Properties>
 						</Item>
-						<Item class="Frame" referent="RBX58AFEB8B0CCA4AB3B958C565D1650DBD">
+						<Item class="Frame" referent="RBX16990FA36C0C42938D1B128A41B3D2C2">
 							<Properties>
 								<bool name="Active">true</bool>
 								<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15290,7 +15507,7 @@ end
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="Frame" referent="RBX4F0A56D4358D45A39FA1D1E6EB503BF8">
+							<Item class="Frame" referent="RBX7CA74927F3754F12AA3E10C59224E756">
 								<Properties>
 									<bool name="Active">true</bool>
 									<Color3 name="BackgroundColor3">4279242768</Color3>
@@ -15324,7 +15541,7 @@ end
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextBox" referent="RBX6B5D048A5C7E4292BB2943E50F81FD69">
+								<Item class="TextBox" referent="RBX847DE95908D2476EB49AB8FBA60E112D">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4282795590</Color3>
@@ -15361,6 +15578,7 @@ end
 										<string name="Text">&lt;MeshId&gt;</string>
 										<Color3 name="TextColor3">4294967295</Color3>
 										<bool name="TextScaled">false</bool>
+										<float name="TextSize">14</float>
 										<Color3 name="TextStrokeColor3">4278190080</Color3>
 										<float name="TextStrokeTransparency">1</float>
 										<float name="TextTransparency">0</float>
@@ -15371,7 +15589,7 @@ end
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBXEB83FCA0038A45A5B5807391FDB5A171">
+								<Item class="TextLabel" referent="RBX9DCB78A804DE4A9CA570F8A49CD57DB8">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4281413937</Color3>
@@ -15406,6 +15624,7 @@ end
 										<string name="Text">Right Leg:</string>
 										<Color3 name="TextColor3">4294967295</Color3>
 										<bool name="TextScaled">false</bool>
+										<float name="TextSize">14</float>
 										<Color3 name="TextStrokeColor3">4278190080</Color3>
 										<float name="TextStrokeTransparency">1</float>
 										<float name="TextTransparency">0</float>
@@ -15418,8 +15637,137 @@ end
 								</Item>
 							</Item>
 						</Item>
+						<Item class="Frame" referent="RBXD9A2CD84B62A486795EE53E397446D8F">
+							<Properties>
+								<bool name="Active">true</bool>
+								<Color3 name="BackgroundColor3">4279242768</Color3>
+								<float name="BackgroundTransparency">1</float>
+								<Color3 name="BorderColor3">4279970357</Color3>
+								<int name="BorderSizePixel">0</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<string name="Name">AssetId</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>1</YS>
+									<YO>-10</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>25</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<token name="Style">0</token>
+								<bool name="Visible">false</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+							<Item class="TextBox" referent="RBXF9D44509351C4292A1C6A5CD996DE296">
+								<Properties>
+									<bool name="Active">true</bool>
+									<Color3 name="BackgroundColor3">4282795590</Color3>
+									<float name="BackgroundTransparency">0</float>
+									<Color3 name="BorderColor3">4281413937</Color3>
+									<int name="BorderSizePixel">1</int>
+									<bool name="ClearTextOnFocus">true</bool>
+									<bool name="ClipsDescendants">false</bool>
+									<bool name="Draggable">false</bool>
+									<token name="Font">3</token>
+									<token name="FontSize">5</token>
+									<bool name="MultiLine">false</bool>
+									<string name="Name">OldAssetId</string>
+									<Ref name="NextSelectionDown">null</Ref>
+									<Ref name="NextSelectionLeft">null</Ref>
+									<Ref name="NextSelectionRight">null</Ref>
+									<Ref name="NextSelectionUp">null</Ref>
+									<UDim2 name="Position">
+										<XS>0.5</XS>
+										<XO>0</XO>
+										<YS>0</YS>
+										<YO>0</YO>
+									</UDim2>
+									<float name="Rotation">0</float>
+									<bool name="Selectable">true</bool>
+									<Ref name="SelectionImageObject">null</Ref>
+									<UDim2 name="Size">
+										<XS>0.5</XS>
+										<XO>0</XO>
+										<YS>0</YS>
+										<YO>25</YO>
+									</UDim2>
+									<token name="SizeConstraint">0</token>
+									<string name="Text">&lt;AssetId&gt;</string>
+									<Color3 name="TextColor3">4294967295</Color3>
+									<bool name="TextScaled">false</bool>
+									<float name="TextSize">14</float>
+									<Color3 name="TextStrokeColor3">4278190080</Color3>
+									<float name="TextStrokeTransparency">1</float>
+									<float name="TextTransparency">0</float>
+									<bool name="TextWrapped">false</bool>
+									<token name="TextXAlignment">2</token>
+									<token name="TextYAlignment">1</token>
+									<bool name="Visible">true</bool>
+									<int name="ZIndex">1</int>
+								</Properties>
+							</Item>
+							<Item class="TextLabel" referent="RBX68A02F64706D48729320E0B29E7A6AEB">
+								<Properties>
+									<bool name="Active">false</bool>
+									<Color3 name="BackgroundColor3">4281413937</Color3>
+									<float name="BackgroundTransparency">1</float>
+									<Color3 name="BorderColor3">4279970357</Color3>
+									<int name="BorderSizePixel">0</int>
+									<bool name="ClipsDescendants">false</bool>
+									<bool name="Draggable">false</bool>
+									<token name="Font">4</token>
+									<token name="FontSize">5</token>
+									<string name="Name">AssetIdInstructions</string>
+									<Ref name="NextSelectionDown">null</Ref>
+									<Ref name="NextSelectionLeft">null</Ref>
+									<Ref name="NextSelectionRight">null</Ref>
+									<Ref name="NextSelectionUp">null</Ref>
+									<UDim2 name="Position">
+										<XS>0</XS>
+										<XO>0</XO>
+										<YS>0</YS>
+										<YO>0</YO>
+									</UDim2>
+									<float name="Rotation">0</float>
+									<bool name="Selectable">false</bool>
+									<Ref name="SelectionImageObject">null</Ref>
+									<UDim2 name="Size">
+										<XS>0.5</XS>
+										<XO>0</XO>
+										<YS>0</YS>
+										<YO>25</YO>
+									</UDim2>
+									<token name="SizeConstraint">0</token>
+									<string name="Text">Enter Old Package AssetId</string>
+									<Color3 name="TextColor3">4294967295</Color3>
+									<bool name="TextScaled">false</bool>
+									<float name="TextSize">14</float>
+									<Color3 name="TextStrokeColor3">4278190080</Color3>
+									<float name="TextStrokeTransparency">1</float>
+									<float name="TextTransparency">0</float>
+									<bool name="TextWrapped">false</bool>
+									<token name="TextXAlignment">2</token>
+									<token name="TextYAlignment">1</token>
+									<bool name="Visible">true</bool>
+									<int name="ZIndex">1</int>
+								</Properties>
+							</Item>
+						</Item>
 					</Item>
-					<Item class="Frame" referent="RBX5ED1D405C9DD46959542BCE846E01626">
+					<Item class="Frame" referent="RBX7990C11CEF02450C99A9EE30626B0AD3">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4294944010</Color3>
