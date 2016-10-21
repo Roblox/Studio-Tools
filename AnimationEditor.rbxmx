@@ -14136,13 +14136,28 @@ local R15PartMapping = {
 	["Left Arm"] = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}
 }
 
+function setupTextClearOnFocus(textbox)
+	-- We do want to clear the text on focus if it is the template text
+	textbox.Focused:connect(function() 
+		if string.find(textbox.Text, "<") ~= nil then
+			textbox.Text = ""
+		end
+	end)
+end
+
 function textboxListSetup(frame, template, nameList)
+	table.sort(nameList)
 	for i = 1, #nameList do
 		local newTextbox = template:Clone()
 		newTextbox.Name = nameList[i]
 		newTextbox.Parent = frame
 		newTextbox.Position = template.Position + UDim2.new(0, 0, 0, (i-1)*newTextbox.Size.Y.Offset)
 		newTextbox.Description.Text = nameList[i]
+		for _, obj in pairs(newTextbox:GetChildren()) do
+			if obj:IsA("TextBox") then
+				setupTextClearOnFocus(obj)
+			end
+		end
 	end
 	template:Destroy()
 end
@@ -14176,13 +14191,22 @@ function createConfigureGui(R15Folder, R6Folder)
 	textboxTemplate = R6CharaterMeshes.TextboxTemplate
 	textboxListSetup(R6CharaterMeshes, textboxTemplate, nameList)
 	
+	local R6TextureTextboxes = rigConfigurationFrame.R6.TextureIDs.Textboxes
+	setupTextClearOnFocus(R6TextureTextboxes.BaseTextureId)
+	setupTextClearOnFocus(R6TextureTextboxes.OverlayTextureId)
+	
 	-- Show the current values from the rig
 	for _, obj in pairs(R15TextureIds:GetChildren()) do
 		local id = tonumber(obj.TextureID.Text)
 		for _, name in pairs(R15PartMapping[obj.Name]) do
 			local part = R15Folder:FindFirstChild(name)
 			if part and part:IsA("MeshPart") and part.TextureID ~= "" then
-				obj.TextureID.Text = part.TextureID
+				local assetUrl = "http://roblox.com/asset/?id="
+				local textureId = part.TextureID
+				if string.find(textureId, assetUrl, 1, true) ~= nil then
+					textureId = string.sub(textureId, assetUrl:len() + 1)
+				end
+				obj.TextureID.Text = textureId
 				break
 			end
 		end
@@ -14191,12 +14215,11 @@ function createConfigureGui(R15Folder, R6Folder)
 	local R6AssetIdFrame = rigConfigurationFrame.R6.AssetId
 	if canUseSimpleR6import then
 		R6AssetIdFrame.Visible = true
+		setupTextClearOnFocus(R6AssetIdFrame.OldAssetId)
 	end
 	
 	for _, obj in pairs(R6Folder:GetChildren()) do
 		if obj:IsA("CharacterMesh") then
-			local R6TextureTextboxes = rigConfigurationFrame.R6.TextureIDs.Textboxes
-			
 			if tostring(obj.BaseTextureId) ~= "" and obj.BaseTextureId ~= 0 then
 				R6TextureTextboxes.BaseTextureId.Text = tostring(obj.BaseTextureId)
 			end
@@ -14218,7 +14241,7 @@ function createConfigureGui(R15Folder, R6Folder)
 				local id = obj.TextureID.Text
 				if id ~= "" and string.find(id, "<") == nil then
 					local assetString = "http://roblox.com/asset/?id="
-					if string.find(id, assetString) == nil then
+					if string.find(id, assetString, 1, true) == nil then
 						id = assetString.. "" ..id
 					end
 					
@@ -14460,6 +14483,12 @@ game.Workspace.ChildAdded:connect(function(child)
 	if child.Name == "FBXImport" then
 		fbxRigImported(child)
 	elseif child.Name == "ImportedFbx" then
+		-- Remove duplicates if re-importing
+		for _, obj in pairs(game.Workspace:GetChildren()) do
+			if obj.Name == "ImportedFbx" and obj ~= child then
+				obj:Destroy()
+			end
+		end
 		local R15Folder = child:WaitForChild("R15", 1)
 		local R6Folder = child:WaitForChild("R6", 1)
 		if R15Folder and R6Folder then
@@ -14859,7 +14888,7 @@ end
 							<Ref name="NextSelectionRight">null</Ref>
 							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
-								<XS>0</XS>
+								<XS>0.5</XS>
 								<XO>5</XO>
 								<YS>0</YS>
 								<YO>40</YO>
@@ -15045,7 +15074,7 @@ end
 										<float name="BackgroundTransparency">0</float>
 										<Color3 name="BorderColor3">4281413937</Color3>
 										<int name="BorderSizePixel">1</int>
-										<bool name="ClearTextOnFocus">true</bool>
+										<bool name="ClearTextOnFocus">false</bool>
 										<bool name="ClipsDescendants">false</bool>
 										<bool name="Draggable">false</bool>
 										<token name="Font">3</token>
@@ -15150,7 +15179,7 @@ end
 							<Ref name="NextSelectionRight">null</Ref>
 							<Ref name="NextSelectionUp">null</Ref>
 							<UDim2 name="Position">
-								<XS>0.5</XS>
+								<XS>0</XS>
 								<XO>5</XO>
 								<YS>0</YS>
 								<YO>40</YO>
@@ -15336,7 +15365,7 @@ end
 										<float name="BackgroundTransparency">0</float>
 										<Color3 name="BorderColor3">4281413937</Color3>
 										<int name="BorderSizePixel">1</int>
-										<bool name="ClearTextOnFocus">true</bool>
+										<bool name="ClearTextOnFocus">false</bool>
 										<bool name="ClipsDescendants">false</bool>
 										<bool name="Draggable">false</bool>
 										<token name="Font">3</token>
@@ -15384,7 +15413,7 @@ end
 										<float name="BackgroundTransparency">0</float>
 										<Color3 name="BorderColor3">4281413937</Color3>
 										<int name="BorderSizePixel">1</int>
-										<bool name="ClearTextOnFocus">true</bool>
+										<bool name="ClearTextOnFocus">false</bool>
 										<bool name="ClipsDescendants">false</bool>
 										<bool name="Draggable">false</bool>
 										<token name="Font">3</token>
@@ -15548,7 +15577,7 @@ end
 										<float name="BackgroundTransparency">0</float>
 										<Color3 name="BorderColor3">4281413937</Color3>
 										<int name="BorderSizePixel">1</int>
-										<bool name="ClearTextOnFocus">true</bool>
+										<bool name="ClearTextOnFocus">false</bool>
 										<bool name="ClipsDescendants">false</bool>
 										<bool name="Draggable">false</bool>
 										<token name="Font">3</token>
@@ -15678,7 +15707,7 @@ end
 									<float name="BackgroundTransparency">0</float>
 									<Color3 name="BorderColor3">4281413937</Color3>
 									<int name="BorderSizePixel">1</int>
-									<bool name="ClearTextOnFocus">true</bool>
+									<bool name="ClearTextOnFocus">false</bool>
 									<bool name="ClipsDescendants">false</bool>
 									<bool name="Draggable">false</bool>
 									<token name="Font">3</token>
