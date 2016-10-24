@@ -6627,12 +6627,23 @@ local recyclingBin = {}
 local bin = {}
 local expirationTime = 5
 
+local HttpService = game:GetService("HttpService")
+
 function recyclingBin:Recycle(object)
 	local class = object.ClassName
-	if not bin[class] then
-		bin[class] = {}
+	local classBin = bin[class]
+	if not classBin then
+		classBin = {}
+		bin[class] = classBin
 	end
-	bin[class][object] = tick()+expirationTime;
+	local expirationGuid = HttpService:GenerateGUID(false)
+	classBin[object] = expirationGuid;
+	delay(expirationTime,function ()
+		if classBin[object] == expirationGuid then
+			classBin[object] = nil
+			object:Destroy()
+		end
+	end)
 	object.Parent = nil
 end
 
@@ -6683,18 +6694,6 @@ function recyclingBin:Allocate(objectType,needed,bin)
 	end
 	return allocation
 end
-
-spawn(function ()
-	while wait(1) do
-		for _,queue in pairs(bin) do
-			for object,expireTime in pairs(queue) do
-				if tick() > expirationTime then
-					queue[object] = nil
-				end
-			end
-		end
-	end
-end)
 
 return recyclingBin]]></ProtectedString>
 			</Properties>
