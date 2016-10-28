@@ -4905,6 +4905,7 @@ return module
 local Metapart = require(script.Parent.Metapart)
 local Input = require(script.Parent.Input)
 local Utility = require(script.Parent.Utility)
+local RecyclingBin = require(script.Parent.RecyclingBin)
 
 -----------------------------------
 --------------VARIABLES------------
@@ -4915,6 +4916,8 @@ local shadowKeeper = {}
 local planeKeeper = {}
 
 local cg = game:GetService("CoreGui")
+local tempAdorns = Instance.new("Folder",cg)
+tempAdorns.Name = "TransformTempAdornments"
 
 local initialized = false
 
@@ -5018,18 +5021,17 @@ local function setLinePosition(cone1, cone2, line1, line2, line3, point1, point2
 	line3.Length = direction.magnitude
 end
 
-local tmpRotation = {}
+local rotationBin = Instance.new("Folder",tempAdorns)
+rotationBin.Name = "Rotation"
 
 local function clearRotation()
-	for k, v in pairs(tmpRotation) do
-		v:Destroy()
-		tmpRotation[k] = nil
+	local children = rotationBin:GetChildren()
+	if #children > 0 then
+		RecyclingBin:RecycleObjects(children)
 	end
 end
 
 local function setRotation(cframe, radius, degrees)
-	clearRotation()
-		
 	if degrees == 0 then return end
 	
 	local direction = degrees / math.abs(degrees)
@@ -5051,6 +5053,14 @@ local function setRotation(cframe, radius, degrees)
 	end
 	
 	local amount = math.abs(degrees)
+	local pending = {}
+	local function pendIt(image)
+		table.insert(pending,{
+			CFrame = cframe:toWorldSpace(CFrame.Angles(flip and math.rad(180) or 0,0, math.rad(amount * direction)) * CFrame.new(Vector3.new(-radius * 0.5, radius * 0.5, 0)));
+			Image = image;
+		})
+	end
+	
 		
 	while amount >= 90 do
 		--add 90
@@ -5058,16 +5068,7 @@ local function setRotation(cframe, radius, degrees)
 			amount = amount - 90
 		end
 		
-		local im = Instance.new("ImageHandleAdornment", cg)
-		im.Adornee = strayAdornee
-		im.Image = ninetyDegrees
-		im.CFrame = cframe:toWorldSpace(CFrame.Angles(flip and math.rad(180) or 0,0, math.rad(amount * direction)) * CFrame.new(Vector3.new(-radius * 0.5, radius * 0.5, 0)))
-		im.ZIndex = 1
-		im.AlwaysOnTop = true
-		im.Size = Vector2.new(radius, radius)
-		im.Color3 = Color3.new(1, 0, 0)
-		im.Transparency = 0.6
-		table.insert(tmpRotation, im)
+		pendIt(ninetyDegrees)
 		
 		if direction > 0 then
 			amount = amount - 90
@@ -5080,16 +5081,7 @@ local function setRotation(cframe, radius, degrees)
 			amount = amount - 22.5
 		end
 		
-		local im = Instance.new("ImageHandleAdornment", cg)
-		im.Adornee = strayAdornee
-		im.Image = oneEigthDegrees
-		im.CFrame = cframe:toWorldSpace(CFrame.Angles(flip and math.rad(180) or 0,0, math.rad(amount * direction)) * CFrame.new(Vector3.new(-radius * 0.5, radius * 0.5, 0)))
-		im.ZIndex = 1
-		im.AlwaysOnTop = true
-		im.Size = Vector2.new(radius, radius)
-		im.Color3 = Color3.new(1, 0, 0)
-		im.Transparency = 0.6
-		table.insert(tmpRotation, im)
+		pendIt(oneEigthDegrees)
 		
 		if direction > 0 then
 			amount = amount - 22.5
@@ -5101,16 +5093,7 @@ local function setRotation(cframe, radius, degrees)
 			amount = amount - 5
 		end
 		
-		local im = Instance.new("ImageHandleAdornment", cg)
-		im.Adornee = strayAdornee
-		im.Image = fiveDegrees
-		im.CFrame = cframe:toWorldSpace(CFrame.Angles(flip and math.rad(180) or 0,0, math.rad(amount * direction)) * CFrame.new(Vector3.new(-radius * 0.5, radius * 0.5, 0)))
-		im.ZIndex = 1
-		im.AlwaysOnTop = true
-		im.Size = Vector2.new(radius, radius)
-		im.Color3 = Color3.new(1, 0, 0)
-		im.Transparency = 0.6
-		table.insert(tmpRotation, im)
+		pendIt(fiveDegrees)
 		
 		if direction > 0 then
 			amount = amount - 5
@@ -5122,22 +5105,25 @@ local function setRotation(cframe, radius, degrees)
 			amount = amount - 1
 		end
 		
-		local im = Instance.new("ImageHandleAdornment", cg)
-		im.Adornee = strayAdornee
-		im.Image = oneDegrees
-		im.CFrame = cframe:toWorldSpace(CFrame.Angles(flip and math.rad(180) or 0,0, math.rad(amount * direction)) * CFrame.new(Vector3.new(-radius * 0.5, radius * 0.5, 0)))
-		im.ZIndex = 1
-		im.AlwaysOnTop = true
-		im.Size = Vector2.new(radius, radius)
-		im.Color3 = Color3.new(1, 0, 0)
-		im.Transparency = 0.6
-		table.insert(tmpRotation, im)
-		
+		pendIt(oneDegrees)
+
 		if direction > 0 then
 			amount = amount - 1
 		end
 	end
 	
+	local imageAdorns = RecyclingBin:Allocate("ImageHandleAdornment",#pending,rotationBin)
+	for i,data in ipairs(pending) do
+		local im = imageAdorns[i]
+		im.Adornee = strayAdornee
+		im.ZIndex = 1
+		im.AlwaysOnTop = true
+		im.Size = Vector2.new(radius, radius)
+		im.Color3 = Color3.new(1, 0, 0)
+		im.Transparency = 0.6
+		im.CFrame = data.CFrame
+		im.Image = data.Image
+	end
 end
 
 local rotationFrame = nil
@@ -5511,7 +5497,7 @@ local function initializeAdorns()
 	---measure rotate lines
 	
 	for i = 1, 88 do
-		local rotateLine = Instance.new("LineHandleAdornment", game.CoreGui)
+		local rotateLine = Instance.new("LineHandleAdornment", cg)
 		rotateLine.Visible = false
 		rotateLine.Adornee = strayAdornee
 		rotateLine.AlwaysOnTop = true
@@ -5656,38 +5642,49 @@ local function adornInstanceWithRotate(adornee)
 	adornInstance(R_YZ, adornee)
 end
 
-local tempPoints = {}
+local pendingLines = {}
+local lineAlloc = Instance.new("Folder",tempAdorns)
+lineAlloc.Name = "LineGrid"
 
 local function clearTemporaryLines()
-	for i, v in ipairs(tempPoints) do
-		v.Visible = false
-		v.Adornee = nil
-		v.Parent = nil
-		v:Destroy()
-		tempPoints[i] = nil
+	local lines = lineAlloc:GetChildren()
+	if #lines > 0 then
+		RecyclingBin:RecycleObjects(lines)
 	end
 end
 
-local function drawTemporaryLine(startPoint, endPoint, transparency, thickness, adornee)
-	if not adornee then return end
-	local tmp = Instance.new("LineHandleAdornment", cg)
-	
-	local objectStartPoint = adornee.CFrame:pointToObjectSpace(startPoint)
-	local objectEndPoint = adornee.CFrame:pointToObjectSpace(endPoint)
-	
-	local direction = (objectEndPoint - objectStartPoint)
-	tmp.Length = direction.Magnitude
-	
-	tmp.CFrame = CFrame.new(objectStartPoint, objectEndPoint)
-	local transition = Utility.smoothstep(0, 1, currentPlaneHoverTransitionLevel)
+local function appendTemporaryLine(startPoint, endPoint, transparency, thickness, adornee)
+	if adornee then
+		local params = {startPoint, endPoint, transparency, thickness, adornee}
+		table.insert(pendingLines,params)
+	end
+end
+
+local function drawTemporaryLines()
+	local expected = #pendingLines
+	local lines = RecyclingBin:Allocate("LineHandleAdornment",expected,lineAlloc)
+	for i = expected,1,-1 do
+		local params = pendingLines[i]
+		pendingLines[i] = nil
 		
-	tmp.Color3 = Utility.colorAdd(Utility.colorMultiply(grey, transition), Utility.colorMultiply(black, 1-transition))
-	tmp.Transparency = transparency
-	tmp.Thickness = (thickness * 1.2 * (transition)) + (thickness * (1-transition))
-	tmp.ZIndex = 1
-	tmp.Adornee = adornee
-	
-	table.insert(tempPoints, tmp)
+		local startPoint, endPoint, transparency, thickness, adornee = unpack(params)
+		local tmp = lines[i]
+		
+		local objectStartPoint = adornee.CFrame:pointToObjectSpace(startPoint)
+		local objectEndPoint = adornee.CFrame:pointToObjectSpace(endPoint)
+		
+		local direction = (objectEndPoint - objectStartPoint)
+		tmp.Length = direction.Magnitude
+		
+		tmp.CFrame = CFrame.new(objectStartPoint, objectEndPoint)
+		local transition = Utility.smoothstep(0, 1, currentPlaneHoverTransitionLevel)
+			
+		tmp.Color3 = Utility.colorAdd(Utility.colorMultiply(grey, transition), Utility.colorMultiply(black, 1-transition))
+		tmp.Transparency = transparency
+		tmp.Thickness = (thickness * 1.2 * (transition)) + (thickness * (1-transition))
+		tmp.ZIndex = 1
+		tmp.Adornee = adornee
+	end
 end
 
 local function setFrameLine(index, point1, point2)
@@ -5765,13 +5762,6 @@ local function updatePlanePosition()
 
 	if not planeKeeper[1].Visible and not renderRotation then return end
 	
-	-- temporary internal lines
-	--if not workplaneFrame then return end
-	
-	--drawTemporaryLine(Vector3.new(0,0,0), Vector3.new(10, 10, 0), Color3.new(.3,.3,.3), 0.0, 1.5, planeKeeper[1].Adornee)
-	
-	--if true then return end
-	
 	local adornee = planeKeeper[1].Adornee
 	local halfSize = adornee.Size / 2
 	local p0 = {}
@@ -5806,6 +5796,7 @@ local function updatePlanePosition()
 	--local totalLines = 10
 	
 	if renderRotation then
+		clearTemporaryLines()
 		for i, v in ipairs(planeKeeper) do
 			v.Visible = false
 		end
@@ -5842,7 +5833,7 @@ local function updatePlanePosition()
 		local transparency = 1.0 - (isFarStrongLine and 1.0 or (isStrongLine and farTransparency or transparencyDist))
 		
 		if (p0[0] <= p1[0] and p0[1] <= p1[1] and p0[2] <= p1[2] and transparency < 1.0) then
-			drawTemporaryLine(workplaneFrame:pointToWorldSpace(Vector3.new(p0[0], p0[1], p0[2])), 
+			appendTemporaryLine(workplaneFrame:pointToWorldSpace(Vector3.new(p0[0], p0[1], p0[2])), 
 								workplaneFrame:pointToWorldSpace(Vector3.new(p1[0], p1[1], p1[2])), transparency, isStrongLine and 1.8 or 1.5, adornee)
 		end
 		end
@@ -5859,7 +5850,7 @@ local function updatePlanePosition()
 			local transparency = 1.0 - (isFarStrongLine and 1.0 or (isStrongLine and farTransparency or transparencyDist))
 			
 			if (p0[0] <= p1[0] and p0[1] <= p1[1] and p0[2] <= p1[2] and transparency < 1.0) then
-				drawTemporaryLine(workplaneFrame:pointToWorldSpace(Vector3.new(p0[0],p0[1],p0[2])),
+				appendTemporaryLine(workplaneFrame:pointToWorldSpace(Vector3.new(p0[0],p0[1],p0[2])),
 								workplaneFrame:pointToWorldSpace(Vector3.new(p1[0],p1[1],p1[2])), transparency, isStrongLine and 1.8 or 1.5, adornee)
 			end
 		end
@@ -5868,23 +5859,20 @@ local function updatePlanePosition()
 		local v2 = workplaneFrame:pointToWorldSpace(workplaneFrame:pointToObjectSpace(adornee.CFrame:pointToWorldSpace(halfSize * Vector3.new(-1, 0, 1))) * Vector3.new(1, 0, 1))
 		local v3 = workplaneFrame:pointToWorldSpace(workplaneFrame:pointToObjectSpace(adornee.CFrame:pointToWorldSpace(halfSize * Vector3.new(1, 0, -1))) * Vector3.new(1, 0, 1))
 		local v4 = workplaneFrame:pointToWorldSpace(workplaneFrame:pointToObjectSpace(adornee.CFrame:pointToWorldSpace(halfSize * Vector3.new(1, 0, 1))) * Vector3.new(1, 0, 1))
-		drawTemporaryLine(	v1,
+		appendTemporaryLine(	v1,
 							v2,
 							0.0, 2.0, adornee)
-		drawTemporaryLine(	v3,
+		appendTemporaryLine(	v3,
 							v4,
 							0.0, 2.0, adornee)
-		drawTemporaryLine(	v1,
+		appendTemporaryLine(	v1,
 							v3,
 							0.0, 2.0, adornee)
-		drawTemporaryLine(	v2,
+		appendTemporaryLine(	v2,
 							v4,
 							0.0, 2.0, adornee)
 		
-		local tmpPlane = Instance.new("BoxHandleAdornment", cg)
-	
-		--tmp.CFrame = adornee.CFrame:toObjectSpace(cframe)
-		-- workplaneFrame -- camera_pos
+		local tmpPlane = RecyclingBin:Allocate("BoxHandleAdornment",1,lineAlloc)[1]
 		local distFromPlane = workplaneFrame:pointToObjectSpace(camera_pos).y
 		
 		tmpPlane.Size = (adornee.Size * Vector3.new(1, 0, 1)) + Vector3.new(0, (distFromPlane / 20) * .005, 0)
@@ -5894,11 +5882,9 @@ local function updatePlanePosition()
 		tmpPlane.Transparency = 0.5
 		tmpPlane.Adornee = adornee
 		
-		table.insert(tempPoints, tmpPlane)
+		drawTemporaryLines()
 	end
 
-	--drawline
-	
 	updateMiniPlane(adornee.CFrame)
 end
 
@@ -5927,8 +5913,6 @@ local function updateAdornmentPositions()
 		
 	local mouseDown = Input.getButtonState(Input.Enum.Key.MOUSE_BUTTON1)
 	
-	clearTemporaryLines()
-	
 	local selection = game:GetService("Selection"):Get()
 	
 	if #selection <= 0 then
@@ -5936,6 +5920,7 @@ local function updateAdornmentPositions()
 		setPlaneVisibility(false)
 		setRotateAdornVisibility(false)
 		setScaleAdornVisibility(false)
+		clearTemporaryLines()
 		return
 	end
 	
@@ -6287,10 +6272,10 @@ local function destroyAdorns()
 		rotateLines[i] = nil
 	end
 	
-	clearTemporaryLines()
-	
 	strayAdornee:Destroy()
 	strayAdornee = nil
+		
+	clearTemporaryLines()
 end
 
 local function grabHandle()
@@ -6622,6 +6607,88 @@ module.updateRubberBand = updateRubberBand
 
 return module
 ]]></ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBXEC7C6085619E450693F32FA161266FC2">
+			<Properties>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">RecyclingBin</string>
+				<string name="ScriptGuid"></string>
+				<ProtectedString name="Source"><![CDATA[-- @CloneTrooper1019 <3
+
+local recyclingBin = {}
+local bin = {}
+local expirationTime = 5
+
+local HttpService = game:GetService("HttpService")
+
+function recyclingBin:Recycle(object)
+	local class = object.ClassName
+	local classBin = bin[class]
+	if not classBin then
+		classBin = {}
+		bin[class] = classBin
+	end
+	local expirationGuid = HttpService:GenerateGUID(false)
+	classBin[object] = expirationGuid;
+	delay(expirationTime,function ()
+		if classBin[object] == expirationGuid then
+			classBin[object] = nil
+			object:Destroy()
+		end
+	end)
+	object.Parent = nil
+end
+
+function recyclingBin:RecycleObjects(objects)
+	for _,v in pairs(objects) do
+		self:Recycle(v)
+	end	
+end
+
+function recyclingBin:Pull(objectType,parent)
+	local object do
+		local objects = bin[objectType]
+		if objects then
+			object = next(objects)
+			if object then
+				objects[object] = nil
+			end
+		end
+	end
+	if not object then
+		object = Instance.new(objectType)
+	end
+	if parent then
+		object.Parent = parent
+	end
+	return object
+end
+
+-- Allocate works similarly to Pull, except it tries to reuse objects that exist in the specified bin.
+-- This removes the need to recycle every object during every frame.
+
+function recyclingBin:Allocate(objectType,needed,allocationStorage)
+	local allocation = {}
+	local allocated = 0
+	for _,v in pairs(allocationStorage:GetChildren()) do
+		if v:IsA(objectType) then
+			allocated = allocated + 1
+			if allocated > needed then
+				self:Recycle(v)
+			else
+				allocation[allocated] = v
+			end
+		end
+	end
+	while allocated < needed do
+		allocated = allocated + 1
+		allocation[allocated] = self:Pull(objectType,allocationStorage)
+	end
+	return allocation
+end
+
+return recyclingBin]]></ProtectedString>
 			</Properties>
 		</Item>
 	</Item>
