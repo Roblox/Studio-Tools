@@ -375,11 +375,11 @@ function boxSideTest(ray, normal, size, p)
 	local hit = ray.Origin + ray.Direction * t
 	
 	if (origin.x ~= 0 or hit.x <= size.x) and
-	(origin.x ~= 0 or hit.x >= -size.x) and
-	(origin.y ~= 0 or hit.y <= size.y) and
-	(origin.y ~= 0 or hit.y >= -size.y) and
-	(origin.z ~= 0 or hit.z <= size.z) and
-	(origin.z ~= 0 or hit.z >= -size.z) then
+	   (origin.x ~= 0 or hit.x >= -size.x) and
+	   (origin.y ~= 0 or hit.y <= size.y) and
+	   (origin.y ~= 0 or hit.y >= -size.y) and
+	   (origin.z ~= 0 or hit.z <= size.z) and
+	   (origin.z ~= 0 or hit.z >= -size.z) then
 		return hit
 	end
 
@@ -429,11 +429,6 @@ end
 local function moveUntilCollideWrapper(part, threshold, ignoreList, direction, maximum)
 	if not ignoreList then ignoreList = {} end
 	return Collision.moveUntilCollide(part, ignoreList, direction, threshold, maximum)
-end
-
-local function rayCastWithWhiteList(ray, whiteList)
-	local ignoreList = List.createIgnoreListGivenWhiteList(game.Workspace, ignoreList)
-	game.Workspace:FindPartOnRayWithIgnoreList(ray, ignoreList)
 end
 
 local function safeMoveWrapper(part, threshold, ignoreList, direction)
@@ -503,26 +498,25 @@ end
 
 function snapVector3ByHandle(value, handle)
 	if handle == S_X_POS or 
-	handle == S_X_NEG or 
-	handle == S_X_POS_Z_POS or 
-	handle == S_X_POS_Z_NEG or 
-	handle == S_X_NEG_Z_POS or 
-	handle == S_X_NEG_Z_NEG then
+	   handle == S_X_NEG or 
+	   handle == S_X_POS_Z_POS or 
+	   handle == S_X_POS_Z_NEG or 
+	   handle == S_X_NEG_Z_POS or 
+	   handle == S_X_NEG_Z_NEG then
 		value = Vector3.new(math.max(roundToNearestGrid(value.X), plugin.GridSize), value.Y, value.Z)
 	end
 	
 	if handle == S_Z_POS or 
-	handle == S_Z_NEG or 
-	handle == S_X_POS_Z_POS or 
-	handle == S_X_POS_Z_NEG or 
-	handle == S_X_NEG_Z_POS or 
-	handle == S_X_NEG_Z_NEG then
+	   handle == S_Z_NEG or 
+	   handle == S_X_POS_Z_POS or 
+	   handle == S_X_POS_Z_NEG or 
+	   handle == S_X_NEG_Z_POS or 
+	   handle == S_X_NEG_Z_NEG then
 		value = Vector3.new(value.X, value.Y, math.max(roundToNearestGrid(value.Z), plugin.GridSize))
 	end
 	
 	if handle == S_Y_POS or
-	--handle == S_Y_NEG or
-	handle == T_Y_POS then
+	   handle == T_Y_POS then
 		value = Vector3.new(value.X, math.max(roundToNearestGrid(value.Y), plugin.GridSize), value.Z)
 	end
 		
@@ -579,21 +573,20 @@ function setWaypoint()
 	local currentHandle = Adorn.getCurrentHandle()
 	local handleType = "Unknown"
 	if currentHandle == S_X_POS or 
-	currentHandle == S_Y_POS or 
-	--currentHandle == S_Y_NEG or
-	currentHandle == S_Z_POS or
-	currentHandle == S_X_NEG or 
-	currentHandle == S_Z_NEG or
-	currentHandle == S_X_POS_Z_POS or
-	currentHandle == S_X_NEG_Z_POS or
-	currentHandle == S_X_NEG_Z_NEG or
-	currentHandle == S_X_POS_Z_NEG then
+	   currentHandle == S_Y_POS or 
+	   currentHandle == S_Z_POS or
+	   currentHandle == S_X_NEG or 
+	   currentHandle == S_Z_NEG or
+	   currentHandle == S_X_POS_Z_POS or
+	   currentHandle == S_X_NEG_Z_POS or
+	   currentHandle == S_X_NEG_Z_NEG or
+	   currentHandle == S_X_POS_Z_NEG then
 		handleType = "Scale"
 	elseif 	currentHandle == T_Y_POS then
 		handleType = "Move"
 	elseif currentHandle == R_XY or
-	currentHandle == R_XZ or
-	currentHandle == R_YZ then
+		   currentHandle == R_XZ or
+		   currentHandle == R_YZ then
 		handleType = "Rotate"
 	end
 	
@@ -813,28 +806,55 @@ end
 local planePreviouslySelected = false
 local itemToUpdate = nil
 
-			local sanitizationPrecision = 1000000
+local sanitizationPrecision = 1000000
 			
-			local function sanitizeFloatTest(value)
-				return value > 0.0 and (math.ceil((value * sanitizationPrecision) - 0.5) / sanitizationPrecision) or (math.floor((value * sanitizationPrecision) + 0.5) / sanitizationPrecision)
-			end
+local function sanitizeFloatTest(value)
+	return value > 0.0 and (math.ceil((value * sanitizationPrecision) - 0.5) / sanitizationPrecision) or (math.floor((value * sanitizationPrecision) + 0.5) / sanitizationPrecision)
+end
 
-			local function sanitizeCFrameTest(value)
-				local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = value:components()
-				return CFrame.new(
-					sanitizeFloat(x),
-					sanitizeFloat(y),
-					sanitizeFloat(z),
-					sanitizeFloat(r00),
-					sanitizeFloat(r01),
-					sanitizeFloat(r02),
-					sanitizeFloat(r10),
-					sanitizeFloat(r11),
-					sanitizeFloat(r12),
-					sanitizeFloat(r20),
-					sanitizeFloat(r21),
-					sanitizeFloat(r22))
-			end
+local function sanitizeCFrameTest(value)
+	local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = value:components()
+	return CFrame.new(
+		sanitizeFloat(x),
+		sanitizeFloat(y),
+		sanitizeFloat(z),
+		sanitizeFloat(r00),
+		sanitizeFloat(r01),
+		sanitizeFloat(r02),
+		sanitizeFloat(r10),
+		sanitizeFloat(r11),
+		sanitizeFloat(r12),
+		sanitizeFloat(r20),
+		sanitizeFloat(r21),
+		sanitizeFloat(r22))
+end
+
+function getShapeRenderSize(shape, size)
+	if (shape == Enum.PartType.Cylinder) then
+		local minYZ = math.min(size.Y, size.Z)
+		return Vector3.new(size.X, minYZ, minYZ)
+	end
+	
+	return size
+end
+
+function updateChildAttachments(part, initialSize, finalSize)
+	if (not part:IsA("BasePart")) then return end
+	
+	local children = part:GetChildren()
+	
+	local shape = part.Shape
+	
+	initialSize = getShapeRenderSize(shape, initialSize)
+	finalSize = getShapeRenderSize(shape, finalSize)
+	
+	for i = 1, #children do
+		local child = children[i]
+		if (child:IsA("Attachment")) then
+			child.Position = (child.Position / initialSize) * finalSize
+		end
+	end
+end
 
 function updatePart()
 	
@@ -945,12 +965,12 @@ function updatePart()
 		local tangent = projectedCameraDirection:Cross(normal).unit 
 	
 		Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, -1, 0)), 
-						selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, 1, 0)),
-		tangent)
+					   selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(0, 1, 0)),
+					   tangent)
 			
 		
 	elseif currentHandle == S_X_POS or
-	currentHandle == S_Z_POS then
+		   currentHandle == S_Z_POS then
 				
 		if shouldBreakJoints then
 			UnjoinSelection()
@@ -1005,7 +1025,7 @@ function updatePart()
 --		filteredSelectionMetapart.CFrame = selectedPart.CFrame
 		
 	elseif currentHandle == S_X_NEG or 
-	currentHandle == S_Z_NEG then
+		   currentHandle == S_Z_NEG then
 	
 		if shouldBreakJoints then
 			UnjoinSelection()
@@ -1093,12 +1113,12 @@ function updatePart()
 		local side = Utility.getVector3Sign(localCamera)
 		
 		Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
-							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
-							selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
+					   selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
+					   selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
 		
 		Adorn.scaleTwo(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, -1)), 
-							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, 1)),
-		selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
+					   selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, 1)),
+					   selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
 		
 	elseif currentHandle == S_X_NEG_Z_NEG then
 		
@@ -1114,12 +1134,12 @@ function updatePart()
 		local side = Utility.getVector3Sign(localCamera)
 		
 		Adorn.scaleOne(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(-1, -1, side.z)), 
-							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
-							selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
+					   selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(1, -1, side.z)),
+					   selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(0, 0, 1)) - selectedPart.CFrame.p)
 		
 		Adorn.scaleTwo(selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, -1)), 
-							selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, 1)),
-		selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
+					   selectedPart.CFrame:pointToWorldSpace(selectedPart.Size / 2 * Vector3.new(side.x, -1, 1)),
+					   selectedPart.CFrame:pointToWorldSpace(side * Vector3.new(1,0,0)) - selectedPart.CFrame.p)
 		
 	elseif currentHandle == S_X_POS_Z_NEG	then
 
@@ -1347,8 +1367,9 @@ function updatePart()
 			local rotationalOffset = out + 180
 						
 			Adorn.showRotate(originalCFrame:toWorldSpace(CFrame.new(Vector3.new(halfSize.X * handleSide,0,0)))* CFrame.Angles(0,math.rad(90) ,math.rad(rotationalOffset) ), 
-				radius,
-			nearestChange, intersectionPoint)
+							 radius,
+							 nearestChange,
+							 intersectionPoint)
 			
 		end
 				
@@ -1380,16 +1401,16 @@ function updatePart()
 		
 	if plugin.CollisionEnabled and #game:GetService("Selection"):Get() == 1 then
 		if currentHandle == S_Y_POS or 
-		currentHandle == S_Z_POS or
-		currentHandle == S_X_NEG or 
-		currentHandle == S_Z_NEG or
-		currentHandle == S_X_POS_Z_POS or
-		currentHandle == S_X_NEG_Z_POS or
-		currentHandle == S_X_NEG_Z_NEG or
-		currentHandle == S_X_POS_Z_NEG or
-		currentHandle == R_XY or 
-		currentHandle == R_XZ or
-		currentHandle == R_YZ then
+		   currentHandle == S_Z_POS or
+		   currentHandle == S_X_NEG or 
+		   currentHandle == S_Z_NEG or
+		   currentHandle == S_X_POS_Z_POS or
+		   currentHandle == S_X_NEG_Z_POS or
+		   currentHandle == S_X_NEG_Z_NEG or
+		   currentHandle == S_X_POS_Z_NEG or
+		   currentHandle == R_XY or 
+		   currentHandle == R_XZ or
+		   currentHandle == R_YZ then
 			if selectedPart and List.itemsHasItemNotInList(selectedPart:GetTouchingParts(), filteredSelection) then
 				if preactionCFrame then
 					selectedPart.CFrame = preactionCFrame
@@ -1400,6 +1421,8 @@ function updatePart()
 			end
 		end
 	end
+	
+	updateChildAttachments(selectedPart, preActionSize, selectedPart.Size)
 		
 	if allowAdornUpdate then
 		updateDragPart()
@@ -2913,8 +2936,8 @@ end
 function inputChanged(evt)
 	
 	if (Input.getButtonState(Input.Enum.Key.MOUSE_BUTTON1) and 
-	evt.UserInputType == Enum.UserInputType.MouseMovement) or
-	(Adorn.isPlaneSelectingModeOn() and Adorn.getCurrentHandle() == H_PLANE) then
+		evt.UserInputType == Enum.UserInputType.MouseMovement) or
+		(Adorn.isPlaneSelectingModeOn() and Adorn.getCurrentHandle() == H_PLANE) then
 		
 		if not originalCFrame then
 			local filteredSelectionMetapart = Selection.getFilteredSelectionMetapart()
