@@ -5762,13 +5762,6 @@ local function updatePlanePosition()
 
 	if not planeKeeper[1].Visible and not renderRotation then return end
 	
-	-- temporary internal lines
-	--if not workplaneFrame then return end
-	
-	--appendTemporaryLine(Vector3.new(0,0,0), Vector3.new(10, 10, 0), Color3.new(.3,.3,.3), 0.0, 1.5, planeKeeper[1].Adornee)
-	
-	--if true then return end
-	
 	local adornee = planeKeeper[1].Adornee
 	local halfSize = adornee.Size / 2
 	local p0 = {}
@@ -6675,10 +6668,10 @@ end
 -- Allocate works similarly to Pull, except it tries to reuse objects that exist in the specified bin.
 -- This removes the need to recycle every object during every frame.
 
-function recyclingBin:Allocate(objectType,needed,bin)
+function recyclingBin:Allocate(objectType,needed,allocationStorage)
 	local allocation = {}
 	local allocated = 0
-	for _,v in pairs(bin:GetChildren()) do
+	for _,v in pairs(allocationStorage:GetChildren()) do
 		if v:IsA(objectType) then
 			allocated = allocated + 1
 			if allocated > needed then
@@ -6690,7 +6683,7 @@ function recyclingBin:Allocate(objectType,needed,bin)
 	end
 	while allocated < needed do
 		allocated = allocated + 1
-		allocation[allocated] = self:Pull(objectType,bin)
+		allocation[allocated] = self:Pull(objectType,allocationStorage)
 	end
 	return allocation
 end
