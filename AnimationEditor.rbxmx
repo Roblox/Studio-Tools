@@ -14123,9 +14123,11 @@ return module
 				<ProtectedString name="Source"><![CDATA[local rigCreator = require(script.Parent.RigCreator)
 
 local toolbar = plugin:CreateToolbar("Animations")
-local fbxFlagExists, fbxFlagValue = pcall(function () return settings():GetFFlag("StudioFbxRigImporting") end)
+local fbxFlagExists, fbxFlagValue = pcall(function() return settings():GetFFlag("StudioFbxRigImporting") end)
 local packageIdsFromAssetIdsFlagExists, packageIdsFromAssetIdsFlagValue = pcall(function() return settings():GetFFlag("GetAssetIdsFromPackageAPI") end)
 local canUseSimpleR6import = (packageIdsFromAssetIdsFlagExists == true and packageIdsFromAssetIdsFlagValue == true)
+local saveSelectionFlagExists, saveSelectionFlagValue = pcall(function() return settings():GetFFlag("PluginSaveSelection") end)
+local saveSelectionExport = (saveSelectionFlagExists and saveSelectionFlagValue == true)
 
 local R15PartMapping = {
 	["Head"] = {"Head"},
@@ -14135,6 +14137,10 @@ local R15PartMapping = {
 	["Right Arm"] = {"RightUpperArm", "RightLowerArm", "RightHand"},
 	["Left Arm"] = {"LeftUpperArm", "LeftLowerArm", "LeftHand"}
 }
+
+-- If the old CharacterMeshs are imported by ID then this will contain a map in the format:
+-- BodyPart.Name => AssetId
+local assetIdMap = {}
 
 function setupTextClearOnFocus(textbox)
 	-- We do want to clear the text on focus if it is the template text
@@ -14303,6 +14309,7 @@ function createConfigureGui(R15Folder, R6Folder)
 					end
 					for _, child in pairs(children) do
 						if child:IsA("CharacterMesh") then
+							assetIdMap[child.BodyPart.Name] = assetId
 							-- Destroy duplicates of this Character mesh if there are any
 							for _, existingPart in pairs(R6Folder:GetChildren()) do
 								if existingPart:IsA("CharacterMesh") and existingPart.BodyPart == child.BodyPart then
@@ -14541,6 +14548,31 @@ if fbxFlagExists and fbxFlagValue == true then
 			createConfigureGui(R15Model, R6Model)
 		end
 	end)
+	
+	if saveSelectionExport then
+		local saveButton = toolbar:CreateButton(
+			"",
+			"Export Package",
+			"http://roblox.com/asset/?id=467691760"	
+		)
+		
+		saveButton.Click:connect(function()
+			local exportModel = game.ServerStorage:FindFirstChild("PackageExport")
+			if exportModel then
+				for _, folder in pairs(exportModel:GetChildren()) do
+					if folder.Name ~= "Head" then
+						game.Selection:Set(folder:GetChildren())
+						local outputFileName = folder.Name
+						local bodyPartName = folder.Name:gsub("%s+", "")
+						if assetIdMap[bodyPartName] then
+							outputFileName = assetIdMap[bodyPartName]
+						end
+						plugin:PromptSaveSelection(outputFileName)
+					end
+				end
+			end
+		end)
+	end
 end
 
 
