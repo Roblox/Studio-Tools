@@ -14405,49 +14405,72 @@ function makeExportVersion(R15Model, R6Model)
 	R6Model.ChildRemoved:connect(function() changed = true end)	
 end
 
-local function jointBetween(a, b, cfa, cfb)
-    local weld = Instance.new("Motor6D")
-    weld.Part0 = a
-    weld.Part1 = b
-    weld.C0 = cfa
-    weld.C1 = cfb
-    weld.Parent = a
-    return weld;
+local function buildJoint(parentAttachment, partForJointAttachment)
+    local newMotor = Instance.new("Motor6D")
+	newMotor.Name = parentAttachment.Name:gsub("RigAttachment", "")
+	
+    newMotor.Part0 = parentAttachment.Parent
+    newMotor.Part1 = partForJointAttachment.Parent
+    
+	newMotor.C0 = parentAttachment.CFrame
+    newMotor.C1 = partForJointAttachment.CFrame
+	
+	local oldMotor = partForJointAttachment.Parent:FindFirstChild(newMotor.Name)
+	while oldMotor do
+		oldMotor:Destroy()
+		oldMotor = partForJointAttachment.Parent:FindFirstChild(newMotor.Name)
+	end
+	
+    newMotor.Parent = partForJointAttachment.Parent
+    return weld
 end
+
+-- Removes old Motor6Ds and builds the rig from the attachments in the parts
+-- Call this with nil, HumanoidRootPart
+function buildRigFromAttachments(last, part)
+	for _, attachment in pairs(part:GetChildren()) do
+		if attachment:IsA("Attachment") and string.find(attachment.Name, "RigAttachment") then
+			for _, sibling in pairs(part.Parent:GetChildren()) do
+				if sibling ~= part and sibling ~= last then
+					local matchingAttachment = sibling:FindFirstChild(attachment.Name)
+					if matchingAttachment then
+						buildJoint(attachment, matchingAttachment)
+						-- Continue the recursive tree traversal building joints
+						buildRigFromAttachments(part, matchingAttachment.Parent)
+					end
+				end
+			end
+		end
+	end
+end
+
+-- Mr Grey R15
+local r15DummyId = 516159357
 
 function fbxRigImported(R15Rig)
 	-- This wait is necessary because the imported rig is added to workspace 
 	-- before all the parts are loaded
 	wait(.5)
 	
-	local r15Head = R15Rig:WaitForChild("Head", 1) -- 1 second timeout
+	-- Not all packages have all their parts, we load MrGreyR15 first then substitute the parts we did load
+	local R15Dummy = game:GetService("InsertService"):LoadAsset(r15DummyId):GetChildren()[1]
 	
-	if not r15Head then
-		local upperTorso = R15Rig:FindFirstChild("UpperTorso")
-		if upperTorso then
-			-- Add the dummy head
-			local Head = Instance.new("Part", R15Rig)
-			Head.Name = "Head"
-			Head.Anchored = false
-			Head.CanCollide = true
-			Head.Size = Vector3.new(2, 1, 1)
-			Head.CFrame = CFrame.new(upperTorso.Position.X, upperTorso.Position.Y + 1.25, upperTorso.Position.Z)
-			Head.BottomSurface = "Smooth"
-			Head.TopSurface = "Smooth"
-
-			local NCA = CFrame.new(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-			local NCB = CFrame.new(0, -0.5, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0)
-			local Neck = jointBetween(upperTorso, Head, NCA, NCB)
-			Neck.Name = "Neck"
-			Neck.MaxVelocity = 0.1
-			
-			local HeadMesh = Instance.new("SpecialMesh", Head)
-			HeadMesh.MeshType = 0
-			HeadMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
-			
-			r15Head = Head
+	for _, part in pairs(R15Rig:GetChildren()) do
+		local matchingPart = R15Dummy:FindFirstChild(part.Name)
+		if matchingPart then
+			matchingPart:Destroy()
 		end
+		part.Parent = R15Dummy
 	end
+	R15Rig:Destroy()
+	
+	R15Rig = R15Dummy
+	buildRigFromAttachments(nil, R15Rig.HumanoidRootPart)
+	
+	R15Rig.Parent = game.Workspace
+	R15Rig:MoveTo(Vector3.new(0, 0, 0))
+	
+	local r15Head = R15Rig:WaitForChild("Head", 1) -- 1 second timeout
 	
 	local Face = Instance.new("Decal", r15Head)
 	Face.Name = "Face"
