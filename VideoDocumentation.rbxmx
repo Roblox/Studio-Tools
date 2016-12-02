@@ -140,10 +140,10 @@ local function onDescendantRemoved(instance)
 	end
 end
 
-game.DescendantAdded:connect(checkInstance)
-game.DescendantRemoving:connect(onDescendantRemoved)
+game.Workspace.DescendantAdded:connect(checkInstance)
+game.Workspace.DescendantRemoving:connect(onDescendantRemoved)
 
-findWikiLinks(game)
+findWikiLinks(game.Workspace)
 
 end]]></ProtectedString>
 		</Properties>
