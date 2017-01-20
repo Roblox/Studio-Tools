@@ -14471,10 +14471,19 @@ function fbxRigImported(R15Rig)
 	R15Rig:MoveTo(Vector3.new(0, 0, 0))
 	
 	local r15Head = R15Rig:WaitForChild("Head", 1) -- 1 second timeout
-	
-	local Face = Instance.new("Decal", r15Head)
-	Face.Name = "Face"
-	Face.Texture = "rbxasset://textures/face.png"
+
+	if not r15Head:FindFirstChildOfClass("Decal") then
+		local Face = Instance.new("Decal", r15Head)
+		Face.Name = "Face"
+		Face.Texture = "rbxasset://textures/face.png"
+	end
+
+	-- Remove duplicates if re-importing
+	for _, obj in pairs(game.Workspace:GetChildren()) do
+		if obj.Name == "ImportedFbx" then
+			obj:Destroy()
+		end
+	end
 	
 	local rigModel = Instance.new("Model")
 	rigModel.Name = "ImportedFbx"
@@ -14507,25 +14516,8 @@ function fbxRigImported(R15Rig)
 	R6Rig:Destroy()
 
 	createConfigureGui(R15Folder, R6Folder)
+	makeExportVersion(R15Folder, R6Folder)
 end
-
-game.Workspace.ChildAdded:connect(function(child)
-	if child.Name == "FBXImport" then
-		fbxRigImported(child)
-	elseif child.Name == "ImportedFbx" then
-		-- Remove duplicates if re-importing
-		for _, obj in pairs(game.Workspace:GetChildren()) do
-			if obj.Name == "ImportedFbx" and obj ~= child then
-				obj:Destroy()
-			end
-		end
-		local R15Folder = child:WaitForChild("R15", 1)
-		local R6Folder = child:WaitForChild("R6", 1)
-		if R15Folder and R6Folder then
-			makeExportVersion(R15Folder, R6Folder)
-		end
-	end
-end)
 
 -- Hook up events to make export copy of rig for already imported Fbx rigs
 for _, obj in pairs(game.Workspace:GetChildren()) do
@@ -14552,7 +14544,10 @@ if fbxFlagExists and fbxFlagValue == true then
 		end		
 		
 		warn("This operation may take a few seconds depending on rig complexity!")
-		plugin:ImportFbxRig()
+		local importedRig = plugin:ImportFbxRig()
+		if importedRig then
+			fbxRigImported(importedRig)
+		end
 	end)
 	
 	local configureButton = toolbar:CreateButton(
