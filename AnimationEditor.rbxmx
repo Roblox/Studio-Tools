@@ -239,15 +239,12 @@ local cleanup = {}--Parts to be cleaned up on close
 ----------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------
 
-local easingFlagExists, easingFlagValue = pcall(function () return settings():GetFFlag("AnimationEasingStylesEnabled") end)
 local fbxFlagExists, fbxFlagValue = pcall(function () return settings():GetFFlag("DebugStudioRigImporter") end)
 --In the middle of a flag name transition...
 if not fbxFlagExists then
 	fbxFlagExists, fbxFlagValue = pcall(function () return settings():GetFFlag("StudioFbxRigImporting") end)
 end
 -----------------------------------------...
-local EasingStylesEnabled = easingFlagExists and easingFlagValue or false
-local UseOldImport = not EasingStylesEnabled
 local DebugEnabled = false
 ----------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------
@@ -1105,11 +1102,9 @@ function pastePoses()
 			
 			if keyframe.Poses[item.Item] then
 				keyframe.Poses[item.Item].CFrame = pose.CFrame
-				if EasingStylesEnabled then
-					keyframe.Poses[item.Item].EasingDirection = pose.EasingDirection
-					keyframe.Poses[item.Item].EasingStyle = pose.EasingStyle
-					keyframe.Poses[item.Item].updateColor()
-				end
+				keyframe.Poses[item.Item].EasingDirection = pose.EasingDirection
+				keyframe.Poses[item.Item].EasingStyle = pose.EasingStyle
+				keyframe.Poses[item.Item].updateColor()
 			end
 		end
 	end	
@@ -1180,7 +1175,7 @@ function initializePose(keyframe, part, poseObject, override)
 		pose.Item = partToItemMap[part]
 		pose.Time = keyframe.Time
 		
-		if poseObject and EasingStylesEnabled then
+		if poseObject then
 			pose.EasingStyle = poseObject.EasingStyle
 			pose.EasingDirection = poseObject.EasingDirection
 		else
@@ -1219,10 +1214,8 @@ function initializePose(keyframe, part, poseObject, override)
 				})
 				deletePose(keyframe, part)
 			else
-				if EasingStylesEnabled then
-					modal = true
-					menuManager.SetEasingStyle(pose, (function() modal = false  pose.updateColor() end))
-				end
+				modal = true
+				menuManager.SetEasingStyle(pose, (function() modal = false  pose.updateColor() end))
 			end
 		end)
 
@@ -1235,29 +1228,25 @@ function initializePose(keyframe, part, poseObject, override)
 			if copy then
 				pose.UI.BackgroundColor3 = copyPoseColor
 			else
-				if EasingStylesEnabled then
-					local styleName = pose.EasingStyle.Name
-					if styleName == "Linear" then
-						pose.UI.Text = ""
-						pose.UI.BackgroundColor3 = poseColor
-					elseif styleName == "Constant" then
-						pose.UI.Text = "-"
-						pose.UI.BackgroundColor3 = Color3.new(61/255, 61/255, 61/255)
-					elseif styleName == "Cubic" then
-						pose.UI.Text = "C"
-						pose.UI.BackgroundColor3 = Color3.new(255/255, 106/255, 0/255)
-					elseif styleName == "Elastic" then
-						pose.UI.Text = "E"
-						pose.UI.BackgroundColor3 = Color3.new(71/255, 204/255, 86/255)
-					elseif styleName == "Bounce" then
-						pose.UI.Text = "B"
-						pose.UI.BackgroundColor3 = Color3.new(14/255, 188/255, 204/255)
-					else
-						pose.UI.Text = "?"
-						pose.UI.BackgroundColor3 = Color3.new(1,1,1)
-					end
-				else
+				local styleName = pose.EasingStyle.Name
+				if styleName == "Linear" then
+					pose.UI.Text = ""
 					pose.UI.BackgroundColor3 = poseColor
+				elseif styleName == "Constant" then
+					pose.UI.Text = "-"
+					pose.UI.BackgroundColor3 = Color3.new(61/255, 61/255, 61/255)
+				elseif styleName == "Cubic" then
+					pose.UI.Text = "C"
+					pose.UI.BackgroundColor3 = Color3.new(255/255, 106/255, 0/255)
+				elseif styleName == "Elastic" then
+					pose.UI.Text = "E"
+					pose.UI.BackgroundColor3 = Color3.new(71/255, 204/255, 86/255)
+				elseif styleName == "Bounce" then
+					pose.UI.Text = "B"
+					pose.UI.BackgroundColor3 = Color3.new(14/255, 188/255, 204/255)
+				else
+					pose.UI.Text = "?"
+					pose.UI.BackgroundColor3 = Color3.new(1,1,1)
 				end
 			end
 		end
@@ -1434,11 +1423,9 @@ function resetKeyframeToDefaultPose(keyframe)
 		if pose then
 			pose.CFrame = CFrame.new()	
 			item.Motor6D.C1 = item.OriginC1
-			if EasingStylesEnabled then
-				pose.EasingStyle = Enum.PoseEasingStyle.Linear
-				pose.EasingDirection = Enum.PoseEasingDirection.Out
-				pose.updateColor()
-			end
+			pose.EasingStyle = Enum.PoseEasingStyle.Linear
+			pose.EasingDirection = Enum.PoseEasingDirection.Out
+			pose.updateColor()
 		end
 	end
 end
@@ -2878,17 +2865,9 @@ end
 
 
 function showImportAnimText()
-	local gameAnimationsFlagExists, gameAnimationsTabFlagValue = pcall(function () return settings():GetFFlag("StudioEnableGameAnimationsTab") end)
-	if (gameAnimationsFlagExists and gameAnimationsTabFlagValue) and not UseOldImport then
-		local id = Plugin:PromptForExistingAssetId("Animation")
-		if (id ~= nil and tonumber(id) > 0) then
-			  loadImportAnim(tonumber(id))
-		end
-	else
-		local id = showTextExtryDialog("Enter Animation ID:", "<anim ID>")
-		if (id ~= nil and tonumber(id) ~= nil) then
-			loadImportAnim(tonumber(id))
-		end
+	local id = Plugin:PromptForExistingAssetId("Animation")
+	if (id ~= nil and tonumber(id) > 0) then
+		  loadImportAnim(tonumber(id))
 	end
 end
 					
@@ -3014,12 +2993,10 @@ function importPose(keyframe, pose)
 				LocalPose.CFrame = pose.CFrame
 			end
 			
-			--Easing Style Importing
-			if EasingStylesEnabled then
-				LocalPose.EasingStyle = pose.EasingStyle
-				LocalPose.EasingDirection = pose.EasingDirection
-				LocalPose.updateColor()
-			end
+			-- Easing Style Importing
+			LocalPose.EasingStyle = pose.EasingStyle
+			LocalPose.EasingDirection = pose.EasingDirection
+			LocalPose.updateColor()
 			
 			if (pose.Parent:IsA('Pose')) and (pose.Weight > 0) then
 				importPartInclude[pose.Name] = true
@@ -3045,11 +3022,9 @@ function loadPose(keyframe, pose)
 			end
 			
 			--Easing Style Importing
-			if EasingStylesEnabled then
-				LocalPose.EasingStyle = pose.EasingStyle
-				LocalPose.EasingDirection = pose.EasingDirection
-				LocalPose.updateColor()
-			end
+			LocalPose.EasingStyle = pose.EasingStyle
+			LocalPose.EasingDirection = pose.EasingDirection
+			LocalPose.updateColor()
 			
 			if (pose.Parent:IsA('Pose')) and (pose.Weight > 0) then
 				importPartInclude[pose.Name] = true
@@ -3148,21 +3123,19 @@ function loadImportAnim(animId)
 					local previousStyle = Enum.PoseEasingStyle.Linear
 					local previousDirection = Enum.PoseEasingDirection.Out
 					
-					local myStyle = EasingStylesEnabled and pose.EasingStyle or Enum.PoseEasingStyle.Linear
-					local myDirection = EasingStylesEnabled and pose.EasingDirection or Enum.PoseEasingDirection.Out
+					local myStyle = pose.EasingStyle
+					local myDirection = pose.EasingDirection
 					
 					local nextStyle = Enum.PoseEasingStyle.Linear
 					local nextDirection = Enum.PoseEasingDirection.Out
 					
-					if EasingStylesEnabled then
-						if nextPose then
-							nextStyle = nextPose.EasingStyle
-							nextDirection = nextPose.EasingDirection
-						end
-						if previousPose then
-							previousStyle = EasingStylesEnabled and previousPose.EasingStyle or Enum.PoseEasingStyle.Linear
-							previousDirection = EasingStylesEnabled and previousPose.EasingDirection or Enum.PoseEasingDirection.Out						
-						end
+					if nextPose then
+						nextStyle = nextPose.EasingStyle
+						nextDirection = nextPose.EasingDirection
+					end
+					if previousPose then
+						previousStyle = previousPose.EasingStyle
+						previousDirection = previousPose.EasingDirection
 					end
 					
 					local easingDifferent = false
@@ -5103,10 +5076,9 @@ end
 						         and item.OriginC1:inverse()*pose.CFrame:inverse()*item.OriginC1
 						         or  pose.CFrame)
 				})
-				if EasingStylesEnabled then
-					poseParent.EasingStyle = pose.EasingStyle
-					poseParent.EasingDirection = pose.EasingDirection
-				end
+
+				poseParent.EasingStyle = pose.EasingStyle
+				poseParent.EasingDirection = pose.EasingDirection
 			end
 
 			for _, childPart in pairs(part.Children) do
@@ -5129,10 +5101,9 @@ end
 				MaskWeight = 0,
 				CFrame = (posedPartData.OriginC1 and posedPartData.OriginC1:inverse() * poseData.CFrame:inverse() * posedPartData.OriginC1) or poseData.CFrame,
 			})
-			if EasingStylesEnabled then
-				poseParent.EasingStyle = poseData.EasingStyle
-				poseParent.EasingDirection = poseData.EasingDirection
-			end
+
+			poseParent.EasingStyle = poseData.EasingStyle
+			poseParent.EasingDirection = poseData.EasingDirection
 			didCreatePose = true
 		end
 		
@@ -5147,10 +5118,9 @@ end
 					MaskWeight = 0,
 					CFrame = CFrame.new(),
 				})
-				if EasingStylesEnabled then
-					poseParent.EasingStyle = Enum.PoseEasingStyle.Linear
-					poseParent.EasingDirection = Enum.PoseEasingDirection.Out
-				end
+
+				poseParent.EasingStyle = Enum.PoseEasingStyle.Linear
+				poseParent.EasingDirection = Enum.PoseEasingDirection.Out
 				didCreatePose = true
 			end
 			
@@ -5768,17 +5738,9 @@ function menuRequest(arg)
 		modal = true
 		showExportAnim()
 	elseif arg == "Import" then
-		if not UseOldImport then
-			modal = true
-			showImportAnimText()
-			modal = false
-		else
-			closePopupMenu()
-			modal = true
---			showImportAnim()
-			showImportAnimText()
-			modal = false
-		end
+		modal = true
+		showImportAnimText()
+		modal = false
 	elseif arg == "Help" then
 		Plugin:OpenWikiPage("Animations")
 	elseif arg == "EditHelp" then
