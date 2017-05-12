@@ -6,17 +6,20 @@
 			<bool name="Disabled">false</bool>
 			<Content name="LinkedSource"><null></null></Content>
 			<string name="Name">VideoDocumentation</string>
-			<ProtectedString name="Source"><![CDATA[plugin:Activate(false)
+			<string name="ScriptGuid">{85CC1B81-70BC-43BC-B840-0F164663D4C3}</string>
+			<ProtectedString name="Source"><![CDATA[
+local StudioResetPluginButtonStateExists, StudioResetPluginButtonStateEnabled = pcall(function()
+	return settings():GetFFlag("StudioResetPluginButtonStateOnDataModelChange")
+end)
 
-local enabledFlagExists, enabledFlagValue = pcall(function() return settings():GetFFlag("VideoDocumentationPluginEnabled") end)
-			
-if enabledFlagExists and enabledFlagValue then
+if (not StudioResetPluginButtonStateExists) or (not StudioResetPluginButtonStateEnabled) then
+	plugin:Activate(false)
+end
 
 local BUTTON_NORMAL = "rbxassetid://417211667"
-local BUTTON_HOVER = "rbxassetid://417211758"
-local BUTTON_DOWN = "rbxassetid://417211718"
-local BUTTON_CURSOR ="rbxassetid://419142055"
---local BUTTON_CURSOR = "rbxasset://textures/DragCursor.png"
+local BUTTON_HOVER	= "rbxassetid://417211758"
+local BUTTON_DOWN	= "rbxassetid://417211718"
+local BUTTON_CURSOR = "rbxassetid://419142055"
 
 local mouse = plugin:GetMouse()
 local connections = {}
@@ -26,7 +29,6 @@ local function findPartAncestor(object)
 	if object == game or object == game.Workspace then return false end
 	return findPartAncestor(object.Parent)
 end
-
 
 local function setupButton(frame, link)
 	local holding = false
@@ -70,11 +72,7 @@ local function setupButton(frame, link)
 	local mouseEnterConnection = button.MouseEnter:connect(function()
 		inside = true
 		updateButton()
---		if holding then
---			button.Image = BUTTON_DOWN
---		else
---			button.Image = BUTTON_HOVER
---		end
+
 		if partAncestor then partAncestor.Locked = true end
 		mouse.Icon = BUTTON_CURSOR
 	end)
@@ -82,23 +80,20 @@ local function setupButton(frame, link)
 		inside = false
 		updateButton()
 		mouse.Icon = oldIcon
-		--button.Image = BUTTON_NORMAL
 		if partAncestor and not initialLock then
 			partAncestor.Locked = false
 		end
 	end)
-	--local mouseDownConnection = button.MouseButton1Down:connect(function()
+	
 	local mouseDownConnection = mouse.Button1Down:connect(function()
 		if inside then
 			inside = false
-			--button.Image = BUTTON_DOWN
 			holding = true
 			updateButton()
 		end
 	end)
-	--local mouseUpConnection	= button.MouseButton1Up:connect(function()
+	
 	local mouseUpConnection	= mouse.Button1Up:connect(function()
-		--button.Image = BUTTON_HOVER
 		holding = false
 		updateButton()
 	end)
@@ -144,8 +139,7 @@ game.Workspace.DescendantAdded:connect(checkInstance)
 game.Workspace.DescendantRemoving:connect(onDescendantRemoved)
 
 findWikiLinks(game.Workspace)
-
-end]]></ProtectedString>
+]]></ProtectedString>
 		</Properties>
 	</Item>
 </roblox>
