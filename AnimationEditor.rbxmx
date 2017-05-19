@@ -244,6 +244,7 @@ local fbxFlagExists, fbxFlagValue = pcall(function () return settings():GetFFlag
 if not fbxFlagExists then
 	fbxFlagExists, fbxFlagValue = pcall(function () return settings():GetFFlag("StudioFbxRigImporting") end)
 end
+local stepAnimFlagExists, stepAnimFlagValue = pcall(function() return settings():GetFFlag("UseStepAnimations") end)
 -----------------------------------------...
 local DebugEnabled = false
 ----------------------------------------------------------------------------------------------------------------------------
@@ -5250,9 +5251,11 @@ end
 			end
 			Animation.AnimationId = animID
 
-			wait()
-			game:GetService('RunService'):Run()
-			wait()
+			if not stepAnimFlagValue then
+				wait()
+				game:GetService('RunService'):Run()
+				wait()
+			end
 
 			local endEarly = menuManager.GetStopRequest(function()
 				stopAnim = true
@@ -5261,32 +5264,60 @@ end
 			currentAnimTrack = animationController:LoadAnimation(Animation)
 			currentAnimTrack:Play()
 
-			if (not loopAnimation) then
-				Spawn(function()
-					local ID = animationPlayID
-					time = tick()
-					while (tick() - time < animationLength ) do
-						wait()
-					end	
-					if (ID == animationPlayID) then
-						if not stopAnim then
-							endEarly()
-						end
-						stopAnim = true
-					end
-				end)
-			end
+			local animator
+			if stepAnimFlagValue then
+				animator = animationController:FindFirstChildOfClass("Animator")
+				if not animator then
+					return -- error?
+				end
 
-			while (not stopAnim) do
-				wait()
+				local ID = animationPlayID
+				time = tick()
+
+				while not stopAnim and (loopAnimation or tick() - time < animationLength) do
+					local step = game:GetService("RunService").Heartbeat:wait()
+					if not stopAnim and (loopAnimation or tick() - time < animationLength) then
+						animator:StepAnimations(step)
+					end
+				end
+
+				if not stopAnim then
+					endEarly()
+				end
+				stopAnim = true
+			else
+				if (not loopAnimation) then
+					Spawn(function()
+						local ID = animationPlayID
+						time = tick()
+						while (tick() - time < animationLength ) do
+							wait()
+						end	
+						if (ID == animationPlayID) then
+							if not stopAnim then
+								endEarly()
+							end
+							stopAnim = true
+						end
+					end)
+				end
+
+				while (not stopAnim) do
+					wait()
+				end
 			end
 
 			currentAnimTrack:Stop(0)
-			wait()
+			if stepAnimFlagValue then
+				animator:StepAnimations(0)
+			else
+				wait()
 			
-			game:GetService('RunService'):Stop()
+				game:GetService('RunService'):Stop()
 
-			wait()
+				wait()
+			end
+			
 			playingAnim = false
 			modal = false
 			--game:GetService("ChangeHistoryService"):Undo()
