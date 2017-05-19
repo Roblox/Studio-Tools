@@ -215,8 +215,7 @@ NOTES FOR ANYBODY READING / MODIFYING THE EDITOR!
 --]]
 local version = "3.3.2" --try to keep this up to date :)
 _G["AnimationEdit"] = false
-local Plugin = PluginManager():CreatePlugin()
-local toolbar = Plugin:CreateToolbar("Animations")
+local toolbar = plugin:CreateToolbar("Animations")
 local button = toolbar:CreateButton(
 	"Animation Editor",
 	"Create, preview and publish animations for character rigs", -- The text next to the icon. Leave Othis blank if the icon is sufficient.
@@ -255,11 +254,11 @@ local DebugEnabled = false
 ----------------------------------------------------------------------------------------------------------------------------
 
 local preferences = {
-	["TweenCursor"] = Plugin:GetSetting("AnimEditor_TweenCursor"),
+	["TweenCursor"] = plugin:GetSetting("AnimEditor_TweenCursor"),
 	["Snapping"] = true,
-	["TransparentSelect"] = Plugin:GetSetting("AnimEditor_TransparentSelect"),
-	["Interpolation"] = Plugin:GetSetting("AnimEditor_Interpolation"),
-	["Tooltips"] = Plugin:GetSetting("AnimEditor_Tooltips")
+	["TransparentSelect"] = plugin:GetSetting("AnimEditor_TransparentSelect"),
+	["Interpolation"] = plugin:GetSetting("AnimEditor_Interpolation"),
+	["Tooltips"] = plugin:GetSetting("AnimEditor_Tooltips")
 }
 if preferences["TweenCursor"] == nil then
 	preferences["TweenCursor"] = true
@@ -516,7 +515,7 @@ end
 --------------------------------------------------------------------------------------------
 
 local function mouseCallbackCheck(list)
-	local mouse = Plugin:GetMouse()
+	local mouse = plugin:GetMouse()
 	for _,elem in spairs(list, function(t, a, b) return t[a].Order > t[b].Order end) do
 		if (isSafeNIL(elem.Element)) then
 			if (elem.Function(mouse.X, mouse.Y)) then
@@ -530,19 +529,19 @@ local function mouseCallbackCheck(list)
 	end
 end
 
-Plugin:GetMouse().Button1Down:connect(function()
+plugin:GetMouse().Button1Down:connect(function()
 		mouseCallbackCheck(mouseOnLClick)
 	end
 )
-Plugin:GetMouse().Button2Down:connect(function()
+plugin:GetMouse().Button2Down:connect(function()
 		mouseCallbackCheck(mouseOnRClick)
 	end
 )
-Plugin:GetMouse().Button1Up:connect(function()
+plugin:GetMouse().Button1Up:connect(function()
 		mouseCallbackCheck(mouseOnLUp)
 	end
 )
-Plugin:GetMouse().Button2Up:connect(function()
+plugin:GetMouse().Button2Up:connect(function()
 		mouseCallbackCheck(mouseOnRUp)
 	end
 )
@@ -635,9 +634,9 @@ local lineCount = 0
 local cursorTime = 0
 local timeScale = 0.05 -- Pixels per second of animation
 --New Timeline
-local tickIncrements = Plugin:GetSetting("AnimEditor_TickIncrement") == nil and 0.1 or Plugin:GetSetting("AnimEditor_TickIncrement")
+local tickIncrements = plugin:GetSetting("AnimEditor_TickIncrement") == nil and 0.1 or plugin:GetSetting("AnimEditor_TickIncrement")
 local timelineWidth = 0
-local dragSnapIncrements = Plugin:GetSetting("AnimEditor_SnapIncrement") == nil and 0.05 or Plugin:GetSetting("AnimEditor_SnapIncrement")
+local dragSnapIncrements = plugin:GetSetting("AnimEditor_SnapIncrement") == nil and 0.05 or plugin:GetSetting("AnimEditor_SnapIncrement")
 
 partList = {}
 undoMemory = {}
@@ -814,7 +813,7 @@ function displayOptionsMenu(x, y)
 	end)
 	
 	buttons["Priority"].MouseButton1Click:connect(function()
-		local mouse = Plugin:GetMouse()
+		local mouse = plugin:GetMouse()
 		local newPriority = displayDropDownMenu(timelineUI.RootFrame.PriorityDisplay, animationPriorityList, x + 300, mouse.Y)
 		if (newPriority ~= nil) then
 			animationPriority = newPriority
@@ -834,8 +833,8 @@ function displayOptionsMenu(x, y)
 	end)
 	
 	local close
-	close = Plugin:GetMouse().Button1Down:connect(function()
-		local mouse = Plugin:GetMouse()
+	close = plugin:GetMouse().Button1Down:connect(function()
+		local mouse = plugin:GetMouse()
 		if mouse.X > x + (200) or mouse.X < x then
 			if mouse.Y > y + (marginSize) + numButtons * (buttonSize + marginSize) or mouse.Y < y then
 				close:disconnect()
@@ -2224,7 +2223,7 @@ local function MakePartSelectGui(baseItem)
 		lockUndoStep("editTransform")
 	end)
 
-	local mouse = Plugin:GetMouse()
+	local mouse = plugin:GetMouse()
 
 	MouseTargeterHalt = Repeat(function()
 		local part = mouseRaycast{}
@@ -2555,7 +2554,7 @@ local function selectObjectToAnimate()
 	local mOnClickCn
 	local waitLock = true
 
-	local mouse = Plugin:GetMouse()
+	local mouse = plugin:GetMouse()
 
 
 
@@ -2680,7 +2679,7 @@ local function selectObjectToAnimate()
 	end)
 	guiWindow.TestFrame.HelpButton.MouseButton1Click:connect(function()
 		local success, msg = pcall(function()
-			Plugin:OpenWikiPage("Animations")
+			plugin:OpenWikiPage("Animations")
 		end)
 		if not success then
 			guiWindow.TestFrame.HelpButton.Text = "Coming Very Soon!"
@@ -2849,7 +2848,7 @@ function showExportAnim()
 
 	game.Selection:Set(selectionSet)
 	wait()
-	Plugin:SaveSelectedToRoblox()
+	plugin:SaveSelectedToRoblox()
 
 --[[
 	local selectionSet = {}
@@ -2857,7 +2856,7 @@ function showExportAnim()
 
 	game.Selection:Set(selectionSet)
 	wait()
-	Plugin:SaveSelectedToRoblox()
+	plugin:SaveSelectedToRoblox()
 --]]
 
 	modal = false
@@ -2865,7 +2864,7 @@ end
 
 
 function showImportAnimText()
-	local id = Plugin:PromptForExistingAssetId("Animation")
+	local id = plugin:PromptForExistingAssetId("Animation")
 	if (id ~= nil and tonumber(id) > 0) then
 		  loadImportAnim(tonumber(id))
 	end
@@ -2874,7 +2873,7 @@ end
 
 function showImportAnim()
 	local animPage = 1
-	local userID = Plugin:GetStudioUserId()
+	local userID = plugin:GetStudioUserId()
 	local kfsp = game:GetService('KeyframeSequenceProvider')
 	local animList = kfsp:GetAnimations(userID, animPage)
 
@@ -4490,9 +4489,9 @@ if (angleChangeUI == nil) then
 		end)
 		
 		function loadOptionsMenu()
-			local mouse = Plugin:GetMouse()
+			local mouse = plugin:GetMouse()
 			displayOptionsMenu(mouse.X, mouse.Y)
-			local mouse = Plugin:GetMouse()
+			local mouse = plugin:GetMouse()
 			local loopButton = loopAnimation == true and "Loop (true)" or "Loop (false)"
 			local priorityType = "Priority: "..timelineUI.RootFrame.PriorityDisplay.Text
 			local cursorText = preferences["TweenCursor"] == true and "Cursor Tween (true)" or "Cursor Tween (false)"
@@ -4518,7 +4517,7 @@ if (angleChangeUI == nil) then
 			elseif selection == "Cursor Tween (false)" then
 				preferences["TweenCursor"] = true
 			elseif string.find(selection, "Priority") then
-				local mouse = Plugin:GetMouse()
+				local mouse = plugin:GetMouse()
 				spawn(function()
 					local newPriority = displayDropDownMenu(timelineUI.RootFrame.PriorityDisplay, animationPriorityList, sx + 300, mouse.Y)
 					if (newPriority ~= nil) then
@@ -4565,13 +4564,13 @@ if (angleChangeUI == nil) then
 				end
 				destroySelectionBoxes()]]
 				exitPlugin()
-				Plugin:SetSetting("AnimEditor_TweenCursor", preferences["TweenCursor"])
-				Plugin:SetSetting("AnimEditor_AnimLength", animationLength)
-				Plugin:SetSetting("AnimEditor_SnapIncrement", dragSnapIncrements)
-				Plugin:SetSetting("AnimEditor_TickIncrement", tickIncrements)
-				Plugin:SetSetting("AnimEditor_TransparentSelect", preferences["TransparentSelect"])
-				Plugin:SetSetting("AnimEditor_Interpolation", preferences["Interpolation"])
-				Plugin:SetSetting("AnimEditor_Tooltips", preferences["Tooltips"])
+				plugin:SetSetting("AnimEditor_TweenCursor", preferences["TweenCursor"])
+				plugin:SetSetting("AnimEditor_AnimLength", animationLength)
+				plugin:SetSetting("AnimEditor_SnapIncrement", dragSnapIncrements)
+				plugin:SetSetting("AnimEditor_TickIncrement", tickIncrements)
+				plugin:SetSetting("AnimEditor_TransparentSelect", preferences["TransparentSelect"])
+				plugin:SetSetting("AnimEditor_Interpolation", preferences["Interpolation"])
+				plugin:SetSetting("AnimEditor_Tooltips", preferences["Tooltips"])
 			end
 		end)
 
@@ -4589,7 +4588,7 @@ if (angleChangeUI == nil) then
 
 		registerOn(mouseOnLClick, timelineUI.RootFrame.PriorityDisplay, function(x, y)
 			if (not modal) then
-				local mouse = Plugin:GetMouse()
+				local mouse = plugin:GetMouse()
 				local newPriority = displayDropDownMenu(timelineUI.RootFrame.PriorityDisplay, animationPriorityList, mouse.X, mouse.Y + 10)
 				if (newPriority ~= nil) then
 					animationPriority = newPriority
@@ -4632,7 +4631,7 @@ if (angleChangeUI == nil) then
 			if (not modal) then
 				--print("Cursor click")
 				local halt = Repeat(function()
-						local mouse = Plugin:GetMouse()
+						local mouse = plugin:GetMouse()
 						xvalue = mouse.X - timelineUI.RootFrame.KeyframeContainer.TimelineFrame.AbsolutePosition.X
 						cursorTime = findTime(xvalue)
 						if (cursorTime < 0) then
@@ -4823,7 +4822,7 @@ function setAnimationLength(length)
 	if (animationLength > 30) then
 		animationLength = 30
 	end
-	Plugin:SetSetting("AnimEditor_AnimLength", animationLength)
+	plugin:SetSetting("AnimEditor_AnimLength", animationLength)
 
 	-- modify animation framerate (easier than trying to combine keyframes)
 	updateAnimationFramerate()
@@ -4873,7 +4872,7 @@ function keyframeContextMenu(x, y, needsShift)
 		else
 			local keyframeMenu = { "Delete", "Rename", "Copy", "Reset" }
 			if DebugEnabled then table.insert(keyframeMenu, "Debug") end
-			local mouse = Plugin:GetMouse()
+			local mouse = plugin:GetMouse()
 			local selection = displayDropDownMenu(timelineUI.RootFrame.KeyframeContainer.TimelineFrame, keyframeMenu, mouse.X, mouse.Y)
 			if (selection == "Delete") then
 				if (time > 0) then
@@ -4913,7 +4912,7 @@ function keyframePositionShift(x, y)
 
 		if (keyframe ~= nil and time > 0) then
 			local halt = Repeat(function()
-					local mouse = Plugin:GetMouse()
+					local mouse = plugin:GetMouse()
 					xvalue = mouse.X - timelineUI.RootFrame.KeyframeContainer.TimelineFrame.AbsolutePosition.X
 					mouseTime = findTime(xvalue)
 					if (mouseTime < 0) then
@@ -4985,7 +4984,7 @@ function resetAnimation()
 	doNotUpdateCursor = true
 	resetCopyPoseList()
 	resetKeyframes()
-	local savedLength = Plugin:GetSetting("AnimEditor_AnimLength")
+	local savedLength = plugin:GetSetting("AnimEditor_AnimLength")
 	animationLength = savedLength ~= nil and savedLength or 2
 	cursorTime = 0
 	loopAnimation = false
@@ -5391,7 +5390,7 @@ end
 	
 	function promptChangePriority()
 		modal = true
-		menuManager.GetPriority(Plugin, function(newPriority) 
+		menuManager.GetPriority(plugin, function(newPriority) 
 			modal = false 
 			animationPriority = newPriority 
 		end)
@@ -5399,7 +5398,7 @@ end
 	
 	function promptChangeLooping()
 		modal = true
-		menuManager.GetLoop(Plugin, function(loopDecision) 
+		menuManager.GetLoop(plugin, function(loopDecision) 
 			modal = false 
 			loopAnimation = loopDecision
 		end)
@@ -5456,7 +5455,7 @@ end
 					conn:disconnect()
 				end
 			end)
-			Plugin:ImportFbxAnimation(dummy)
+			plugin:ImportFbxAnimation(dummy)
 		else
 			warn("Rig does not have initial pose data. Rig must be imported via FBX to use this feature!")
 		end
@@ -5560,7 +5559,7 @@ function exitPlugin()
 		okToQuit = true
 	end
 	if okToQuit then
-		Plugin:Activate(false)
+		plugin:Activate(false)
 		pcall(function()
 			destroySelectionBoxes()
 		end)
@@ -5585,7 +5584,7 @@ function exitPlugin()
 	end
 end
 
-Plugin.Deactivation:connect(function()
+plugin.Deactivation:connect(function()
 	autoSave()
 	
 	_G["AnimationEdit"] = false
@@ -5742,11 +5741,11 @@ function menuRequest(arg)
 		showImportAnimText()
 		modal = false
 	elseif arg == "Help" then
-		Plugin:OpenWikiPage("Animations")
+		plugin:OpenWikiPage("Animations")
 	elseif arg == "EditHelp" then
-		Plugin:OpenWikiPage("Animations#Edit_Menu")
+		plugin:OpenWikiPage("Animations#Edit_Menu")
 	elseif arg == "SettingsHelp" then
-		Plugin:OpenWikiPage("Animations#Settings_Menu")
+		plugin:OpenWikiPage("Animations#Settings_Menu")
 	elseif arg == "New" then
 		promptNew()
 	elseif arg == "Play" then
@@ -5793,7 +5792,7 @@ button.Click:connect(function()
 	elseif menuManager.HasActiveWindow() then --Is the "root picker" UI open?
 		exitPlugin()
 	else
-		Plugin:Activate(true)
+		plugin:Activate(true)
 		button:SetActive(true)
 		local retFunc = function(selectedObject)
 			if selectedObject ~= nil then
@@ -5824,7 +5823,7 @@ button.Click:connect(function()
 				rotateStep = 0
 				moveStep = 0
 			
-				local mouse = Plugin:GetMouse()
+				local mouse = plugin:GetMouse()
 				connectListeners(mouse)
 				
 				local getController = function(p)
@@ -5927,11 +5926,11 @@ button.Click:connect(function()
 				resetAnimation()
 				CreateGrid(selectedObject)
 			else
-				Plugin:Activate(false)
+				plugin:Activate(false)
 				button:SetActive(false)
 			end
 		end	
-		menuManager.SelectRig(Plugin:GetMouse(), Plugin, retFunc)
+		menuManager.SelectRig(plugin:GetMouse(), plugin, retFunc)
 	end
 end)]]></ProtectedString>
 			</Properties>
@@ -15117,7 +15116,6 @@ return rigCreator
 				<string name="Name">RigBuilder</string>
 				<string name="ScriptGuid"></string>
 				<ProtectedString name="Source"><![CDATA[--Startup
-local plugin = PluginManager():CreatePlugin()
 local toolbar = plugin:CreateToolbar("Animations")
 local button = toolbar:CreateButton(
 	"Rig Builder", -- The text next to the icon. Leave this blank if the icon is sufficient.
