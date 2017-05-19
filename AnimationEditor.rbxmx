@@ -245,6 +245,9 @@ if not fbxFlagExists then
 	fbxFlagExists, fbxFlagValue = pcall(function () return settings():GetFFlag("StudioFbxRigImporting") end)
 end
 local stepAnimFlagExists, stepAnimFlagValue = pcall(function() return settings():GetFFlag("UseStepAnimations") end)
+if not stepAnimFlagExists then
+	stepAnimFlagValue = false
+end
 -----------------------------------------...
 local DebugEnabled = false
 ----------------------------------------------------------------------------------------------------------------------------
