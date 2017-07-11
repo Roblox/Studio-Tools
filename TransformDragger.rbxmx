@@ -1422,7 +1422,9 @@ function updatePart()
 		end
 	end
 	
-	updateChildAttachments(selectedPart, preActionSize, selectedPart.Size)
+	if (selectedPart) then
+		updateChildAttachments(selectedPart, preActionSize, selectedPart.Size)
+	end
 		
 	if allowAdornUpdate then
 		updateDragPart()
